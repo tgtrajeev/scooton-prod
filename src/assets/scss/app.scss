@@ -1,0 +1,341 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply h-full overflow-x-hidden dark:text-slate-300 text-slate-600 font-normal;
+    &.light,
+    &.skin--default {
+      @apply bg-slate-100;
+    }
+    &.lght,
+    &.skin--bordered {
+      @apply bg-transparent;
+    }
+    &.dark {
+      @apply bg-[#e31e24] text-slate-300;
+    }
+  }
+  html,
+  body {
+    @apply h-full;
+  }
+
+  .Scooton-app-wrapper {
+    @apply relative;
+  }
+  .single-sidebar-menu .ReactCollapse--collapse {
+    transition: height 400ms;
+  }
+  .space-xy-5 {
+    > div,
+    > button,
+    > a,
+    label,
+    > * {
+      @apply mr-2 mb-2;
+    }
+  }
+  .space-xy-6 {
+    > div,
+    > button,
+    > a,
+    label,
+    > * {
+      @apply mr-4 mb-2;
+    }
+  }
+
+  html[dir="rtl"] {
+    .recharts-wrapper {
+      direction: rtl;
+    }
+    .recharts-yAxis {
+      .recharts-text {
+        text-anchor: start;
+      }
+    }
+  }
+  .Scooton-app {
+    .leaflet-control {
+      z-index: 0 !important;
+    }
+    .leaflet-control-container {
+      z-index: 555 !important;
+      position: relative;
+    }
+    .recharts-curve.recharts-tooltip-cursor {
+      display: none;
+    }
+    .recharts-wrapper.bar-chart {
+      .recharts-tooltip-cursor {
+        fill: transparent;
+      }
+    }
+    .recharts-tooltip-wrapper {
+      border: none !important;
+    }
+
+    // .recharts-cartesian-grid line,
+    // .recharts-polar-grid-angle line,
+    // .recharts-yAxis line,
+    // .recharts-xAxis line {
+    //   @apply stroke-black-200 dark:stroke-slate-700;
+    // }
+  }
+}
+@layer components {
+  @import "components/table.scss";
+  @import "components/map.scss";
+  @import "components/progress";
+  @import "components/tippy";
+  @import "components/swiper";
+  @import "components/alert";
+  @import "components/card";
+  @import "components/auth";
+  @import "components/button";
+  @import "components/badge";
+  @import "components/typography";
+  @import "components/form";
+  @import "components/input-group";
+  @import "components/react-select";
+  @import "components/pagination";
+  @import "components/breadcrumbs";
+  @import "layout/header";
+  @import "layout/footer";
+  @import "layout/sidebar";
+  @import "layout/settings";
+  @import "utility/mix";
+  @import "utility/loading";
+  @import "utility/css-animation";
+  @import "utility/calander";
+  @import "utility/full-calender";
+  @import "components/print.scss";
+}
+@layer utilities {
+}
+@media (min-width:768px){
+  .btn {
+    padding-left: 1rem;
+    padding-right: 1rem;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+}
+
+:root{
+  --primary: #e31e24;
+}
+.bg-warning-700 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(255 193 7 / 19%);
+}
+.form-check .form-check-input {
+  height: 1.2rem;
+  border-color: #b8b7b7;
+}
+.focus-invisible:focus-visible{outline: none;}
+.btn:hover{background-color: #000;outline: 0; border-color: #000;box-shadow: none;}
+.btn-primary{ background-color: var(--primary);}
+.btn-outline-light:hover{background-color: var(--primary);color: #fff;border-color: var(--primary);}
+.react-tabs__tab-list{border-bottom: none;
+  text-align: center;
+  margin: 2rem 0;
+  background-color: #fff;
+  box-shadow: 0 0 10px #ccc;
+  padding: .5rem;
+  border-radius: .5rem;
+  display: flex;gap:10px;
+}
+.react-tabs__tab {
+  display: inline-block;
+  border: 1px solid #e31e24;
+  bottom: -1px;
+  position: relative;
+  list-style: none;
+  padding: 8px 24px;
+  cursor: pointer;
+  border-radius: .5rem;
+  flex: 1;
+}
+
+.react-tabs__tab.react-tabs__tab--selected {
+  background: #e31e24;
+  border-color: #e31e24;
+  color: #fff;
+}
+
+.common-box-shadow {
+  border: 1px solid #f3f3f5;
+  padding: 1.5rem;
+  border-radius: .5rem;margin-bottom: 4rem;
+}
+
+.change-rider-status{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  color: #76838f;
+}
+.card-header{background-color: transparent;}
+
+.documentreason{
+    border: 1px solid #dee2e6;
+    padding: .5rem
+}
+
+.wallets{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+table thead th{background-color: #f1f1f1;}
+table thead th:first-child {width: 90px;}
+.table-td, .table-th{padding-top: .5rem;padding-bottom: .5rem;padding-left: .875rem;padding-right: .875rem;}
+.backdrop-filter {backdrop-filter: blur(4px);background-color: #00000073;}
+.onOff-riders>div {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+}
+.onOff-riders { display: flex; align-items: center;gap: 14px;flex-wrap: wrap;}
+.onOff-riders>div>span {
+  width: 10px;
+  height: 10px;
+  background-color: #ffa560;
+  border-radius: 50%;
+  margin-right: .25rem;line-height: normal;
+}
+.onOff-riders>div.online>span{background-color: green;}
+.onOff-riders>div.offline>span{background-color: red;}
+.rider-status{flex: 1;}
+.rider-filter{display: flex;gap:10px;}
+.rider-filter>div{flex:1;}
+.flex-1{flex:1;}
+.MuiInputBase-formControl{height: 40px;}
+.filter-orderlist {
+  display: flex;
+  // justify-content: center;
+  justify-content: space-between;
+  align-items: center;gap:20px
+}
+.filter-orderlist .MuiFormControl-root.css-1iw3t7y-MuiFormControl-root .css-cis11t-MuiFormGroup-root{flex-wrap: nowrap !important;overflow-x: auto;}
+.filter-orderlist .css-13lvt8g-MuiButtonBase-root-MuiRadio-root + .MuiTypography-root{
+  padding: .5rem .5rem;border-radius: .5rem;
+}
+.filter-orderlist .css-13lvt8g-MuiButtonBase-root-MuiRadio-root{font-size: .875rem;}
+.filter-orderlist .css-13lvt8g-MuiButtonBase-root-MuiRadio-root.Mui-checked + .MuiTypography-root {
+  background-color: #e31e24;
+  color: #fff;font-size: .875rem;
+}
+.filter-orderlist .css-13lvt8g-MuiButtonBase-root-MuiRadio-root {
+  display: none;
+}
+.filter-orderlist .css-19opgx6-MuiFormControlLabel-root+.css-19opgx6-MuiFormControlLabel-root { 
+  margin-right: .5rem; margin-left: .5rem;
+}
+.filter-orderlist .css-19opgx6-MuiFormControlLabel-root{margin-left: 0;margin-right: 0;}
+.filter-orderlist .MuiFormControl-root.css-1iw3t7y-MuiFormControl-root {
+  box-shadow: 0px 0px 18px #ccc; padding: .5rem .5rem;border-radius: .5rem;
+}
+.change-rider-status>div>div>label {flex: 1;}
+.change-rider-status>div>div {font-size: .875rem;  margin-bottom: .5em;}
+.change-rider-status>div>div>div>label>div{width:38px;height: 16px;}
+.change-rider-status>div>div>div>label>div>span{width:12px;height: 12px;--tw-translate-x:1.3rem}
+.mobile-view{display: none;}
+.all-riders {display: flex;justify-content: space-between;}
+.all-rider-mobile{display: flex;align-items: center;gap: 10px;flex-wrap: wrap;}
+.filterbyRider {display: flex;border: 1px solid #c4c4c4; border-radius: .25rem;height: 40px;}
+.filterbyRider fieldset{border: 0;}
+.filterbyRider>div+div fieldset{border-left: 1px solid #c4c4c4; border-radius: 0;}
+.filter-showhide{position: relative;}
+.filter-show{background-color: #fff;border: 1px solid #ccc;border-radius: .25rem;
+width: 100%;padding: 1rem;margin-bottom: 1rem;}
+.filter-show>div{display: flex;gap:10px;align-items: flex-end;}
+.viewdocument-frame iframe {height: 400px;}
+.export-data .MuiInputBase-formControl {height: 50px;}
+.loader-fixed {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #00000030;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;z-index: 999;backdrop-filter: blur(4px);
+}
+.rider-count{display: flex;border: 1px solid #e31e24;gap: 8px;border-radius: .25rem;padding: .5rem .5rem;align-items: center;
+  height: 40px;background-color: #e31e240f;}
+.rider-datetime span {white-space: nowrap;}  
+// Progressbar
+.multistep-prgressbar ul { display: flex; gap: 15px; justify-content: space-between;}
+.multistep-prgressbar ul .multistep-list{ flex: 1;text-align: center;position: relative;}
+.multistep-prgressbar ul .multistep-list span.orderTimetaken {
+  position: absolute;
+  left: -38px;
+  background-color: #fff0f1;
+  border: 1px solid #e31e24;
+  padding: .25rem;
+  top: 0px;
+  border-radius: .15rem .25rem;
+  font-size: 12px;line-height: normal;height: auto;
+}
+.multistep-prgressbar ul .multistep-list .multistep-item {
+  cursor: pointer;position: relative;z-index: 9;padding: .35rem 1rem;text-align: left;font-size: 14px;
+}
+.multistep-prgressbar ul .multistep-list span{font-size: 12px;max-width: 120px;display: block;margin: auto;height: 42px;}
+.multistep-prgressbar .multistep-list .multistep-item:after, .multistep-prgressbar .multistep-list .multistep-item:before{
+    position: absolute;
+    left: 0;
+    content: " ";
+    width: 100%;
+    height: 52%;
+    z-index: -1;
+    background-color: #f3f3f3;
+}
+.multistep-prgressbar ul .multistep-list.active .multistep-item{color: #fff;}
+.multistep-prgressbar ul .multistep-list.active .multistep-item:after, .multistep-prgressbar ul .multistep-list.active .multistep-item:before{background-color: #e31e24;}
+.multistep-prgressbar ul .multistep-list .multistep-item:before{top: 0;transform: skew(20deg);border-radius: 0.2em 0.2em 0 0;}
+.multistep-prgressbar ul .multistep-list .multistep-item:after{  bottom: 0; transform: skew(-20deg); border-radius: 0 0 0.2em 0.2em;}
+// .order-header{position: sticky;top: 0px;background-color: #fff;padding: 20px;box-shadow: 0px 0px 20px #f4f4f4;
+//   border: 1px solid #f3f3f5; border-radius: .25rem;}
+.pickup-address, .delivery-address{width: 250px;}
+@media (max-width:991px){
+  .desktop-view-filter{display: none;}
+  .mobile-view{display: block;}
+  .mobile-view .btn{padding: .5rem;}
+  // .filter-show{position: fixed;top: 50%;left: 50%;transform: translate(-50%, -50%);}
+  .filter-show>div{display: block;gap:10px}
+  
+  .filter-show .MuiFormControl-fullWidth{display: flex;flex-direction: row;}
+  .filter-show .MuiFormControl-fullWidth label{flex:1}
+  .react-tabs__tab{font-size: 14px;}
+  .filter-show .MuiFormControl-fullWidth .MuiOutlinedInput-root, .filter-show .MuiFormControl-fullWidth>.filterbyRider{flex: 2;font-size: 14px;}
+}
+@media (max-width:768px){
+  .onOff-riders{column-gap: 10px !important;gap: 0px;}  
+  .all-rider-mobile{gap: 5px;}
+  .react-tabs__tab-list{overflow-x: auto;}
+  .react-tabs__tab{padding: 8px 12px;white-space: nowrap;}
+  .filter-show .MuiFormControl-fullWidth{margin-bottom: .5rem;}
+  .filter-show{transform: translate(-50%, -50%);
+    position: fixed;
+    width: 95%;
+    top: 50%;
+    left: 50%;
+    z-index: 9999;
+  }
+  .backdrop-filter{background-color: #00000094;position: fixed;width: 100%;height: 100%;top:0;left: 0;z-index: 999;}
+}
+@media (max-width:1366px) {
+  .loginwrapper .left-column h4{font-size: 32px;line-height: 38px;}
+}
+
+//new
+.error-msg{
+  color: red;
+}
