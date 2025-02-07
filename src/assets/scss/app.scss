@@ -339,3 +339,25 @@ width: 100%;padding: 1rem;margin-bottom: 1rem;}
 .error-msg{
   color: red;
 }
+
+.tabs{
+  pointer-events: none;
+  opacity: .5;
+}
+
+.riderexport{
+  display: flex;
+  align-items: center;
+ // justify-content: space-between;
+  gap: 20px;
+  border-top: 1px solid rgb(226 232 240);
+}
+
+.tenMinAgo{
+  background-color: #ff050512;
+  color: #fff;
+}
+
+.lightGrey{
+  background-color: #feff7857;
+}

@@ -99,11 +99,11 @@ const RoleList = () => {
           }
         )
         .then((response) => {
-          debugger
+          
           setRoleList(response.data); 
           setTotalCount(Number(response.headers["x-total-count"])); 
           setPageCount(Math.ceil(Number(response.headers["x-total-count"]) / pageSize));
-          debugger
+          
         })
         .catch((error) => {
           console.error("Error fetching user data:", error);
@@ -213,8 +213,19 @@ const RoleList = () => {
         navigate("/");
         toast.error("Unauthorized. Please log in again.");
       } else {
-        toast.error("Error adding role. Please try again.");
+        if(error.response.data.error == 'Password is must'){
+        toast.error('Password is required');
+        } else if(error.response.data.error == "Name can't be empty"){
+        toast.error('First name required');
+        } else if(selectedUserDetails.mobile_number ==''){
+        toast.error('Phone number is required');
+        }
+        else if(error.response.data.error == "Wrong phone number"){
+        toast.error('Phone number must be 10 digit');
+        }
+       
       }
+      
     };
   }
   const columns = useMemo(() => COLUMNS(openEditRole, deleteUser), []);
@@ -224,13 +235,13 @@ const RoleList = () => {
   const tableInstance = useTable(
     {
       columns,
-      data: roleList, // Use the updated data
+      data: roleList, 
       initialState: {
         pageIndex: currentPage,
         pageSize: 10,
       },
-      manualPagination: true, // Enable manual pagination
-      pageCount, // Pass the total number of pages
+      manualPagination: true,
+      pageCount, 
     },
     useSortBy,
     usePagination,

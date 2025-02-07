@@ -2,14 +2,10 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { logoutAndRedirect } from './hooks/logout';
 
-
-//export const BASE_URL = 'https://scooton-api-dev.el.r.appspot.com';
-
-export const BASE_URL = 'https://scootin-300701.el.r.appspot.com';
- 
+export const BASE_URL = 'https://scooton-api-dev.el.r.appspot.com';
 
 const axiosInstance = axios.create({
-  baseURL: 'https://scootin-300701.el.r.appspot.com',
+  baseURL: 'https://scooton-api-dev.el.r.appspot.com',
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
@@ -42,5 +38,6 @@ axiosInstance.interceptors.response.use(
 );
 
 export default axiosInstance;
+
 
 

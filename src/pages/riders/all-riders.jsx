@@ -188,26 +188,29 @@ const AllRiders = () => {
 
 
   useEffect(() => {
+    
     setLoading(true);
     const token = localStorage.getItem("jwtToken");
     if (token) {
-      axiosInstance
-        .get(`${BASE_URL}/register/v2/rider/get-all-service-area-by-registration-status/ALL/0/ALL/0?page=${currentPage}&size=${pagesizedata}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        })
-        .then((response) => {
-          setRiderData(response.data);
-          setTotalCount(Number(response.headers["x-total-count"])); 
-          setPageCount(Math.ceil(Number(response.headers["x-total-count"]) / pageSize)); 
-        })
-        .catch((error) => {
-          console.error("Error fetching user data:", error);
-        })
-        .finally(() => {
-          setLoading(false);
-        });
+      if (riderstatus == "All" && documentstatus === "All" && vehicleid === "0" && filterby == "NONE"){
+        axiosInstance
+          .get(`${BASE_URL}/register/v2/rider/get-all-service-area-by-registration-status/ALL/0/ALL/0?page=${currentPage}&size=${pagesizedata}`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          })
+          .then((response) => {
+            setRiderData(response.data);
+            setTotalCount(Number(response.headers["x-total-count"])); 
+            setPageCount(Math.ceil(Number(response.headers["x-total-count"]) / pageSize)); 
+          })
+          .catch((error) => {
+            console.error("Error fetching user data:", error);
+          })
+          .finally(() => {
+            setLoading(false);
+          });
+      }
     }
   }, [currentPage,pagesizedata]); 
 
@@ -233,12 +236,14 @@ const AllRiders = () => {
   };
   
   const filterRiders = () => {
+    
     setLoading(true);
+    if(riderstatus == "All" && documentstatus === "All" && vehicleid === "0") return;
     const token = localStorage.getItem("jwtToken");
     try {
       axiosInstance
         .get(
-          `${BASE_URL}/register/v2/rider/get-all-service-area-by-registration-status/${documentstatus}/${currentPage}/${riderstatus}/${vehicleid}?page=${currentPage}&size=100`,
+          `${BASE_URL}/register/v2/rider/get-all-service-area-by-registration-status/${documentstatus}/${currentPage}/${riderstatus}/${vehicleid}?page=${currentPage}&size=${pagesizedata}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -246,6 +251,8 @@ const AllRiders = () => {
           })
         
         .then((response) => {
+          setFilterBy("NONE");
+          setSearch("");
           setRiderData(response.data);
         })
         .catch((error) => {
@@ -260,29 +267,33 @@ const AllRiders = () => {
   
   useEffect(() => {
     filterRiders();
-  }, [riderstatus, documentstatus, vehicleid, currentPage]);
+  }, [riderstatus, documentstatus, vehicleid, currentPage,pagesizedata]);
 
 
   const handleChange = (event) => {
     const value = event.target.value;
     setFilterBy(value);
 
-    // Reset search if "NONE" is selected
     if (value === "NONE") {
       setSearch("");
     }
   };
 
-  // Handle input change for search field
   const handleSearchChange = (event) => {
     setSearch(event.target.value);
   };
 
   const FilterOrder = () => {
     setLoading(true);
+    if(filterby !== "NONE"){
+      setVehicleId('0');
+      setDocumentStatus('All');
+      setRiderStatus('All');
+    }
+   
     const token = localStorage.getItem("jwtToken");
     const endpoint =
-      filterby === "NONE"
+      filterby === "NONE" && riderstatus == "All" && documentstatus === "All" && vehicleid === "0"
         ? `${BASE_URL}/register/v2/rider/get-all-service-area-by-registration-status/ALL/0/ALL/0?page=0&size=${pagesizedata}`
         : `${BASE_URL}/register/rider/get-rider-by-mobilenumber-or-riderid/${filterby}/${search}?page=0&size=${pagesizedata}`;
     
@@ -305,8 +316,7 @@ const AllRiders = () => {
 
   useEffect(() => {
       FilterOrder();
-    
-  }, [filterby, search, currentPage]);
+  }, [filterby, search, currentPage,pagesizedata]);
 
 
   const columns = useMemo(() => COLUMNS, []);
@@ -374,7 +384,7 @@ const AllRiders = () => {
     try {
       axiosInstance
         .post(
-          `${BASE_URL}/order-history/search-city-wide-orders/${serviceAreaStatus}?page=${currentPage}&size=100`,
+          `${BASE_URL}/order-history/search-city-wide-orders/${serviceAreaStatus}?page=${currentPage}&size=${pagesizedata}`,
           {
             orderType: "PLACED",
             searchType: "NONE", 
@@ -436,6 +446,29 @@ const AllRiders = () => {
                 </span>
               </div>
             </div>
+            <div className="filterbyRider me-3">                    
+              <Select
+                id="demo-simple-select"
+                value={filterby}
+                onChange={handleChange}
+                displayEmpty
+                inputProps={{ 'aria-label': 'Without label' }}
+              >
+                <MenuItem value="NONE">NONE</MenuItem>
+                <MenuItem value="RIDERID">Rider ID</MenuItem>
+                <MenuItem value="MOBILE">Mobile Number</MenuItem>
+                <MenuItem value="RIDERNAME">Rider Name</MenuItem>
+              </Select>
+              <TextField
+                id="search"
+                type="text"
+                name="search"
+                className=""
+                placeholder="Filter By"
+                value={search}
+                onChange={handleSearchChange}
+              />
+            </div>
             <div className="rider-filter">            
               <div className="d-flex justify-content-end">              
                 <Button className="btn btn-dark desktop-view-filter" onClick={handleShow}>
@@ -443,6 +476,7 @@ const AllRiders = () => {
                 </Button>
               </div>
             </div>
+            
           </div>
           {isVisible && (
             <div>
@@ -520,7 +554,7 @@ const AllRiders = () => {
                       </Select>
                     </FormControl>
                   </div>
-                  <div className="flex-1">
+                  {/* <div className="flex-1">
                     <FormControl fullWidth className="">
                       <label className="text-sm mb-1">Filter By</label>
                       <div className="filterbyRider">                    
@@ -547,7 +581,7 @@ const AllRiders = () => {
                         />
                       </div>
                     </FormControl>
-                  </div>
+                  </div> */}
                   <div className="d-flex gap-2 justify-content-end">
                     <div className="h-100">
                       <button className="btn btn-dark h-100 text-xl" onClick={resetFilters}><Icon icon="heroicons:arrow-path" /></button>

@@ -17,7 +17,7 @@ import { useNavigate } from "react-router-dom";
 const promocodeType = ["FIXED", "PERCENTAGE"];
 
 const AddPromocode = () => {
-
+ 
   const navigate = useNavigate(); 
   const [formData, setFormData] = useState({
     promoCode: "",
@@ -58,12 +58,23 @@ const AddPromocode = () => {
   };
 
   const handleSubmit = async (e) => {
-    debugger
+    
     e.preventDefault();
     if (!formData.promoCode && !formData.amount  && !formData.startDate && !formData.expireDate) {
           toast.error("All fields are required");
           return;
     }
+
+    if(formData.amount == ''){
+      toast.error("Discount is required" );
+      return
+    } else if(formData.startDate == ''){
+      toast.error("Start Date is required");
+      return
+    } else if(formData.expireDate == ''){
+      toast.error("Expiry Date is required");
+      return
+    } 
 
       const token = localStorage.getItem("jwtToken");
       if(token){
@@ -94,15 +105,17 @@ const AddPromocode = () => {
         .catch((error) => {
           const errorMessage = error.response.data.error.match(/\[(.*?)\]/);
           console.log(error)
-             toast.error(errorMessage[1]);
+          if(errorMessage[1] == "Promo Code can't be empty"){
+            toast.error("Promocode is required");
+          }
+             
         })
       
     } else((error) => {
       console.error("No token found");
     })
       
-  
-    debugger
+
   };
 
   return (
@@ -127,7 +140,7 @@ const AddPromocode = () => {
                     <label className="form-label mb-1">Discount</label>
                     <input
                       id="amount"
-                      type="text"
+                      type="number"
                       className="form-control"
                       value={formData.amount}
                       onChange={handleChange}

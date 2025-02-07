@@ -45,6 +45,14 @@ const COLUMNS = (openIsNotificationModel,openIsDeleteOrder,ordersType) => [
     accessor: "orderHistory.userInfo.mobileNumber",
   },
   {
+    Header: "Pickup Address",
+    accessor: "orderHistory.pickupAddressDetails.addressLine1",
+  },
+  {
+    Header: "Delivery Address",
+    accessor: "orderHistory.deliveryAddressDetails.addressLine1",
+  },
+  {
     Header: "City",
     accessor: "City",
     Cell: () => {
@@ -75,7 +83,8 @@ const COLUMNS = (openIsNotificationModel,openIsDeleteOrder,ordersType) => [
       });
       return <div className="rider-datetime"><span className="riderDate">{`${formattedDate}`}</span><br/><span className="riderTime">{`${formattedTime}`}</span></div>;
     },
-  },  
+  }, 
+  ...(ordersType === "ALL ORDERS" ? [ 
   {
     Header: "Status",
     accessor: "orderHistory.orderStatus",
@@ -110,12 +119,18 @@ const COLUMNS = (openIsNotificationModel,openIsDeleteOrder,ordersType) => [
             
              `}
             >
-              {row?.cell?.value}
+              {row?.cell?.value === 'CANCEL' ? 'CANCELLED' :
+              row?.cell?.value === 'PLACED' ? 'PLACED' :
+              row?.cell?.value === 'COMPLETED' ? 'DELIVERED' :
+              row?.cell?.value === 'ACCEPTED' ? 'ACCEPTED' :
+               'PICKED' 
+              } 
             </span>
           </span>
         );
     },
   },
+]: [] ),
   ...(ordersType === "PLACED" 
     ? [
       {
@@ -222,7 +237,7 @@ const CityWideOrders = () => {
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(0);
   const [pageCount, setPageCount] = useState(0);
-  const [ordersType, SetOrderType] = useState("ALL ORDERS");
+  const [ordersType, SetOrderType] = useState("PLACED");
   const [filterby, setFilterBy] = React.useState('NONE');
   const [deleteordermodel, setDeleteOrderModel] = useState(false);
   const [orderdeleteid, setOrderDeleteId] = useState();
@@ -241,7 +256,9 @@ const CityWideOrders = () => {
   const [clientId, setClientId] = useState('');
   
   useEffect(() => {
-    fetchOrders("ALL ORDERS");
+    if(filterby == 'NONE'){
+      fetchOrders("PLACED");
+    }
   }, [currentPage,pagesizedata]);
 
 
@@ -267,8 +284,9 @@ const CityWideOrders = () => {
         },
         })
         .then((response) => {
-          toast.success("Notification Sended Successfully")
           setNotification(false);
+          toast.success("Notification Sended Successfully")
+         
         })
       } else {
         axiosInstance.get(`${BASE_URL}/order/v2/send-order-notification/${notificationid}`,{
@@ -310,10 +328,16 @@ const CityWideOrders = () => {
   const fetchOrders = (orderType) => {
     setLoading(true);
     SetOrderType(orderType)
+    const dataToSend ={
+      "orderType": orderType, "searchType": filterby
+    }
+    if (filterby && search) {
+      dataToSend.number = search; 
+    }
     axiosInstance
       .post(
         `${BASE_URL}/order-history/search-city-wide-orders-all-service-area-isOfflineOrder/0/false?page=${currentPage}&size=${pagesizedata}`,
-        { "orderType": orderType, "searchType": "NONE" },
+        dataToSend
 
       )
       .then((response) => {
@@ -387,7 +411,7 @@ const CityWideOrders = () => {
 
   const deletePlaceOrder = () => {
     const token = localStorage.getItem('jwtToken');
-    axiosInstance.post(`${BASE_URL}/order/cancel-order/${orderdeleteid}`,{
+    axiosInstance.post(`${BASE_URL}/order/v2/cancel-order/${orderdeleteid}`,{
         type: "CITYWIDE"
       },
       {
@@ -405,6 +429,36 @@ const CityWideOrders = () => {
       }
     )
   }
+
+  const timeDiffClass = (acceptedDate, orderDate, orderStatus) => {
+   
+    if(orderStatus == 'PLACED' || orderStatus == 'ACCEPTED'){
+      
+      const currentTime = new Date().getTime();
+      
+      let baseDateTime = acceptedDate ? new Date(acceptedDate).getTime() : new Date(orderDate).getTime();
+      
+      if (isNaN(baseDateTime)) {
+        console.warn("Invalid date provided. Falling back to current time.");
+        return "recentActivity"; 
+      }
+    
+      const differenceInMin = (currentTime - baseDateTime) / (1000 * 60);
+    
+      if (differenceInMin >= 20) {
+        return "tenMinAgo";
+      } else if (differenceInMin >= 10) {
+        return "lightGrey";
+      } else {
+        return "recentActivity";
+      }
+  
+    }
+  };
+  
+  
+  
+  
   
   
 
@@ -597,18 +651,18 @@ const CityWideOrders = () => {
              */}
           </div>
           <div className="filter-orderlist">
-            <div>
+            <div className={loading ? "tabs":""}>
               <FormControl>
                 <RadioGroup
                   row
                   aria-labelledby="demo-row-radio-buttons-group-label"
                   name="row-radio-buttons-group"
                   onChange={(e) => fetchOrders(e.target.value)}
-                  defaultValue="ALL ORDERS"
+                  defaultValue="PLACED"
                 >
                   <FormControlLabel value="PLACED" control={<Radio />} label="PLACED" />
                   <FormControlLabel value="ACCEPTED" control={<Radio />} label="ACCEPTED" />
-                  <FormControlLabel value="PICKED" control={<Radio />} label="PICKED" />
+                  <FormControlLabel value="DISPATCHED" control={<Radio />} label="PICKED" />
                   <FormControlLabel value="DELIVERED" control={<Radio />} label="DELIVERED" />
                   <FormControlLabel value="CANCELLED" control={<Radio />} label="CANCELLED" />
                   <FormControlLabel value="ALL ORDERS" control={<Radio />} label="ALL ORDERS" />
@@ -687,12 +741,14 @@ const CityWideOrders = () => {
                           page.map((row) => {
                         prepareRow(row);
                         return (
-                          <tr {...row.getRowProps()} key={row.id}>
+                          <tr className={timeDiffClass(row.original.acceptedDate, row.original.orderHistory.orderDate,  row.original.orderHistory.orderStatus)} {...row.getRowProps()} key={row.id}>
                             {row.cells.map((cell) => (
                               <td {...cell.getCellProps()} className="table-td" key={cell.column.id}>
                                 {cell.render("Cell")}
                               </td>
                             ))}
+                           
+                          
                           </tr>
                         );
                       })
@@ -708,9 +764,18 @@ const CityWideOrders = () => {
                     )}
                   </tbody>              
               </table>
+              
                )}
             </div>
           </div>
+        </div>
+        <div>
+          <strong>Note*</strong>
+            <i>After 10 minutes, if an order is not accepted/Picked, it turns yellow.</i>
+        </div>
+        <div>
+            <strong>Note*</strong>
+            <i>After 20 minutes, if an order is still not accepted/Picked up, it turns red.</i>
         </div>
         <div className="md:flex md:space-y-0 space-y-5 justify-between mt-6 items-center">
           <div className=" flex items-center space-x-3 rtl:space-x-reverse">
@@ -834,13 +899,25 @@ const CityWideOrders = () => {
             <div className="mb-3">
               <label className="form-label">Select Role</label>
               <select className="form-select" onChange={handlenotification}>
-                <option selected>Notification</option>
-                <option value="ALL">All</option>
+                <option value="ALL" selected>All</option>
                 <option value="INDIVIDUAL">Individual</option>
               </select>
             </div>
+            {notification === 'INDIVIDUAL' && (
+              <div className="mb-3">
+                <label className="form-label mb-1">Mobile Number</label>
+                <input                
+                  id="mobile"
+                  type="number"
+                  name="mobile"
+                  value={mobile}
+                  onChange={handleMobileNumber}
+                  className="form-control"
+                />
+              </div>
+            )} 
              
-            <div>
+            {/* <div>
               <TextField
                 label="Mobile Number"
                 id="mobile"
@@ -849,9 +926,9 @@ const CityWideOrders = () => {
                 value={mobile}
                 onChange={handleMobileNumber}
               />
-            </div>
+            </div> */}
             <div className="d-flex gap-2 justify-content-center mt-4">
-              <Button className="btn btn-dark" type="button" onClick={sendNotification} >
+              <Button className="btn btn-dark" type="button" onClick={() => { sendNotification(); setNotificationModel(false) }} >
                 Send Notification
               </Button>
               <Button className="btn btn-outline-light" type="button" onClick={() => { setNotificationModel(false) }}>

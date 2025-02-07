@@ -107,6 +107,55 @@ const Settings = () => {
         }
     };
 
+    const exportRiderCsv = async () => {
+        try{
+            setLoadingCSV(true);
+            await axiosInstance.get(`${BASE_URL}/order/admin/registered-rider-details`).then((response)=> {
+             
+
+                if(response.data.length == 0){
+                    toast.error("No data found");
+                    setLoadingCSV(false); 
+                    return;
+                }
+
+                const riderDetails = response.data.jsonData;
+                const csvData = riderDetails.map((item) => {
+                    return {
+                        "Rider ID": item?.riderId || "N/A",
+                        "Rider Name": item?.riderName || "N/A",
+                        "Mobile Number": item?.mobileNumber || "N/A",
+                        "Status": item?.status || "N/A",
+                        "Vehicle Type": item?.vehicleType || "N/A",
+                        "Last Activity": item?.lastActivity || 0,
+                        "Created Date": item?.createdDate || 0,
+                        "Wallet Balance": item?.walletBalance || "N/A",
+                        "Registration Fee Status": item?.registrationFeesPaid || "N/A",
+                        "No of Orders Delivered": item?.noOfDeliveredOrders || "N/A",
+                    };
+                    
+                });   
+               
+                
+                const workbook = XLSX.utils.book_new();
+                const worksheet = XLSX.utils.json_to_sheet(csvData);
+        
+                XLSX.utils.book_append_sheet(workbook, worksheet, "Rider_Detail");
+        
+                XLSX.writeFile(
+                    workbook,
+                    `Rider_Detail.xlsx`
+                );
+                
+            })
+        } catch (error) {
+            console.error("Error exporting CSV:", error);
+            toast.error("Failed to export data. Please try again.");
+        } finally {
+            setLoadingCSV(false); 
+        }
+    }
+
     const exportCsv = async () => {
         
         if (!startDate || !endDate) return;    
@@ -132,9 +181,8 @@ const Settings = () => {
                 setLoadingCSV(false); 
                 return;
             }
-    
             const csvData = response.data.map((item) => {
-                const { orderDetails, customerDetails, riderDetails } = item.jsonData;
+                const { orderDetails = {}, customerDetails = {}, riderDetails = {} } = item.jsonData || {};
                 return {
                     "Order ID": orderDetails?.orderId || "N/A",
                     "Order Date": orderDetails?.orderDateTime || "N/A",
@@ -156,7 +204,7 @@ const Settings = () => {
                 };
                 
             });   
-
+            
             const workbook = XLSX.utils.book_new();
             const worksheet = XLSX.utils.json_to_sheet(csvData);
     
@@ -300,6 +348,17 @@ const Settings = () => {
                     </div>
                     <div className="mt-4">
                         <p><strong>Note*</strong> <i>For every export,you can set the date limit to a maximum of 30 days.</i></p>
+                    </div>
+                    <div className="riderexport mt-3 pt-3 mb-3">
+                        <div className="">
+                            <div className="flex items-center">
+                                <h4 className="card-title">Export Rider Detail</h4>
+                            </div>
+                        </div>
+                        <button
+                            className="btn btn-dark"
+                            onClick={exportRiderCsv}
+                        >   Export</button>
                     </div>
                 </TabPanel>
             </Tabs>

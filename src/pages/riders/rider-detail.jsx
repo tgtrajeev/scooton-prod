@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState,useRef } from "react";
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import 'react-tabs/style/react-tabs.css';
 import { useParams, Link } from "react-router-dom";
@@ -17,9 +17,19 @@ import Select from "@/components/ui/Select";
 import Modal from "../../components/ui/Modal";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../../api";
+import { GoogleMap, LoadScript,useLoadScript, Marker } from '@react-google-maps/api';
  
 const RejectionType = ["Information Rejected", "Document Issue"];
 const DocumentStatus =["Approve","Reject"]
+
+
+const mapContainerStyle = {
+  width: '50vw',
+  height: '50vh',
+};
+
+const mapStyles = { height: "400px", width: "100%" };
+    const defaultCenter = { lat: 40.748817, lng: -73.985428 };
 
 const RiderDetail = () => {
     const { riderId } = useParams();
@@ -46,8 +56,23 @@ const RiderDetail = () => {
         id:'',
         fileName:''
     })
+    const[riderAddress, setRiderAddress]= useState(null);
+    const[riderLatitude, setRiderLatitude]= useState(null);
+    const[riderLongitude, setRiderLongitude] = useState(null);
+    const mapRef = useRef(null);
+
+    // useEffect(() => {
+    //     if (mapRef.current && window.google) {
+    //       new window.google.maps.marker.AdvancedMarkerElement({
+    //         map: mapRef.current,
+    //         position: center,
+    //         title: "Advanced Marker",
+    //       });
+    //     }
+    // }, []);
     const navigate = useNavigate();
-    const [isDeleteModal, setIsDeleteModal] = useState(false);    
+    const [isDeleteModal, setIsDeleteModal] = useState(false);   
+    const [isMapOpen, setIsMapOpen] = useState(false);   
 
     const [updateridersdetails, setUpdateRiderDetails] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -103,6 +128,18 @@ const RiderDetail = () => {
       };  
       fetchRiderOrderDetail();
     }, [riderId, updateWallet]);
+
+    // const { isLoaded, loadError } = useLoadScript({
+    //     googleMapsApiKey: 'AIzaSyBV57UA9d4G4J1Z2XnZFiGykdv0ZLcaAuI'
+    // });
+    
+    // if (loadError) {
+    // return <div>Error loading maps</div>;
+    // }
+
+    // if (!isLoaded) {
+    // return <div>Loading maps</div>;
+    // }
 
 
 
@@ -238,7 +275,24 @@ const RiderDetail = () => {
         }));
        
     };
-    
+
+    const mapLocation = async () => {
+        try {
+            await axiosInstance.get(`${BASE_URL}/login/get-rider-location/${riderId}`).then((response)=> {
+              
+                setRiderAddress(response.data.riderAddress);
+                setRiderLatitude(response.data.latitude);
+                setRiderLongitude(response.data.longitude)
+            }); 
+        } catch (error) {
+            console.error("Error fetching rider location:", error);
+        }
+    };
+      
+    const center = {
+        lat: riderLatitude || 28.207609, 
+        lng: riderLongitude || 79.826660 
+    }
 
     const updateRiderRegistration = () =>{
         
@@ -262,7 +316,6 @@ const RiderDetail = () => {
             rejectedType: documentRejectDetails?.rejectedType,
             approved: approved
         }
-        debugger
         if(approved && documentRejectDetails.rejectedReason != '' && documentRejectDetails.rejectedReason != undefined){
             try{
                 axiosInstance.post(`${BASE_URL}/login/rider-registration`,payload)
@@ -301,7 +354,7 @@ const RiderDetail = () => {
             setUpdateErrorMsg(true)
            toast.error("Not Updated")
         }
-        debugger
+        
         
     }
 
@@ -420,7 +473,12 @@ const RiderDetail = () => {
       console.error("Error deleting rider:", error);
       toast.error("An error occurred while deleting the rider.");
     }
+
+
   };
+
+
+
   return (
     <>
         <ToastContainer/>
@@ -432,6 +490,8 @@ const RiderDetail = () => {
                     </Link>
                     <h4 className="card-title ms-2 mb-0">Rider Details  <span className="px-2 py-1 text-sm rounded-[6px] bg-danger-500 text-white">Rider Id: {riderId}</span></h4>
                 </div>
+
+
                 <div className="flex gap-2">
                     {/* <button type="button" className="btn btn-dark"><img src={} /></button> */}
                     <button type="button" className="btn btn-dark p-2"><Icon icon="heroicons:bell-alert" className="text-[20px]"></Icon></button>
@@ -469,7 +529,33 @@ const RiderDetail = () => {
                         </div>
                         </Modal>
                     )}
-                    <button type="button" className="btn btn-dark p-2"><Icon icon="heroicons:map-pin" className="text-[20px]"></Icon></button>
+                    <button type="button" className="btn btn-dark p-2" onClick={() => {setIsMapOpen(true), mapLocation()}}><Icon icon="heroicons:map-pin" className="text-[20px]"></Icon></button>
+                    {
+                        isMapOpen && (
+                            <Modal
+                            activeModal={isMapOpen}
+                            uncontrol
+                            className="max-w-5xl"
+                            title=""
+                            centered
+                            onClose={() => setIsMapOpen(false)}
+                            >
+                            <div>
+                                <h5 className="text-center">Map</h5>
+                                
+                                <LoadScript googleMapsApiKey="AIzaSyB41DRUbKWJHPxaFjMAwdrzWzbVKartNGg">
+                                    
+                                    <GoogleMap
+                                        mapContainerStyle={mapContainerStyle}
+                                        center={center}
+                                        zoom={12}
+                                        onLoad={(map) => (mapRef.current = map)}
+                                    />
+                                </LoadScript>
+                               
+                            </div>
+                        </Modal>
+                    )}
                 </div>
             </div>
             <div className="">

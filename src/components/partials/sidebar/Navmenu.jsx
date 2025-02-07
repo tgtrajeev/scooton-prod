@@ -6,9 +6,16 @@ import Icon from "@/components/ui/Icon";
 import { useDispatch } from "react-redux";
 import useMobileMenu from "@/hooks/useMobileMenu";
 import Submenu from "./Submenu";
+import getRole from "../../../store/utility";
 
 const Navmenu = ({ menus }) => {
   const [activeSubmenu, setActiveSubmenu] = useState(null);
+  const [filteredMenus, setFilteredMenus] = useState([]);
+  const[role, setRole] = useState("");
+  useEffect(() => {
+    const role = getRole();
+    console.log("role", role.authorities[0])
+  })
 
   const toggleSubmenu = (i) => {
     if (activeSubmenu === i) {
@@ -23,34 +30,70 @@ const Navmenu = ({ menus }) => {
   const [mobileMenu, setMobileMenu] = useMobileMenu();
   const dispatch = useDispatch();
 
+  // useEffect(() => {
+  //   let submenuIndex = null;
+  //   menus.map((item, i) => {
+  //     if (!item.child) return;
+  //     if (item.link === locationName) {
+  //       submenuIndex = null;
+  //     } else {
+  //       const ciIndex = item.child.findIndex(
+  //         (ci) => ci.childlink === locationName
+  //       );
+  //       if (ciIndex !== -1) {
+  //         submenuIndex = i;
+  //       }
+  //     }
+  //   });
+  //   document.title = `Scooton  | ${locationName}`;
+
+  //   setActiveSubmenu(submenuIndex);
+  //   //dispatch(toggleActiveChat(false));
+  //   if (mobileMenu) {
+  //     setMobileMenu(false);
+  //   }
+  // }, [location]);
   useEffect(() => {
     let submenuIndex = null;
-    menus.map((item, i) => {
+  
+    const filteredMenus = menus.filter((item) => {
+      if (role !== 'ROLE_SUPER_ADMIN') {
+        if(item.title == "Configuration"){
+          return false;
+        }
+      }
+      return true;
+    });
+  
+    console.log("Filtered Menus", filteredMenus);
+  
+    filteredMenus.forEach((item, i) => {
       if (!item.child) return;
+  
       if (item.link === locationName) {
         submenuIndex = null;
       } else {
-        const ciIndex = item.child.findIndex(
-          (ci) => ci.childlink === locationName
-        );
+        const ciIndex = item.child.findIndex((ci) => ci.childlink === locationName);
         if (ciIndex !== -1) {
           submenuIndex = i;
         }
       }
-    });
-    document.title = `Scooton  | ${locationName}`;
-
+    }); 
+    console.log("Filtered Menus2", filteredMenus);
+  
+    document.title = `Scooton | ${locationName}`;
+  
     setActiveSubmenu(submenuIndex);
-    //dispatch(toggleActiveChat(false));
+    setFilteredMenus(filteredMenus);
+  
     if (mobileMenu) {
       setMobileMenu(false);
     }
-  }, [location]);
-
+  }, [location, role, menus]);
   return (
     <>
       <ul>
-        {menus.map((item, i) => (
+        {filteredMenus.map((item, i) => (
           <li
             key={i}
             className={` single-sidebar-menu mb-2

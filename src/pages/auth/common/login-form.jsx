@@ -42,7 +42,6 @@ const schema = yup
   }, [isAuth, navigate]);
 
   const onSubmit = async (data) => {
-    console.log("userid",data.userId)
     try {
       const response = await axiosInstance.post(`${BASE_URL}/auth/login/admin`, {
         user: data.userId,

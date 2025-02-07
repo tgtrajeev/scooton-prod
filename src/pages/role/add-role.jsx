@@ -106,8 +106,20 @@ const AddRole = () => {
             navigate("/");
             toast.error("Unauthorized. Please log in again.");
           } else {
-           // toast.error("Error adding role. Please try again.");
-            toast.error(error.response.data.error);
+           if(error.response.data.error == 'Password is must'){
+            toast.error('Password is required');
+           } else if(error.response.data.error == "Name can't be empty"){
+            toast.error('First name required');
+           } else if(error.response.data.error =="Role can't be empty"){
+            toast.error('Role is required');
+           } else if(formData.mobileNumber ==''){
+            toast.error('Phone number is required');
+           } else if(error.response.data.error == "Mobile number already registered"){
+            toast.error('Mobile number already registered');
+           } else if(error.response.data.error == "Wrong phone number"){
+            toast.error('Phone number must be 10 digit');
+           }
+            
           }
         });
     } else {

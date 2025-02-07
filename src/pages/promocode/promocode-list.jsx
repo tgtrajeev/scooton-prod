@@ -219,10 +219,16 @@ const PromocodeList = () => {
 
   const editPromodecode = async (id) => {
     try {
+      
       const token = localStorage.getItem("jwtToken");
       const formattedStartDate = formatDate(selectedPromoCode?.startDate);
       const formattedExpireDate = formatDate(selectedPromoCode?.expireDate);
-
+      
+      if( promoCodeData?.amount == '' || promoCodeData?.amount == undefined){
+        toast.error("The promo code cannot be updated without a discount amount!");
+        return
+      }
+       
       await axiosInstance.post(`${BASE_URL}/promo-code/update/${id}`, 
         {
           active: promoCodeData?.active,

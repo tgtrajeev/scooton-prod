@@ -104,21 +104,24 @@ const OrderDetail = () => {
         }
     };
     const downloadInvoice = async () => {
+        
         setisLoadingInvoice(true);
         try {
             
             const response = await axiosInstance.post(
                 `${BASE_URL}/order/orders/admin/getInvoice/${orderId}`,
-                {}
+                {} ,
+                { responseType: 'blob' }
             );
             if (response.data) {
-                const url = window.URL.createObjectURL(new Blob([response.data]));
+                const url = window.URL.createObjectURL(new Blob([response.data], {type: 'application/pdf'}));
                 const link = document.createElement('a');
                 link.href = url;
                 link.setAttribute('download', `Invoice_${orderId}.pdf`);
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
+                window.URL.revokeObjectURL(url);
                 toast.success('Invoice Download successfully!');
                 
             } else {
@@ -128,7 +131,9 @@ const OrderDetail = () => {
             toast.error('An error occurred while downloading invoice. Please try again.');
         } finally {
             setLoading(false);
-          };
+            setisLoadingInvoice(false);
+        };
+        
     };
 
     return (
@@ -168,6 +173,7 @@ const OrderDetail = () => {
                             <span>{orderDetails.orderDateTime}</span>
                             <div className="multistep-item">Order Placed</div>
                         </li>
+                        
                         {tripDetails?.orderAccepted && (
                              <li className={`multistep-list  ${tripDetails?.orderAccepted ? 'active' : ''}`}>
                                 {tripDetails?.orderAcceptedTimeTaken && (
@@ -365,7 +371,10 @@ const OrderDetail = () => {
                        
                         {orderDetails.orderStatus === 'Cancelled' && (
                             <li className={`multistep-list ${orderDetails.orderStatus === 'Cancelled'? 'active' : ''}`}>
-                                <span>{orderDetails.orderDateTime}</span>
+                                 {cancelDetails?.orderCancelledTimeTaken && (
+                                    <span className="orderTimetaken">{cancelDetails?.orderCancelledTimeTaken || ' '}</span>
+                                )}
+                                <span>{cancelDetails.orderCancelledDateTime}</span>
                                 <div className="multistep-item">Cancel</div>
                             </li>
                         )}
@@ -520,11 +529,11 @@ const OrderDetail = () => {
                                 </tr>
                                 <tr className="border-b border-slate-100 dark:border-slate-700">
                                     <td className="px-6 py-2">State Tax</td>
-                                    <td className="text-end px-6 py-2">{orderDetails.orderAmount.tollTax.toFixed(3)}</td>
+                                    <td className="text-end px-6 py-2">{orderDetails.orderAmount.stateTax.toFixed(3)}</td>
                                 </tr>
                                 <tr className="border-b border-slate-100 dark:border-slate-700">
                                     <td className="px-6 py-2">Toll Tax</td>
-                                    <td className="text-end px-6 py-2">{orderDetails.orderAmount.stateTax.toFixed(3)}</td>
+                                    <td className="text-end px-6 py-2">{orderDetails.orderAmount.tollTax.toFixed(3)}</td>
                                 </tr>
                                 <tr className="border-b border-slate-100 dark:border-slate-700">
                                     <td className="px-6 py-2">Applied Promocode</td>

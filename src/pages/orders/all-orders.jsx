@@ -72,43 +72,51 @@ const COLUMNS = (openIsNotificationModel, openIsDeleteOrder, ordersType) => [
       return <div className="rider-datetime"><span className="riderDate">{`${formattedDate}`}</span><br/><span className="riderTime">{`${formattedTime}`}</span></div>;
     },
   },
-  {
-    Header: "Status",
-    accessor: "orderHistory.orderStatus",
-    Cell: (row) => {
-      return (
-        <span className="block w-full">
-          <span
-            className={` inline-block px-3 min-w-[90px] text-center mx-auto py-1 rounded-[999px] bg-opacity-25 
-            ${row?.cell?.value === "COMPLETED"
-              ? "text-success-500 bg-success-500"
-              : ""
-              } 
-            ${row?.cell?.value === "PLACED"
-                ? "text-warning bg-warning-700"
+  ...(ordersType === "ALL ORDERS" ? [
+    {
+      Header: "Status",
+      accessor: "orderHistory.orderStatus",
+      Cell: (row) => {
+        return (
+          <span className="block w-full">
+            <span
+              className={` inline-block px-3 min-w-[90px] text-center mx-auto py-1 rounded-[999px] bg-opacity-25 
+              ${row?.cell?.value === "COMPLETED"
+                ? "text-success-500 bg-success-500"
                 : ""
-              }
-            ${row?.cell?.value === "CANCEL"
-                ? "text-danger-500 bg-danger-500"
-                : ""
-              }
-            ${row?.cell?.value === "DISPATCHED"
-                ? "text-warning-500 bg-warning-400"
-                : ""
-              }
-              ${row?.cell?.value === "ACCEPTED"
-                ? "text-info-500 bg-info-400"
-                : ""
-              }
-            
-             `}
-          >
-            {row?.cell?.value}
+                } 
+              ${row?.cell?.value === "PLACED"
+                  ? "text-warning bg-warning-700"
+                  : ""
+                }
+              ${row?.cell?.value === "CANCEL"
+                  ? "text-danger-500 bg-danger-500"
+                  : ""
+                }
+              ${row?.cell?.value === "DISPATCHED"
+                  ? "text-warning-500 bg-warning-400"
+                  : ""
+                }
+                ${row?.cell?.value === "ACCEPTED"
+                  ? "text-info-500 bg-info-400"
+                  : ""
+                }
+              
+              `}
+            >{row?.cell?.value === 'CANCEL' ? 'CANCELLED' :
+              row?.cell?.value === 'PLACED' ? 'PLACED' :
+              row?.cell?.value === 'COMPLETED' ? 'DELIVERED' :
+              row?.cell?.value === 'ACCEPTED' ? 'ACCEPTED' :
+               'PICKED' 
+              }  
+             
+            </span>
           </span>
-        </span>
-      );
+        );
+      },
     },
-  },
+  ]: [] ),
+  
   {
     Header: "Pick Up Address",
     accessor: "orderHistory.pickupAddressDetails.addressLine1",
@@ -244,7 +252,7 @@ const AllOrders = () => {
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(0);
   const [pageCount, setPageCount] = useState(0);
-  const [ordersType, SetOrderType] = useState("ALL ORDERS")
+  const [ordersType, SetOrderType] = useState("PLACED")
   const [filterby, setFilterBy] = React.useState('NONE');
   const [notificationModel, setNotificationModel] = useState(false);
   const [deleteordermodel, setDeleteOrderModel] = useState(false);
@@ -274,7 +282,7 @@ const AllOrders = () => {
 
   const deletePlaceOrder = () => {
     const token = localStorage.getItem('jwtToken');
-    axiosInstance.post(`${BASE_URL}/order/cancel-order/${orderdeleteid}`,{
+    axiosInstance.post(`${BASE_URL}/order/v2/cancel-order/${orderdeleteid}`,{
         type: "CITYWIDE"
       },
       {
@@ -366,6 +374,7 @@ const AllOrders = () => {
     }
   };
 
+  
   const handleSearchChange = (event) => {
     setSearch(event.target.value);
     // if (search === '') {
@@ -389,35 +398,52 @@ const AllOrders = () => {
   //   fetchOrders("PLACED");
   // }, []);
 
+  // useEffect(() => {
+  //   if (filterby && search) {
+  //     FilterOrder();
+  //   } else {
+  //     fetchOrders(ordersType); 
+  //   }
+  // }, [filterby, search, currentPage, ordersType]);
+
 
   useEffect(() => {
     if(filterby && search){
       FilterOrder();
     }
+   
       
-  }, [filterby, search,currentPage]);
+  }, [filterby, search,currentPage,pagesizedata]);
 
   const fetchOrders = (orderType) => {
+    console.log("this")
+    const dataToSend ={
+      "orderType": orderType, "searchType": filterby
+    }
+    if (filterby && search) {
+      dataToSend.number = search; 
+    }
+ 
     setLoading(true);
     SetOrderType(orderType)
     const token = localStorage.getItem("jwtToken");
-    axiosInstance
-      .post(
-        `${BASE_URL}/order-history/search-city-wide-orders-all-service-area/0?page=${currentPage}&size=${pagesizedata}`,
-        { "orderType": orderType, "searchType": "NONE" },
-        { headers: { Authorization: `Bearer ${token}` } },
-      )
-      .then((response) => {
-        setOrderData(response.data);
-        setTotalCount(Number(response.headers["x-total-count"])); 
-        setPageCount(Math.ceil(Number(response.headers["x-total-count"]) / pagesizedata)); 
-      })
-      .catch((error) => {
-        console.error("Error fetching order data:", error);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
+      axiosInstance
+        .post(
+          `${BASE_URL}/order-history/search-city-wide-orders-all-service-area/0?page=${currentPage}&size=${pagesizedata}`,
+          dataToSend ,
+          { headers: { Authorization: `Bearer ${token}` } },
+        )
+        .then((response) => {
+          setOrderData(response.data);
+          setTotalCount(Number(response.headers["x-total-count"])); 
+          setPageCount(Math.ceil(Number(response.headers["x-total-count"]) / pagesizedata)); 
+        })
+        .catch((error) => {
+          console.error("Error fetching order data:", error);
+        })
+        .finally(() => {
+          setLoading(false);
+        });
       
   };
   const FilterOrder = () => {
@@ -425,7 +451,7 @@ const AllOrders = () => {
     const token = localStorage.getItem("jwtToken");
     axiosInstance
       .post(
-        `${BASE_URL}/order-history/search-city-wide-orders-all-service-area/0?page=${currentPage}&size=100`,
+        `${BASE_URL}/order-history/search-city-wide-orders-all-service-area/0?page=${currentPage}&size=${pagesizedata}`,
         { "number": search, "orderType": ordersType, "searchType": filterby },
         { headers: { Authorization: `Bearer ${token}` } },
       )
@@ -548,7 +574,7 @@ const AllOrders = () => {
   };
 
   useEffect(() => {
-   
+    console.log("id?.ordertype",id?.ordertype)
     if (id?.ordertype) { 
   
       SetOrderType(id.ordertype);
@@ -576,7 +602,9 @@ const AllOrders = () => {
     } else {
       console.log("Fetching default orders...");
       setLoading(true);
-      fetchOrders("ALL ORDERS");
+      if(filterby == 'NONE'){
+      fetchOrders("PLACED");
+      }
     }
   }, [id?.ordertype, currentPage,pagesizedata]);
 
@@ -672,18 +700,18 @@ const AllOrders = () => {
             
           </div>
           <div className="filter-orderlist">
-            <div>
+            <div className={loading ? "tabs":""}>
               <FormControl>
                 <RadioGroup
                   row
                   aria-labelledby="demo-row-radio-buttons-group-label"
                   name="row-radio-buttons-group"
                   onChange={(e) => fetchOrders(e.target.value)}
-                  defaultValue="ALL ORDERS"
+                  value={ordersType}
                 >
                   <FormControlLabel value="PLACED" control={<Radio />} label="PLACED" />
                   <FormControlLabel value="ACCEPTED" control={<Radio />} label="ACCEPTED" />
-                  <FormControlLabel value="PICKED" control={<Radio />} label="PICKED" />
+                  <FormControlLabel value="DISPATCHED" control={<Radio />} label="PICKED" />
                   <FormControlLabel value="DELIVERED" control={<Radio />} label="DELIVERED" />
                   <FormControlLabel value="CANCELLED" control={<Radio />} label="CANCELLED" />
                   <FormControlLabel value="ALL ORDERS" control={<Radio />} label="ALL ORDERS" />
@@ -912,22 +940,25 @@ const AllOrders = () => {
             <div className="mb-3">
               <label className="form-label mb-1">Select Role</label>
               <select className="form-select" onChange={handlenotification}>
-                <option selected>Notification</option>
-                <option value="ALL">All</option>
+               {/* <option selected>Notification</option> */}
+                <option selected value="ALL">All</option>
                 <option value="INDIVIDUAL">Individual</option>
               </select>
-            </div>           
-            <div className="mb-3">
-              <label className="form-label mb-1">Mobile Number</label>
-              <input                
-                id="mobile"
-                type="number"
-                name="mobile"
-                value={mobile}
-                onChange={handleMobileNumber}
-                className="form-control"
-              />
-            </div>
+            </div>   
+            {notification === 'INDIVIDUAL' && (
+              <div className="mb-3">
+                <label className="form-label mb-1">Mobile Number</label>
+                <input                
+                  id="mobile"
+                  type="number"
+                  name="mobile"
+                  value={mobile}
+                  onChange={handleMobileNumber}
+                  className="form-control"
+                />
+              </div>
+            )}        
+            
             <div className="d-flex gap-2 justify-content-center mt-4">
               <Button className="btn btn-outline-light" type="button" onClick={() => { setNotificationModel(false) }}>
                 Cancel

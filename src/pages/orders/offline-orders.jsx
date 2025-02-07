@@ -31,7 +31,7 @@ const COLUMNS = (openIsDeleteOrder,ordersType) => [
   },            
   {
     Header: "Order ID",
-    accessor: "orderHistory.orderId",
+    accessor: "order_Id",
   },
   {
     Header: "Mobile Number",
@@ -64,46 +64,53 @@ const COLUMNS = (openIsDeleteOrder,ordersType) => [
       return <div className="rider-datetime"><span className="riderDate">{`${formattedDate}`}</span><br/><span className="riderTime">{`${formattedTime}`}</span></div>;
     },
   },  
-  {
-    Header: "Status",
-    accessor: "orderHistory.orderStatus",
-    Cell: (row) => {       
-        return (
-            <span className="block w-full">
-            <span
-              className={` inline-block px-3 min-w-[90px] text-center mx-auto py-1 rounded-[999px] bg-opacity-25 ${
-                row?.cell?.value === "COMPLETED"
-                  ? "text-success-500 bg-success-500"
+  ...(ordersType === "ALL ORDERS" ? [ 
+    {
+      Header: "Status",
+      accessor: "orderHistory.orderStatus",
+      Cell: (row) => {       
+          return (
+              <span className="block w-full">
+              <span
+                className={` inline-block px-3 min-w-[90px] text-center mx-auto py-1 rounded-[999px] bg-opacity-25 ${
+                  row?.cell?.value === "COMPLETED"
+                    ? "text-success-500 bg-success-500"
+                    : ""
+                } 
+              ${
+                row?.cell?.value === "PLACED"
+                  ? "text-warning bg-warning-700"
                   : ""
-              } 
-            ${
-              row?.cell?.value === "PLACED"
-                ? "text-warning bg-warning-700"
-                : ""
-            }
-            ${
-              row?.cell?.value === "CANCEL"
-                ? "text-danger-500 bg-danger-500"
-                : ""
-            }
-            ${
-                row?.cell?.value === "DISPATCHED"
-                  ? "text-warning-500 bg-warning-400"
+              }
+              ${
+                row?.cell?.value === "CANCEL"
+                  ? "text-danger-500 bg-danger-500"
                   : ""
-            }
-            ${row?.cell?.value === "ACCEPTED"
-              ? "text-info-500 bg-info-400"
-              : ""
-            }
-            
-             `}
-            >
-              {row?.cell?.value}
+              }
+              ${
+                  row?.cell?.value === "DISPATCHED"
+                    ? "text-warning-500 bg-warning-400"
+                    : ""
+              }
+              ${row?.cell?.value === "ACCEPTED"
+                ? "text-info-500 bg-info-400"
+                : ""
+              }
+              
+              `}
+              >
+                {row?.cell?.value === 'CANCEL' ? 'CANCELLED' :
+                row?.cell?.value === 'PLACED' ? 'PLACED' :
+                row?.cell?.value === 'COMPLETED' ? 'DELIVERED' :
+                row?.cell?.value === 'ACCEPTED' ? 'ACCEPTED' :
+                'PICKED' 
+                } 
+              </span>
             </span>
-          </span>
-        );
+          );
+      },
     },
-  },
+  ]: [] ),
   {
     Header: "Pick Up Address",
     accessor: "orderHistory.pickupAddressDetails.addressLine1"
@@ -195,7 +202,7 @@ const OfflineOrders = () => {
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(0);
   const [pageCount, setPageCount] = useState(0);
-  const [ordersType, SetOrderType] = useState("ALL ORDERS");
+  const [ordersType, SetOrderType] = useState("PLACED");
   const [filterby, setFilterBy] = React.useState('NONE');
   const [pagesizedata, setpagesizedata]=useState(10);
   const [totalCount, setTotalCount] = useState(0);
@@ -205,17 +212,25 @@ const OfflineOrders = () => {
   const [serviceAreaStatus, setServiceAreaStatus] = useState('All');
   const maxPagesToShow = 5;
   useEffect(() => {
-    setLoading(true);
-    fetchOrders("ALL ORDERS");
+    if(filterby == 'NONE'){
+      setLoading(true);
+      fetchOrders("PLACED");
+    }
   }, [currentPage,pagesizedata]);
 
   const fetchOrders = (orderType) => {
     setLoading(true);
-    SetOrderType(orderType)
+    SetOrderType(orderType);
+    const dataToSend ={
+      "orderType": orderType, "searchType": filterby
+    }
+    if (filterby && search) {
+      dataToSend.number = search; 
+    }
     axiosInstance
       .post(
         `${BASE_URL}/order-history/search-city-wide-orders-all-service-area-isOfflineOrder/0/true?page=${currentPage}&size=${pagesizedata}`,
-        { "orderType": orderType, "searchType": "NONE" },
+        dataToSend,
 
       )
       .then((response) => {
@@ -245,7 +260,7 @@ const OfflineOrders = () => {
   }
 
   const cancelOrder = () => {
-    axiosInstance.post(`${BASE_URL}/order/cancel-order/${orderid}`).then((response)=>{
+    axiosInstance.post(`${BASE_URL}/order/v2/cancel-order/${orderid}`).then((response)=>{
       toast.success(response)
     }).catch((error) => {
       console.error(error);
@@ -484,14 +499,14 @@ const OfflineOrders = () => {
             
           </div>
           <div className="filter-orderlist">
-            <div>
+            <div className={loading ? "tabs":""}>
               <FormControl>
                 <RadioGroup
                   row
                   aria-labelledby="demo-row-radio-buttons-group-label"
                   name="row-radio-buttons-group"
                   onChange={(e) => fetchOrders(e.target.value)}
-                  defaultValue="ALL ORDERS"
+                  defaultValue="PLACED"
                 >
                   <FormControlLabel value="PLACED" control={<Radio />} label="PLACED" />
                   <FormControlLabel value="ACCEPTED" control={<Radio />} label="ACCEPTED" />
