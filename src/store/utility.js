@@ -6,7 +6,7 @@ const getRole = () => {
      const decodeUserDetails = JSON.parse(window.atob(token.split('.')[1]));
 
      console.log("decodeUserDetails",decodeUserDetails.authorities[0])
-     return decodeUserDetails;
+     return decodeUserDetails.authorities[0];
     }catch(error) {
      console.log(error)
     }
