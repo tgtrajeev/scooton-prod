@@ -40,7 +40,6 @@ import RiderDetail from "./pages/riders/rider-detail";
 import HomepageList from "./pages/home-page/home-page-list";
 import Settings from "./pages/configuration/setting";
 import AddHomePage from "./pages/home-page/add-homepage";
-import ProtectedRoute from "./layout/ProtectedRoute";
 function App() {
 
  
@@ -84,6 +83,8 @@ function App() {
           <Route path="user-list" element={<UserList />} />
           <Route path="service-area-list" element={<ServiceAreaList />} />
           <Route path="add-service-area" element={<AddServiceArea />} />
+          <Route path="role-list" element={<RoleList />} />
+          <Route path="add-role" element={<AddRole />} />
           <Route path="promocode-list" element={<PromocodeList />} />
           <Route path="add-promocode" element={<AddPromocode />} />
           <Route path="all-riders" element={<AllRiders />} />
@@ -99,12 +100,7 @@ function App() {
           <Route path="order-detail/:orderId" element={<OrderDetail />} />
           <Route path="add-homepage" element={<AddHomePage />} />
           <Route path="homepage-list" element={<HomepageList />} />
-          <Route element={<ProtectedRoute isAuthRoute={"ROLE_SUPER_ADMIN"} />}>
-            <Route path="setting" element={<Settings />} />
-            <Route path="role-list" element={<RoleList />} />
-            <Route path="add-role" element={<AddRole />} />
-          </Route>
-            
+          <Route path="setting" element={<Settings />} />
           <Route path="*" element={<Navigate to="/404" />} />
         </Route>
         <Route
