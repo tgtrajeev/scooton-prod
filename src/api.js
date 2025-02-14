@@ -2,7 +2,6 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { logoutAndRedirect } from './hooks/logout';
 
-//export const BASE_URL = 'https://scooton-api-dev.el.r.appspot.com';
 export const BASE_URL = 'https://scootin-300701.el.r.appspot.com';
 
 const axiosInstance = axios.create({
@@ -26,13 +25,12 @@ axiosInstance.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Response Interceptor for Global Error Handling
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response && error.response.status === 401) {     
       
-      logoutAndRedirect(); // Call the logout function
+      logoutAndRedirect(); 
     }
     return Promise.reject(error);
   }

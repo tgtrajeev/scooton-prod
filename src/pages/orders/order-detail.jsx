@@ -14,6 +14,7 @@ import axiosInstance from "../../api";
 const OrderDetail = () => {
     const navigate = useNavigate();
     const { orderId } = useParams();
+    const {thirdPartyUsername} = useParams();
     const [orderDetail, setOrderDetail] = useState(null);
     const [loading, setLoading] = useState(true);
     const [isPickupModal, setisPickupModal] = useState(false);
@@ -33,7 +34,14 @@ const OrderDetail = () => {
         const fetchOrderDetail = async () => {
             try {
                 const token = localStorage.getItem('jwtToken');
-                if (token) {
+                if (thirdPartyUsername) {
+                    const response = await axiosInstance.post(`${BASE_URL}/thirdParty/get-third-party-orders/${orderId}`, {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                        },
+                    });
+                    setOrderDetail(response.data.jsonData);
+                }else{
                     const response = await axiosInstance.get(`${BASE_URL}/order/v2/orders/get-city-wide-order/${orderId}`, {
                         headers: {
                             Authorization: `Bearer ${token}`,
@@ -148,7 +156,7 @@ const OrderDetail = () => {
                         <h4 className="card-title ms-2 mb-0">Order Details</h4>
                     </div>
                     <div className="mb-2 d-flex gap-4">
-                        <img src={vehiceDetails.imageUrl} alt={vehiceDetails.vehicleType} width={40} />
+                        <img src={vehiceDetails?.imageUrl} alt={vehiceDetails?.vehicleType} width={40} />
                         {orderDetails.orderStatus === 'Delivered' && (
                             <button type="button" className="btn btn-sm btn-dark py-1 px-2" onClick={downloadInvoice}>Get Invoice</button>
                         )}
@@ -170,7 +178,16 @@ const OrderDetail = () => {
                             <div className="multistep-item">Order Placed hyg</div>
                         </li> */}
                         <li className="multistep-list active">
-                            <span>{orderDetails.orderDateTime}</span>
+                            <span>{thirdPartyUsername ? new Date(orderDetails.orderDateTime).toLocaleString("en-US", {
+                                            year: "numeric",
+                                            month: "short",
+                                            day: "2-digit",
+                                            hour: "2-digit",
+                                            minute: "2-digit",
+                                            second: "2-digit",
+                                            hour12: true,
+                                            timeZone: "UTC"
+                                            }) :  orderDetails.orderDateTime}</span>
                             <div className="multistep-item">Order Placed</div>
                         </li>
                         
@@ -393,7 +410,8 @@ const OrderDetail = () => {
                                         Order Id
                                     </td>
                                     <td className="text-slate-900 dark:text-slate-300 text-sm  font-normal ltr:text-left ltr:last:text-right rtl:text-right rtl:last:text-left px-6 py-2">
-                                        {orderDetails.order_Id}
+                                     
+                                        {thirdPartyUsername ? orderDetails.orderId : orderDetails.order_Id}
                                     </td>
                                 </tr>
                                 <tr className="border-b border-slate-100 dark:border-slate-700">
@@ -401,7 +419,16 @@ const OrderDetail = () => {
                                         Order Date
                                     </td>
                                     <td className="text-slate-900 dark:text-slate-300 text-sm  font-normal ltr:text-left ltr:last:text-right rtl:text-right rtl:last:text-left px-6 py-2">
-                                        {orderDetails.orderDateTime}
+                                        {thirdPartyUsername ? new Date(orderDetails.orderDateTime).toLocaleString("en-US", {
+                                            year: "numeric",
+                                            month: "short",
+                                            day: "2-digit",
+                                            hour: "2-digit",
+                                            minute: "2-digit",
+                                            second: "2-digit",
+                                            hour12: true,
+                                            timeZone: "UTC"
+                                            }) :  orderDetails.orderDateTime}
                                     </td>
                                 </tr>
                                 <tr className="border-b border-slate-100 dark:border-slate-700">
@@ -410,7 +437,9 @@ const OrderDetail = () => {
                                 </tr>
                                 <tr className="border-b border-slate-100 dark:border-slate-700">
                                     <td className=" px-6 py-2"> Order Type </td>
-                                    <td className=" px-6 py-2 text-end">{orderDetails.orderType}</td>
+                                    <td className=" px-6 py-2 text-end">
+                                        { thirdPartyUsername ? "THIRD PARTY" :orderDetails.orderType}
+                                    </td>
                                 </tr>
                                 <tr className="border-b border-slate-100 dark:border-slate-700">
                                     <td className=" px-6 py-2"> Pickup Address </td>
@@ -432,26 +461,37 @@ const OrderDetail = () => {
                                     <td className=" px-6 py-2"> Distance (KM) </td>
                                     <td className=" px-6 py-2 text-end">{orderDetails.distance}</td>
                                 </tr>
-                                <tr className="border-b border-slate-100 dark:border-slate-700">
-                                    <td className=" px-6 py-2"> Instruction </td>
-                                    <td className=" px-6 py-2 text-end">{orderDetails.instructionText}</td>
-                                </tr>
-                                <tr className="border-b border-slate-100 dark:border-slate-700">
-                                    <td className=" px-6 py-2"> Type Of Package </td>
-                                    <td className=" px-6 py-2 text-end">{packageDetails.packageType}</td>
-                                </tr>
+                                {!thirdPartyUsername && (
+                                    <>
+                                        <tr className="border-b border-slate-100 dark:border-slate-700">
+                                            <td className=" px-6 py-2"> Instruction </td>
+                                            <td className=" px-6 py-2 text-end">{orderDetails?.instructionText}</td>
+                                        </tr>
+                                        <tr className="border-b border-slate-100 dark:border-slate-700">
+                                            <td className=" px-6 py-2"> Type Of Package </td>
+                                            <td className=" px-6 py-2 text-end">{packageDetails?.packageType}</td>
+                                        </tr>
+                                    </>
+                                )}
+                                
                                 <tr className="border-b border-slate-100 dark:border-slate-700">
                                     <td className=" px-6 py-2"> Package Weight</td>
-                                    <td className=" px-6 py-2 text-end">{packageDetails.packageWeight}</td>
+                                    <td className=" px-6 py-2 text-end">
+                                        {thirdPartyUsername ? orderDetails?.packageWeight : packageDetails?.packageWeight}
+                                    </td>
                                 </tr>
-                                <tr className="border-b border-slate-100 dark:border-slate-700">
-                                    <td className=" px-6 py-2"> Package Value</td>
-                                    <td className=" px-6 py-2 text-end">{packageDetails.packageValue}</td>
-                                </tr>
-                                <tr className="border-b border-slate-100 dark:border-slate-700">
-                                    <td className=" px-6 py-2"> Package Type</td>
-                                    <td className=" px-6 py-2 text-end">{packageDetails.isFragile}</td>
-                                </tr>
+                                {!thirdPartyUsername && (
+                                    <>
+                                        <tr className="border-b border-slate-100 dark:border-slate-700">
+                                            <td className=" px-6 py-2"> Package Value</td>
+                                            <td className=" px-6 py-2 text-end">{packageDetails?.packageValue}</td>
+                                        </tr>
+                                        <tr className="border-b border-slate-100 dark:border-slate-700">
+                                            <td className=" px-6 py-2"> Package Type</td>
+                                            <td className=" px-6 py-2 text-end">{packageDetails?.isFragile}</td>
+                                        </tr>
+                                    </>
+                                )}
                             </tbody>
                         </table>
                     </div>
@@ -464,20 +504,22 @@ const OrderDetail = () => {
                                 <tr className="border-b border-slate-100 dark:border-slate-700">
                                     <td className="px-6 py-2"> Rider Name </td>
                                     <td className="text-end px-6 py-2">
-                                        {/* {riderDetails.riderName} */}
+                                        {riderDetails?.riderName || ""}
                                     </td>
                                 </tr>
                                 <tr className="border-b border-slate-100 dark:border-slate-700">
                                     <td className="px-6 py-2">Rider Number</td>
-                                    {/* <td className="text-end px-6 py-4"> {riderDetails.riderContact}</td> */}
+                                    <td className="text-end px-6 py-4"> {riderDetails?.riderContact || ""}</td>
                                 </tr>
                                 <tr className="border-b border-slate-100 dark:border-slate-700">
                                     <td className="px-6 py-2">Rider Vehicle Number</td>
-                                    {/* <td className="text-end px-6 py-4"> {riderDetails.riderVehicleNumber}</td> */}
+                                    <td className="text-end px-6 py-4"> {riderDetails?.riderVehicleNumber || ""}</td>
                                 </tr>
                                 <tr className="border-b border-slate-100 dark:border-slate-700">
                                     <td className="px-6 py-2">Vehicle Type</td>
-                                    <td className="text-end px-6 py-2"> {vehiceDetails.vehicleType}</td>
+                                    <td className="text-end px-6 py-2"> 
+                                        {thirdPartyUsername ? orderDetails?.vehicleType : vehiceDetails?.vehicleType}
+                                    </td>
                                 </tr>
                             </tbody>
                         </table>
@@ -488,7 +530,7 @@ const OrderDetail = () => {
                             <tbody>
                                 <tr className="border-b border-slate-100 dark:border-slate-700">
                                     <td className="px-6 py-2">Payment Mode</td>
-                                    <td className="text-end px-6 py-2">{orderDetails.paymentMode}</td>
+                                    <td className="text-end px-6 py-2">{orderDetails?.paymentMode}</td>
                                 </tr>
                                 {(orderDetails.orderStatus === 'Delivered' && orderDetails.paymentMode !== 'PREPAID')  && (
                                     <tr className="border-b border-slate-100 dark:border-slate-700">
@@ -517,31 +559,40 @@ const OrderDetail = () => {
                                 )}
                                 <tr className="border-b border-slate-100 dark:border-slate-700">
                                     <td className="px-6 py-2">MRP</td>
-                                    <td className="text-end px-6 py-2">{orderDetails.orderAmount.mrp}</td>
+                                    <td className="text-end px-6 py-2">
+                                        {thirdPartyUsername ? orderDetails.orderAmount : orderDetails.orderAmount.mrp}
+                                    </td>
                                 </tr>
-                                <tr className="border-b border-slate-100 dark:border-slate-700">
-                                    <td className="px-6 py-2">Discount</td>
-                                    <td className="text-end px-6 py-2">{orderDetails.orderAmount.discount}</td>
-                                </tr>
-                                <tr className="border-b border-slate-100 dark:border-slate-700">
-                                    <td className="px-6 py-2">MCD Tax</td>
-                                    <td className="text-end px-6 py-2">{orderDetails.orderAmount.mcdTax.toFixed(3)}</td>
-                                </tr>
-                                <tr className="border-b border-slate-100 dark:border-slate-700">
-                                    <td className="px-6 py-2">State Tax</td>
-                                    <td className="text-end px-6 py-2">{orderDetails.orderAmount.stateTax.toFixed(3)}</td>
-                                </tr>
-                                <tr className="border-b border-slate-100 dark:border-slate-700">
-                                    <td className="px-6 py-2">Toll Tax</td>
-                                    <td className="text-end px-6 py-2">{orderDetails.orderAmount.tollTax.toFixed(3)}</td>
-                                </tr>
-                                <tr className="border-b border-slate-100 dark:border-slate-700">
-                                    <td className="px-6 py-2">Applied Promocode</td>
-                                    <td className="text-end px-6 py-2">{orderDetails.orderAmount.promoCode}</td>
-                                </tr>
+                                {!thirdPartyUsername && (
+                                    <>
+                                       <tr className="border-b border-slate-100 dark:border-slate-700">
+                                            <td className="px-6 py-2">Discount</td>
+                                            <td className="text-end px-6 py-2">{orderDetails.orderAmount.discount}</td>
+                                        </tr>
+                                        <tr className="border-b border-slate-100 dark:border-slate-700">
+                                            <td className="px-6 py-2">MCD Tax</td>
+                                            <td className="text-end px-6 py-2">{orderDetails?.orderAmount?.mcdTax?.toFixed(3)}</td>
+                                        </tr>
+                                        <tr className="border-b border-slate-100 dark:border-slate-700">
+                                            <td className="px-6 py-2">State Tax</td>
+                                            <td className="text-end px-6 py-2">{orderDetails.orderAmount.stateTax?.toFixed(3)}</td>
+                                        </tr>
+                                        <tr className="border-b border-slate-100 dark:border-slate-700">
+                                            <td className="px-6 py-2">Toll Tax</td>
+                                            <td className="text-end px-6 py-2">{orderDetails.orderAmount.tollTax?.toFixed(3)}</td>
+                                        </tr>
+                                        <tr className="border-b border-slate-100 dark:border-slate-700">
+                                            <td className="px-6 py-2">Applied Promocode</td>
+                                            <td className="text-end px-6 py-2">{orderDetails.orderAmount.promoCode}</td>
+                                        </tr>
+                                    </>
+                                )}
+                                
                                 <tr className="border-b border-slate-100 dark:border-slate-700">
                                     <td className="px-6 py-2">Total Amount Payable</td>
-                                    <td className="text-end px-6 py-2">{orderDetails.orderAmount.finalPrice}</td>
+                                    <td className="text-end px-6 py-2">
+                                        { thirdPartyUsername ? orderDetails.orderAmount : orderDetails.orderAmount.finalPrice}
+                                    </td>
                                 </tr>
                             </tbody>
                         </table>
