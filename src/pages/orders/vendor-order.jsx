@@ -39,7 +39,7 @@ const COLUMNS = (openIsNotificationModel, openIsDeleteOrder, ordersType) => [
   },
   {
     Header: "Mobile Number",
-    accessor: "thirdPartyOrders.userInfo.mobileNumber",
+    accessor: "thirdPartyOrders.pickupAddressDetails.mobileNumber",
   },
   {
     Header: "City",
@@ -51,7 +51,7 @@ const COLUMNS = (openIsNotificationModel, openIsDeleteOrder, ordersType) => [
   },
   {
     Header: "Amount",
-    accessor: "thirdPartyOrders.paymentDetails.totalAmount",
+    accessor: "finalPrice",
   },
   {
     Header: "Order Date",
@@ -254,7 +254,39 @@ const Vendor = () => {
   const [notificationid,setNotifictionId]= useState();
   const [pagesizedata, setpagesizedata]=useState(50);
   const [totalCount, setTotalCount] = useState(0);
+  const [selectedCancelReason, setSelectedCancelReason] = useState("");
   const [cancelReason, setCancelReason] = useState("");
+  // Cancel order reason
+  const CancelOrderReason = [
+    {
+      name : 'DELIVERY PARTNER NOT MOVING IN MY DIRECTION',
+      value: "DELIVERY_PARTNER_NOT_MOVING_IN_MY_DIRECTION"
+    },
+    {
+      name : 'DELIVERY PARTNER NOT ASSIGNED',
+      value : 'DELIVERY_PARTNER_NOT_ASSIGNED'
+    },
+    {
+      name : 'DELIVERY PARTNER DENIED DUTY',
+      value : 'DELIVERY_PARTNER_DENIED_DUTY'
+    },
+    {
+      name : 'DELIVERY PARTNER MISBEHVAIOR',
+      value : 'DELIVERY_PARTNER_MISBEHVAIOR'
+    },
+    {
+      name : 'CHANGE DELIVERY PARTNER',
+      value : 'CHANGE_DELIVERY_PARTNER'
+    },
+    {
+      name : 'SKIP',
+      value : 'SKIP'
+    },
+    {
+      name : 'OTHERS',
+      value : 'OTHERS'
+    },
+  ]
 
   const maxPagesToShow = 5;
   const id = useParams();
@@ -392,15 +424,25 @@ const Vendor = () => {
     setOrderDeleteId(id)
   }
 
+  const handleReasonChange = (event) => {
+    setSelectedCancelReason(event.target.value);
+  };
   const handleCancelReason = async (event) => {
     setCancelReason(event.target.value);
   }
 
   const deletePlaceOrder = () => {
     const token = localStorage.getItem('jwtToken');
-    axiosInstance.post(`${BASE_URL}/thirdParty/cancel-order/${orderdeleteid}`,{
-        cancelReasons: cancelReason || ""
-      }
+    const isOtherReason = selectedCancelReason === "OTHERS";
+  
+    const cancelOrderReason = isOtherReason ? "OTHERS" : selectedCancelReason;
+    const cancelReasons = isOtherReason ? cancelReason : selectedCancelReason; // Send the entered reason if OTHERS, else selected reason
+
+    const payload = {
+      userType: "admin",
+      cancelReasons: cancelReasons || "", 
+    };
+    axiosInstance.post(`${BASE_URL}/thirdParty/cancel-order/${orderdeleteid}?orderCancelReason=${cancelOrderReason}`,payload,
       ).then((response) => {
         toast.success("Order cancel successfully");
         setOrderData((prevList) => prevList.filter((item) => item.order_Id !== orderdeleteid));
@@ -772,15 +814,28 @@ const Vendor = () => {
           <div className="">
             <h5 className="text-center">Are you sure to cancel?</h5>
             <div className="mt-3">
+              <div className="my-3 selcted-reason">
                 <label className="form-label mb-1">State Reason for Canceling Order</label>
-                <input                
-                  id="canclereason"
-                  type="text"
-                  name="canclereason"
-                  value={cancelReason}
-                  onChange={handleCancelReason}
-                  className="form-control"
-                />
+                <select className="form-control py-2 form-select h-50" onChange={handleReasonChange}>
+                  <option value="" selected>Select cancel reason</option>
+                  {CancelOrderReason.map((reason, index) => (
+                    <option key={index} value={reason.value}>{reason.name}</option>
+                  ))}
+                </select>
+              </div>
+              {selectedCancelReason === "OTHERS" && (
+                <div className="my-3 others-reason">
+                  <label className="form-label mb-1">Enter other reason canceling order</label>
+                  <input
+                    id="canclereason"
+                    type="text"
+                    name="canclereason"
+                    value={cancelReason}
+                    onChange={handleCancelReason}
+                    className="form-control"
+                  />
+                </div>
+              )}
             </div>
             <div className="d-flex gap-2 justify-content-center mt-4">
               <Button className="btn btn-dark" type="button" onClick={() => setDeleteOrderModel(false)}>

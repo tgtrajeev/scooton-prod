@@ -959,8 +959,13 @@ const AllOrders = () => {
         >
           <div className="">
             <h5 className="text-center">Are you sure to cancel?</h5>
-            
+            <Select className="w-full my-4">
+                <MenuItem selected>Select a Reason</MenuItem>
+                <MenuItem value="cancelfromadmin">Cancel from admin</MenuItem>
+                <MenuItem value="other">Other</MenuItem>
+            </Select>
             <div className="d-flex gap-2 justify-content-center mt-4">
+               
               <Button className="btn btn-dark" type="button" onClick={() => setDeleteOrderModel(false)}>
                 No
               </Button>

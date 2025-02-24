@@ -79,28 +79,44 @@ const OrderDetail = () => {
 
     const handlePickupConfirm = async (payload) => {
         try {
-            const response = await axiosInstance.post(
-                `${BASE_URL}/rider/pickup-delivery-otp-verification-admin/`,
-                payload
-            );
-            if (response.data.message === "Success") {
+            let response;      
+            if (thirdPartyUsername) {
+                response = await axiosInstance.post(
+                    `${BASE_URL}/thirdParty/pickup-delivery-otp-verification-admin/`,
+                    payload
+                );
+            } else {
+                response = await axiosInstance.post(
+                    `${BASE_URL}/rider/pickup-delivery-otp-verification-admin/`,
+                    payload
+                );
+            }    
+            if (response?.data?.message === "Success") {
                 setisPickupModal(false);
                 setPickup(true);
                 toast.success('Pickup confirmed successfully!');
             } else {
-                toast.error('Failed to confirm pickup: ' + response.data.message);
+                toast.error('Failed to confirm pickup: ' + (response?.data?.message || "Unknown error"));
             }
         } catch (error) {
             toast.error('An error occurred while confirming pickup. Please try again.');
         }
-    };
+    };    
     const handleDeliveryConfirm = async (payload) => {
         try {
-            const response = await axiosInstance.post(
-                `${BASE_URL}/rider/pickup-delivery-otp-verification-admin/`,
-                payload
-            );
-            if (response.data.message === "Success") {
+            let response;      
+            if (thirdPartyUsername) {
+                response = await axiosInstance.post(
+                    `${BASE_URL}/thirdParty/pickup-delivery-otp-verification-admin/`,
+                    payload
+                );
+            } else {
+                response = await axiosInstance.post(
+                    `${BASE_URL}/rider/pickup-delivery-otp-verification-admin/`,
+                    payload
+                );
+            } 
+            if (response?.data?.message === "Success") {
                 toast.success('Delivery confirmed successfully!');
                 setDelivered(true);
                 setisdeliveryModal(false);
@@ -441,25 +457,41 @@ const OrderDetail = () => {
                                         { thirdPartyUsername ? "THIRD PARTY" :orderDetails.orderType}
                                     </td>
                                 </tr>
+                                {cancelDetails?.orderCancelled === true && (
+                                    <tr className="border-b border-slate-100 dark:border-slate-700">
+                                        <td className=" px-6 py-2"> Order Cancel Reason </td>
+                                        <td className=" px-6 py-2 text-end">
+                                        {cancelDetails?.cancelReasonType?.trim() || cancelDetails?.cancelReasonSelected}
+                                        </td>
+                                    </tr>
+                                )}                                
                                 <tr className="border-b border-slate-100 dark:border-slate-700">
                                     <td className=" px-6 py-2"> Pickup Address </td>
-                                    <td className=" px-6 py-2 text-end">{customerDetails.pickupAddress}</td>
+                                    <td className=" px-6 py-2 text-end">{customerDetails?.pickupAddress}</td>
                                 </tr>
                                 <tr className="border-b border-slate-100 dark:border-slate-700">
                                     <td className=" px-6 py-2"> Pickup Contact </td>
-                                    <td className=" px-6 py-2 text-end">{customerDetails.pickupContact}</td>
+                                    <td className=" px-6 py-2 text-end">{customerDetails?.pickupContact}</td>
                                 </tr>
                                 <tr className="border-b border-slate-100 dark:border-slate-700">
                                     <td className=" px-6 py-2"> Delivery Address </td>
-                                    <td className=" px-6 py-2 text-end">{customerDetails.deliveryAddress},{customerDetails.deliveryAddress1},{customerDetails.deliveryPinCode}</td>
+                                    <td className=" px-6 py-2 text-end">{customerDetails?.deliveryAddress},{customerDetails.deliveryAddress1},{customerDetails.deliveryPinCode}</td>
                                 </tr>
                                 <tr className="border-b border-slate-100 dark:border-slate-700">
                                     <td className=" px-6 py-2"> Delivery Contact </td>
-                                    <td className=" px-6 py-2 text-end">{customerDetails.deliveryContact}</td>
+                                    <td className=" px-6 py-2 text-end">{customerDetails?.deliveryContact}</td>
                                 </tr>
                                 <tr className="border-b border-slate-100 dark:border-slate-700">
                                     <td className=" px-6 py-2"> Distance (KM) </td>
-                                    <td className=" px-6 py-2 text-end">{orderDetails.distance}</td>
+                                    <td className=" px-6 py-2 text-end">{orderDetails?.distance}</td>
+                                </tr>
+                                <tr className="border-b border-slate-100 dark:border-slate-700">
+                                    <td className=" px-6 py-2"> Pickup OTP </td>
+                                    <td className=" px-6 py-2 text-end">{orderDetails?.pickupOtp}</td>
+                                </tr>
+                                <tr className="border-b border-slate-100 dark:border-slate-700">
+                                    <td className=" px-6 py-2"> Delivery OTP </td>
+                                    <td className=" px-6 py-2 text-end">{orderDetails?.deiveryOtp}</td>
                                 </tr>
                                 {!thirdPartyUsername && (
                                     <>
@@ -509,16 +541,16 @@ const OrderDetail = () => {
                                 </tr>
                                 <tr className="border-b border-slate-100 dark:border-slate-700">
                                     <td className="px-6 py-2">Rider Number</td>
-                                    <td className="text-end px-6 py-4"> {riderDetails?.riderContact || ""}</td>
+                                    <td className="text-end px-6 py-2"> {riderDetails?.riderContact || ""}</td>
                                 </tr>
                                 <tr className="border-b border-slate-100 dark:border-slate-700">
                                     <td className="px-6 py-2">Rider Vehicle Number</td>
-                                    <td className="text-end px-6 py-4"> {riderDetails?.riderVehicleNumber || ""}</td>
+                                    <td className="text-end px-6 py-2"> {riderDetails?.riderVehicleNumber || ""}</td>
                                 </tr>
                                 <tr className="border-b border-slate-100 dark:border-slate-700">
                                     <td className="px-6 py-2">Vehicle Type</td>
                                     <td className="text-end px-6 py-2"> 
-                                        {thirdPartyUsername ? orderDetails?.vehicleType : vehiceDetails?.vehicleType}
+                                        {thirdPartyUsername ? vehiceDetails?.vehicleType : vehiceDetails?.vehicleType}
                                     </td>
                                 </tr>
                             </tbody>
@@ -544,17 +576,23 @@ const OrderDetail = () => {
                                         <td className="text-end px-6 py-2">PENDING</td>
                                     </tr>
                                 )}
-                                {orderDetails.paymentMode === 'PREPAID' && (
+                                {(orderDetails.orderStatus === 'Cancelled' && orderDetails.paymentMode === 'PREPAID') && (
+                                    <tr className="border-b border-slate-100 dark:border-slate-700">
+                                        <td className="px-6 py-2">Payment Status</td>
+                                        <td className="text-end px-6 py-2">Cancelled</td>
+                                    </tr>
+                                )}
+                                {/* {orderDetails.paymentMode === 'PREPAID' && (
                                     <tr className="border-b border-slate-100 dark:border-slate-700">
                                         <td className="px-6 py-2">Refund Message</td>
                                         <td className="text-end px-6 py-2">{orderDetails.refundStatus}</td>
                                     </tr>
-                                )}
+                                )} */}
                                 
-                                {orderDetails.paymentMode === 'PREPAID' && (
+                                {(orderDetails.orderStatus === 'In Progress' && orderDetails.paymentMode === 'PREPAID') && (
                                     <tr className="border-b border-slate-100 dark:border-slate-700">
                                         <td className="px-6 py-2">Payment Status</td>
-                                        <td className="text-end px-6 py-2">{orderDetails.paymentStatus}</td>
+                                        <td className="text-end px-6 py-2">Completed</td>
                                     </tr>
                                 )}
                                 <tr className="border-b border-slate-100 dark:border-slate-700">

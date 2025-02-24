@@ -19,8 +19,8 @@ import { useNavigate } from "react-router-dom";
 import axiosInstance from "../../api";
 import { GoogleMap, LoadScript,useLoadScript, Marker } from '@react-google-maps/api';
  
-const RejectionType = ["Information Rejected", "Document Issue"];
-const DocumentStatus =["Approve","Reject"]
+const RejectionType = ["Information Rejected", "Document Rejected"];
+const DocumentStatus =["Approve","Reject", "VERIFICATION_PENDING"]
 
 
 const mapContainerStyle = {
@@ -107,7 +107,17 @@ const RiderDetail = () => {
             setRiderWalletDetail(riderWalletResponse.data.jsonData.walletTxn);
             setWalletAmount(riderWalletResponse.data.jsonData.balance);
             setRiderTripDetail(riderTripResponse.data.jsonData.tripDetails);
-            setDocumentDetail(documentResponse.data.jsonData.documentDetails || []);
+            // setDocumentDetail(documentResponse.data.jsonData.documentDetails || []);
+            setDocumentDetail(
+                (documentResponse.data.jsonData.documentDetails || []).map(order => ({
+                    ...order,
+                    filteredStatus: 
+                        order.status === "Approve" || order.status === "Reject" 
+                            ? DocumentStatus.filter(status => status !== "VERIFICATION_PENDING") 
+                            : DocumentStatus
+                }))
+            );
+            
             setDeviceDetails(documentResponse.data.jsonData.deviceDetails);
             setVehicleDetails(documentResponse.data.jsonData.vehicleDetails);
             setDriverDetails(documentResponse.data.jsonData.driverDetails)
@@ -294,9 +304,71 @@ const RiderDetail = () => {
         lng: riderLongitude || 79.826660 
     }
 
-    const updateRiderRegistration = () =>{
+    // const updateRiderRegistration = () =>{
         
-        const payload ={
+    //     const payload ={
+    //         vehicleNumber: vehicleDetails?.vehicleNumber,
+    //         ownerName: vehicleDetails?.ownerName,
+    //         ownerMobileNumber: vehicleDetails?.ownerMobileNumber,
+    //         vehicleType: vehicleDetails?.vehicleType,
+    //         driverName: driverDetails?.driverName,
+    //         city: driverDetails?.driverCity,
+    //         state: driverDetails?.driverState,
+    //         driverMobileNumber:driverDetails?.driverMobileNumber,
+    //         riderReferralCode: driverDetails?.riderReferralCode,
+    //         fcmId: driverDetails?.fcmId,
+    //         documentDetails: documentDetail,
+    //         rejectedReason: documentRejectDetails?.rejectedReason,
+    //         accountHolderName: "",
+    //         accountsNumber: "",
+    //         accountsIFSC: "",
+    //         language: language.language,
+    //         rejectedType: documentRejectDetails?.rejectedType,
+    //         approved: approved
+    //     }
+    //     if(approved && documentRejectDetails.rejectedReason != '' && documentRejectDetails.rejectedReason != undefined){
+    //         try{
+    //             axiosInstance.post(`${BASE_URL}/login/rider-registration`,payload)
+    //             toast.success("Rider information updated successfully!");
+    //             setUpdateErrorMsg(false);
+    //             // setTimeout(() => {
+    //             //     window.location.reload()
+    //             // }, 500);
+    //         }catch{
+    //             toast.error("Rider information not updated successfully!");
+    //         }
+    //     } else if(!approved && documentRejectDetails.rejectedReason!= '' && documentRejectDetails.rejectedReason != undefined){
+    //         try{
+    //             axiosInstance.post(`${BASE_URL}/login/rider-registration`,payload)
+    //             toast.success("Rider information updated successfully!");
+    //             setUpdateErrorMsg(false);
+    //             // setTimeout(() => {
+    //             //     window.location.reload()
+    //             // }, 500);
+    //         }catch{
+    //             toast.error("Rider information not updated successfully!");
+    //         }
+    //     }else if(approved && documentRejectDetails.rejectedReason == ''){
+    //         try{
+    //             axiosInstance.post(`${BASE_URL}/login/rider-registration`,payload)
+    //             toast.success("Rider information updated successfully!");
+    //             setUpdateErrorMsg(false);
+    //             // setTimeout(() => {
+    //             //     window.location.reload()
+    //             // }, 500);
+    //         }catch{
+    //             toast.error("Rider information not updated successfully!");
+    //         }
+    //     }
+    //     else{
+    //         setUpdateErrorMsg(true)
+    //        toast.error("Not Updated")
+    //     }
+        
+        
+    // }
+    const updateRiderRegistration = async () => {
+        const payload = {
             vehicleNumber: vehicleDetails?.vehicleNumber,
             ownerName: vehicleDetails?.ownerName,
             ownerMobileNumber: vehicleDetails?.ownerMobileNumber,
@@ -304,7 +376,7 @@ const RiderDetail = () => {
             driverName: driverDetails?.driverName,
             city: driverDetails?.driverCity,
             state: driverDetails?.driverState,
-            driverMobileNumber:driverDetails?.driverMobileNumber,
+            driverMobileNumber: driverDetails?.driverMobileNumber,
             riderReferralCode: driverDetails?.riderReferralCode,
             fcmId: driverDetails?.fcmId,
             documentDetails: documentDetail,
@@ -315,49 +387,23 @@ const RiderDetail = () => {
             language: language.language,
             rejectedType: documentRejectDetails?.rejectedType,
             approved: approved
+        };
+    
+        if (!approved && (!documentRejectDetails?.rejectedReason || documentRejectDetails.rejectedReason.trim() === '')) {
+            setUpdateErrorMsg(true);
+            toast.error("Note: State Reason for Rejection");
+            return;
         }
-        if(approved && documentRejectDetails.rejectedReason != '' && documentRejectDetails.rejectedReason != undefined){
-            try{
-                axiosInstance.post(`${BASE_URL}/login/rider-registration`,payload)
-                toast.success("Rider information updated successfully!");
-                setUpdateErrorMsg(false);
-                // setTimeout(() => {
-                //     window.location.reload()
-                // }, 500);
-            }catch{
-                toast.error("Rider information not updated successfully!");
-            }
-        } else if(!approved && documentRejectDetails.rejectedReason!= '' && documentRejectDetails.rejectedReason != undefined){
-            try{
-                axiosInstance.post(`${BASE_URL}/login/rider-registration`,payload)
-                toast.success("Rider information updated successfully!");
-                setUpdateErrorMsg(false);
-                // setTimeout(() => {
-                //     window.location.reload()
-                // }, 500);
-            }catch{
-                toast.error("Rider information not updated successfully!");
-            }
-        }else if(approved && documentRejectDetails.rejectedReason == ''){
-            try{
-                axiosInstance.post(`${BASE_URL}/login/rider-registration`,payload)
-                toast.success("Rider information updated successfully!");
-                setUpdateErrorMsg(false);
-                // setTimeout(() => {
-                //     window.location.reload()
-                // }, 500);
-            }catch{
-                toast.error("Rider information not updated successfully!");
-            }
+    
+        try {
+            await axiosInstance.post(`${BASE_URL}/login/rider-registration`, payload);
+            toast.success("Rider information updated successfully!");
+            setUpdateErrorMsg(false);
+        } catch (error) {
+            toast.error("Rider information not updated successfully!");
         }
-        else{
-            setUpdateErrorMsg(true)
-           toast.error("Not Updated")
-        }
-        
-        
-    }
-
+    };
+    
     const rechargeWallet = () => {
       setRechargeModel(true);
     }
@@ -782,10 +828,10 @@ const RiderDetail = () => {
                                                     <Select
                                                         id="role"
                                                         value={order.status || ""}
-                                                        options={DocumentStatus}
+                                                        options={order.filteredStatus}
                                                         onChange={(event) => handleDocumentStatus(event, index)}
-                                                /></td> 
-                                             
+                                                    />
+                                                </td> 
                                             </tr>
                                         ))
                                     )}
