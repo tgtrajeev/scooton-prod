@@ -589,7 +589,7 @@ const RiderDetail = () => {
                             <div>
                                 <h5 className="text-center">Map</h5>
                                 
-                                <LoadScript googleMapsApiKey="AIzaSyB41DRUbKWJHPxaFjMAwdrzWzbVKartNGg">
+                                <LoadScript googleMapsApiKey="AIzaSyDTetPmohnWdWT0lsYV9iT-58Z5Gm4jmgA">
                                     
                                     <GoogleMap
                                         mapContainerStyle={mapContainerStyle}
