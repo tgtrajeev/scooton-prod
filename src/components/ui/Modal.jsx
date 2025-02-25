@@ -71,17 +71,18 @@ const Modal = ({
                  bg-white dark:bg-slate-800 text-left align-middle shadow-xl transition-alll ${className}`}
                   >
                     <div
-                      className={`relative overflow-hidden py-4 px-4 pb-0 flex justify-between  ${themeClass}`}
+                      className={`relative overflow-hidden py-3 px-4 flex items-center justify-between border-bottom  ${themeClass}`}
                     >
-                      <h2 className="capitalize leading-6 tracking-wider font-medium text-base text-white">
+                      <h2 className="capitalize text-lg text-base">
                         {title}
                       </h2>
-                      <button onClick={onClose} className="text-[22px]">
-                        <Icon icon="heroicons-outline:x" />
+                      <button onClick={onClose} className="flex items-center bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600">
+                        Close
+                        <Icon className="text-[22px]" icon="heroicons-outline:x" />
                       </button>
                     </div>
                     <div
-                      className={`px-6 py-8 ${
+                      className={`px-6 py-3 ${
                         scrollContent ? "overflow-y-auto max-h-[400px]" : ""
                       }`}
                     >

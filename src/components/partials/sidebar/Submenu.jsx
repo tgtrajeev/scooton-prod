@@ -177,7 +177,7 @@ const Submenu = ({ activeSubmenu, item, i }) => {
                           : ""
                       } h-2 w-2 rounded-full border border-slate-600 dark:border-white inline-block flex-none`}
                     ></span>
-                    <span className="flex-1"> {subItem.childtitle}</span>
+                    <span className="flex-1">{subItem.childtitle}</span>
                   </span>
                 )}
               </NavLink>

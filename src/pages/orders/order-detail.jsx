@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState,useRef } from "react";
 import { useParams, Link } from "react-router-dom";
 import Card from "../../components/ui/Card";
 import { Icon } from "@iconify/react/dist/iconify.js";
@@ -10,6 +10,16 @@ import { ToastContainer } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import axiosInstance from "../../api";
+import { GoogleMap, LoadScript,useLoadScript, Marker,InfoWindow  } from '@react-google-maps/api';
+
+const mapContainerStyle = {
+    width: '50vw',
+    height: '50vh',
+  };
+  
+  const markers = [
+      { lat: '', lng: '' }
+  ];
 
 const OrderDetail = () => {
     const navigate = useNavigate();
@@ -22,6 +32,14 @@ const OrderDetail = () => {
     const [isLoadingInvoice, setisLoadingInvoice] = useState(false);
     const [pickup, setPickup] = useState(false);
     const [delivered, setDelivered] = useState(false);
+    const [nearRiderMap, setNearRiderMap] = useState(false);
+    const [riderNearLocation, setRiderNearLocation] = useState([]);
+    const [nearActiveRider, setNearActiveRider]= useState(null);
+    const [nearInActiveRider, setNearInActiveRider]= useState(null);
+    const [nearTotalRider, setNearTotalRider]= useState(null);
+    const [selectedMarker, setSelectedMarker] = useState(null);
+    const [selectedPickupMarker, setSelectedPickupMarker] = useState(null);
+    const mapRef = useRef(null);
 
     const openPickupModal = async () => {
         setisPickupModal(true);
@@ -159,6 +177,49 @@ const OrderDetail = () => {
         };
         
     };
+
+    const nearByRiderDetails = async () => {
+        const params ={
+            radius:5,
+            userLatitude: customerDetails?.pickupLocation?.lat,
+            userLongitude: customerDetails?.pickupLocation?.lon,
+            vehicleId: orderDetail?.vehiceDetails?.id
+        }
+        try{
+           await axiosInstance.get(`${BASE_URL}/rider/nearby-riders`,{params}).then((response) => {
+                if(response.data.length > 0){
+                    debugger
+                    console.log("response", response.data);
+                    setNearRiderMap(true);
+                    setRiderNearLocation(response.data)
+                    const activeRiders = response.data.filter(rider => rider.riderActiveForOrders === true);
+                    const countActiveRiders = activeRiders.length;
+                    setNearActiveRider(countActiveRiders);
+        
+                    const inactiveRiders = response.data.filter(rider => rider.riderActiveForOrders === false);
+                    const countInactiveRiders = inactiveRiders.length;
+                    setNearInActiveRider(countInactiveRiders);
+        
+                    const totalRiders = response.data.length;
+                    setNearTotalRider(totalRiders)
+                    debugger
+                }
+                else {
+                    toast.error("Sorry, no rider available at the moment. Please try again later.")
+                }
+           })
+        }catch (error){
+            console.error("Error fetching rider location:", error);
+        }
+
+    }
+
+    const pickupLocation  = {
+        lat: customerDetails?.pickupLocation?.lat, 
+        lng: customerDetails?.pickupLocation?.lon,
+        address: customerDetails?.pickupAddress,
+        name: "Pickup Location"
+    }
 
     return (
         <Card>
@@ -635,6 +696,85 @@ const OrderDetail = () => {
                             </tbody>
                         </table>
                     </div>
+                    <div className="mt-3 text-end">
+                        {orderDetails.orderStatus === 'In Progress' && (
+                            <button type="button" className="btn btn-dark p-2" onClick={() => {nearByRiderDetails()}}> Get Near By Rider</button>
+                        )}
+                        
+                    </div>
+                    {nearRiderMap && (
+                            <Modal
+                            activeModal={nearRiderMap}
+                            uncontrol
+                            className="max-w-5xl"
+                            title="Near By Rider"
+                            centered
+                            onClose={() => setNearRiderMap(false)}
+                            >
+                            <div>
+                                {/* <h6 className="text-center mb-2">Near By Rider</h6> */}
+                                <LoadScript googleMapsApiKey="AIzaSyDTetPmohnWdWT0lsYV9iT-58Z5Gm4jmgA" preventGoogleFonts={true}>
+                                <div className="overflow-hidden">
+                                    <GoogleMap
+                                        mapContainerStyle={mapContainerStyle}
+                                        center={pickupLocation}
+                                        zoom={15}
+                                        onLoad={(map) => (mapRef.current = map)}
+                                    >
+                                        {riderNearLocation?.map((marker, index) => (
+                                            <Marker
+                                                key={index}
+                                                position={{ lat: marker.latitude, lng: marker.longitude }} 
+                                                onClick={() => setSelectedMarker(marker)}
+                                            />
+                                        ))}
+
+                                        {selectedMarker && selectedMarker.latitude && selectedMarker.longitude && (
+                                            <InfoWindow
+                                                position={{ lat: selectedMarker.latitude, lng: selectedMarker.longitude }} 
+                                                onCloseClick={() => setSelectedMarker(null)}
+                                            >
+                                                <div style={{ padding: "5px", fontSize: "14px" }}>
+                                                <strong>{selectedMarker.firstName}</strong> <br />
+                                                    {selectedMarker.mobileNumber}
+                                                </div>
+                                            </InfoWindow>
+                                        )}
+                                        <Marker 
+                                            position={pickupLocation}
+                                            icon={{
+                                                url: "../../../public/pickuppoint.png",
+                                            }}
+                                            onClick={() => setSelectedPickupMarker(pickupLocation)}
+                                        />
+
+                                        {selectedPickupMarker && (
+                                            <InfoWindow 
+                                            position={selectedPickupMarker} 
+                                            
+                                            onCloseClick={() => setSelectedPickupMarker(null)}
+                                            >
+                                            <div style={{ padding: "5px", fontSize: "14px" }}>
+                                                <strong>{selectedPickupMarker.name}</strong> <br />
+                                                {selectedPickupMarker.address}
+                                            </div>
+                                            </InfoWindow>
+                                        )}
+                                    </GoogleMap>
+                                </div>
+                                </LoadScript>
+                            </div>
+                            <div className="mt-2 text-center">
+                               <strong>
+                                    Near By Total Riders: {nearTotalRider} [
+                                    <span style={{ color: "green", fontWeight: "bold" }}>Active Rider: {nearActiveRider} </span> 
+                                    <span>-</span> 
+                                    <span style={{ color: "red", fontWeight: "bold" }}> InActive Riders: {nearInActiveRider}</span>]
+                                </strong>
+
+                            </div>
+                        </Modal>
+                    )}
                 </div>
             </div>
             

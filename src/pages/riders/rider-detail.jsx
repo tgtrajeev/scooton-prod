@@ -28,8 +28,10 @@ const mapContainerStyle = {
   height: '50vh',
 };
 
-const mapStyles = { height: "400px", width: "100%" };
-    const defaultCenter = { lat: 40.748817, lng: -73.985428 };
+const markers = [
+    { lat: '', lng: '' }
+];
+
 
 const RiderDetail = () => {
     const { riderId } = useParams();
@@ -57,6 +59,7 @@ const RiderDetail = () => {
         fileName:''
     })
     const[riderAddress, setRiderAddress]= useState(null);
+    const[riderLastLocation, setRiderLastLocation] = useState(null);
     const[riderLatitude, setRiderLatitude]= useState(null);
     const[riderLongitude, setRiderLongitude] = useState(null);
     const mapRef = useRef(null);
@@ -138,19 +141,6 @@ const RiderDetail = () => {
       };  
       fetchRiderOrderDetail();
     }, [riderId, updateWallet]);
-
-    // const { isLoaded, loadError } = useLoadScript({
-    //     googleMapsApiKey: 'AIzaSyBV57UA9d4G4J1Z2XnZFiGykdv0ZLcaAuI'
-    // });
-    
-    // if (loadError) {
-    // return <div>Error loading maps</div>;
-    // }
-
-    // if (!isLoaded) {
-    // return <div>Loading maps</div>;
-    // }
-
 
 
     const handlevehicleDetails = (e) => {
@@ -257,14 +247,17 @@ const RiderDetail = () => {
 
 
     const handleDocumentStatus = (event, index) => {
+        debugger
         const newStatus = event.target.value;
         setDocumentDetail((prevDetails) => {
             const updatedDetails = [...prevDetails];
             if (updatedDetails[index]?.status !== newStatus) { 
                 updatedDetails[index].status = newStatus;
             }
+            console.log("updatedDetails",updatedDetails)
             return updatedDetails;
         });
+        debugger
         const allApproved = documentDetail.every(order => order.status !== "Reject");
         setApproved(allApproved);
     };
@@ -292,7 +285,8 @@ const RiderDetail = () => {
               
                 setRiderAddress(response.data.riderAddress);
                 setRiderLatitude(response.data.latitude);
-                setRiderLongitude(response.data.longitude)
+                setRiderLongitude(response.data.longitude);
+                setRiderLastLocation(response.data.lastLocationUpdate);
             }); 
         } catch (error) {
             console.error("Error fetching rider location:", error);
@@ -581,25 +575,58 @@ const RiderDetail = () => {
                             <Modal
                             activeModal={isMapOpen}
                             uncontrol
-                            className="max-w-5xl"
-                            title=""
+                            className="max-w-5xl text-black"
+                            title="Rider Details"
                             centered
                             onClose={() => setIsMapOpen(false)}
                             >
                             <div>
-                                <h5 className="text-center">Map</h5>
-                                
-                                <LoadScript googleMapsApiKey="AIzaSyDTetPmohnWdWT0lsYV9iT-58Z5Gm4jmgA">
+                                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "5px", marginBottom: "10px", }}>
+                                    <div><strong>Map Rider Id:</strong> {riderId}</div>
+                                    <div><strong>Rider Mobile:</strong> {driverDetails?.driverMobileNumber || ""}</div>
+                                    <div><strong>Device:</strong> {deviceDetails?.deviceMake || ""}</div>
+                                    <div><strong>Model:</strong> {deviceDetails?.deviceModel || ""}</div>
+                                    <div><strong>OS version:</strong> {deviceDetails?.deviceOs || ""}-{deviceDetails?.deviceVersion || ""}</div>
+                                    <div><strong>App Version:</strong> {deviceDetails?.appVersion || ""}</div>
+                                </div>
+                                {/* <h6 className="text-center map mb-2">Map Rider Id: {riderId}; Rider Mobile: {driverDetails?.driverMobileNumber || ""}; Device: {deviceDetails?.deviceMake || ""};  Modal: {deviceDetails?.deviceModel || ""}; OS version: {deviceDetails?.deviceOs || ""}-{deviceDetails?.deviceVersion || ""}; App Version: {deviceDetails?.appVersion || ""}</h6> */}
+                                <LoadScript googleMapsApiKey="AIzaSyDTetPmohnWdWT0lsYV9iT-58Z5Gm4jmgA" preventGoogleFonts={true}>
+                                    <div className="overflow-hidden">
+                                        <GoogleMap
+                                            mapContainerStyle={mapContainerStyle}
+                                            center={center}
+                                            zoom={20}
+                                            onLoad={(map) => (mapRef.current = map)}
+                                        >
+                                            {markers.map((marker, index) => (
+                                                <Marker key={index} position={{ lat: riderLatitude, lng: riderLongitude }} />
+                                            ))}
+                                        </GoogleMap>
+                                    </div>
                                     
-                                    <GoogleMap
-                                        mapContainerStyle={mapContainerStyle}
-                                        center={center}
-                                        zoom={12}
-                                        onLoad={(map) => (mapRef.current = map)}
-                                    />
                                 </LoadScript>
-                               
                             </div>
+                            <div style={{ display: "grid", gridTemplateColumns: "1fr 2fr", gap: "5px", marginTop: "20px", fontSize: "14px", }}>
+                                <div><strong>Updated:</strong> {riderLastLocation}</div>
+                                <div><strong>Rider Location:</strong> {riderAddress}</div>
+                            </div>
+                            {/* <div className="row mt-3">
+                                <div className="col-md-3 map">
+                                   <p>Updated: {riderLastLocation}</p>
+                                </div>
+                                <div className="col-md-9 text-end map">
+                                  <p>Rider Location: {riderAddress}</p>
+                                </div>
+                            </div> */}
+                            {/* <div className="text-end mt-3">
+                                <button 
+                                    className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600"
+                                    onClick={() => setIsMapOpen(false)}
+                                >
+                                    Close
+                                </button>
+                            </div> */}
+                            
                         </Modal>
                     )}
                 </div>
