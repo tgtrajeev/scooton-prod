@@ -176,13 +176,13 @@ const AllRiders = () => {
   const [currentPage, setCurrentPage] = useState(0);
   const [pageCount, setPageCount] = useState(0);
   const [activeridercount, setActiveRiderCount] = useState([])
-  const [riderstatus, setRiderStatus]= useState('All')
-  const [documentstatus, setDocumentStatus]= useState('All')
+  const [riderstatus, setRiderStatus]= useState('ALL')
+  const [documentstatus, setDocumentStatus]= useState('ALL')
   const [vehicleid, setVehicleId]= useState('0');
   const [filterby, setFilterBy] = React.useState("NONE");
   const [pagesizedata, setpagesizedata]=useState(50);
   const [serviceArea, setServiceArea] = useState([]);
-  const [serviceAreaStatus, setServiceAreaStatus] = useState('All');
+  const [serviceAreaStatus, setServiceAreaStatus] = useState('ALL');
   const [totalCount, setTotalCount] = useState(0);
   const maxPagesToShow = 5;
 
@@ -192,7 +192,7 @@ const AllRiders = () => {
     setLoading(true);
     const token = localStorage.getItem("jwtToken");
     if (token) {
-      if (riderstatus == "All" && documentstatus === "All" && vehicleid === "0" && filterby == "NONE"){
+      if (serviceAreaStatus == "ALL" && riderstatus == "ALL" && documentstatus === "ALL" && vehicleid === "0" && filterby == "NONE"){
         axiosInstance
           .get(`${BASE_URL}/register/v2/rider/get-all-service-area-by-registration-status/ALL/0/ALL/0?page=${currentPage}&size=${pagesizedata}`, {
             headers: {
@@ -293,7 +293,7 @@ const AllRiders = () => {
    
     const token = localStorage.getItem("jwtToken");
     const endpoint =
-      filterby === "NONE" && riderstatus == "All" && documentstatus === "All" && vehicleid === "0"
+      filterby === "NONE" && riderstatus == "ALL" && documentstatus === "ALL" && vehicleid === "0"
         ? `${BASE_URL}/register/v2/rider/get-all-service-area-by-registration-status/ALL/0/ALL/0?page=0&size=${pagesizedata}`
         : `${BASE_URL}/register/rider/get-rider-by-mobilenumber-or-riderid/${filterby}/${search}?page=0&size=${pagesizedata}`;
     
@@ -492,7 +492,7 @@ const AllRiders = () => {
                         displayEmpty
                         inputProps={{ 'aria-label': 'Without label' }}
                       >
-                        <MenuItem value="ALL" selected>ALL</MenuItem>
+                        <MenuItem value="ALL">ALL</MenuItem>
                         {serviceArea.map((city, index) => (
                           <MenuItem value={city.id} key={index} id={city.id}>{city.name}</MenuItem>
                         ))}                        
