@@ -179,7 +179,7 @@ const AllRiders = () => {
   const [riderstatus, setRiderStatus]= useState('ALL')
   const [documentstatus, setDocumentStatus]= useState('ALL')
   const [vehicleid, setVehicleId]= useState('0');
-  const [filterby, setFilterBy] = React.useState("NONE");
+  const [filterby, setFilterBy] = React.useState("RIDERID");
   const [pagesizedata, setpagesizedata]=useState(50);
   const [serviceArea, setServiceArea] = useState([]);
   const [serviceAreaStatus, setServiceAreaStatus] = useState('ALL');
@@ -192,7 +192,7 @@ const AllRiders = () => {
     setLoading(true);
     const token = localStorage.getItem("jwtToken");
     if (token) {
-      if (serviceAreaStatus == "ALL" && riderstatus == "ALL" && documentstatus === "ALL" && vehicleid === "0" && filterby == "NONE"){
+      if (serviceAreaStatus == "ALL" && riderstatus == "ALL" && documentstatus === "ALL" && vehicleid === "0" && filterby == "RIDERID"){
         axiosInstance
           .get(`${BASE_URL}/register/v2/rider/get-all-service-area-by-registration-status/ALL/0/ALL/0?page=${currentPage}&size=${pagesizedata}`, {
             headers: {
@@ -251,7 +251,7 @@ const AllRiders = () => {
           })
         
         .then((response) => {
-          setFilterBy("NONE");
+          setFilterBy("RIDERID");
           setSearch("");
           setRiderData(response.data);
         })
@@ -274,7 +274,7 @@ const AllRiders = () => {
     const value = event.target.value;
     setFilterBy(value);
 
-    if (value === "NONE") {
+    if (value === "RIDERID") {
       setSearch("");
     }
   };
@@ -285,7 +285,7 @@ const AllRiders = () => {
 
   const FilterOrder = () => {
     setLoading(true);
-    if(filterby !== "NONE"){
+    if(filterby !== "RIDERID"){
       setVehicleId('0');
       setDocumentStatus('All');
       setRiderStatus('All');
@@ -293,7 +293,7 @@ const AllRiders = () => {
    
     const token = localStorage.getItem("jwtToken");
     const endpoint =
-      filterby === "NONE" && riderstatus == "ALL" && documentstatus === "ALL" && vehicleid === "0"
+      filterby === "RIDERID" && riderstatus == "ALL" && documentstatus === "ALL" && vehicleid === "0"
         ? `${BASE_URL}/register/v2/rider/get-all-service-area-by-registration-status/ALL/0/ALL/0?page=0&size=${pagesizedata}`
         : `${BASE_URL}/register/rider/get-rider-by-mobilenumber-or-riderid/${filterby}/${search}?page=0&size=${pagesizedata}`;
     
@@ -418,7 +418,7 @@ const AllRiders = () => {
     setRiderStatus("ALL");
     setDocumentStatus("ALL");
     setVehicleId("0");
-    setFilterBy("NONE");
+    setFilterBy("RIDERID");
     setSearch(""); 
   }
 
@@ -454,7 +454,7 @@ const AllRiders = () => {
                 displayEmpty
                 inputProps={{ 'aria-label': 'Without label' }}
               >
-                <MenuItem value="NONE">NONE</MenuItem>
+                {/* <MenuItem value="NONE">NONE</MenuItem> */}
                 <MenuItem value="RIDERID">Rider ID</MenuItem>
                 <MenuItem value="MOBILE">Mobile Number</MenuItem>
                 <MenuItem value="RIDERNAME">Rider Name</MenuItem>
@@ -587,7 +587,7 @@ const AllRiders = () => {
                       <button className="btn btn-dark h-100 text-xl" onClick={resetFilters}><Icon icon="heroicons:arrow-path" /></button>
                     </div>
                     <div className="h-100">
-                      <button className="btn btn-dark h-100 py-2" onClick={() => setIsVisible(false)}>Submit</button>
+                      <button className="btn btn-dark h-100 py-2" onClick={() => setIsVisible(true)}>Submit</button>
                     </div>
                   </div>
                 </div>
