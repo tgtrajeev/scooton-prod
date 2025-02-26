@@ -362,7 +362,7 @@ const AllRiders = () => {
     setCurrentPage(0);  
   };
   // show hide
-  const [isVisible, setIsVisible] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
   const handleShow = () => {
     setIsVisible(!isVisible); 
   };
@@ -482,9 +482,9 @@ const AllRiders = () => {
             <div>
               <div className="filter-show">
                 <div className="">
-                  {/* <div className="flex-1">
+                  <div className="flex-1">
                     <FormControl fullWidth className="">
-                      <label className="text-sm">Service Area</label>
+                      <label className="text-sm">Rider City</label>
                       <Select
                         id="demo-simple-select"
                         value={serviceAreaStatus}
@@ -498,7 +498,7 @@ const AllRiders = () => {
                         ))}                        
                       </Select>
                     </FormControl>
-                  </div> */}
+                  </div>
                   <div className="flex-1">
                     <FormControl fullWidth className="">
                       <label className="text-sm mb-1">Rider Status</label>

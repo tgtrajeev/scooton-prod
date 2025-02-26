@@ -13,13 +13,15 @@ import axiosInstance from "../../api";
 import { GoogleMap, LoadScript,useLoadScript, Marker,InfoWindow  } from '@react-google-maps/api';
 
 const mapContainerStyle = {
-    width: '50vw',
+    width: '100%',
     height: '50vh',
   };
   
   const markers = [
       { lat: '', lng: '' }
   ];
+ 
+
 
 const OrderDetail = () => {
     const navigate = useNavigate();
@@ -39,6 +41,7 @@ const OrderDetail = () => {
     const [nearTotalRider, setNearTotalRider]= useState(null);
     const [selectedMarker, setSelectedMarker] = useState(null);
     const [selectedPickupMarker, setSelectedPickupMarker] = useState(null);
+    const [selectedDroppMarker, setSelectedDropMarker] = useState(null);
     const mapRef = useRef(null);
 
     const openPickupModal = async () => {
@@ -219,6 +222,13 @@ const OrderDetail = () => {
         lng: customerDetails?.pickupLocation?.lon,
         address: customerDetails?.pickupAddress,
         name: "Pickup Location"
+    }
+
+    const dropLocation  = {
+        lat: customerDetails?.deliveryLocation?.lat, 
+        lng: customerDetails?.deliveryLocation?.lon,
+        address: customerDetails?.deliveryAddress,
+        name: "Drop Location"
     }
 
     return (
@@ -718,13 +728,14 @@ const OrderDetail = () => {
                                     <GoogleMap
                                         mapContainerStyle={mapContainerStyle}
                                         center={pickupLocation}
-                                        zoom={15}
+                                        zoom={20}
                                         onLoad={(map) => (mapRef.current = map)}
                                     >
                                         {riderNearLocation?.map((marker, index) => (
                                             <Marker
                                                 key={index}
                                                 position={{ lat: marker.latitude, lng: marker.longitude }} 
+                                                icon={marker.riderActiveForOrders ? '../../../public/rider-icon-green.png' : '../../../public/rider-icon-red.png'}
                                                 onClick={() => setSelectedMarker(marker)}
                                             />
                                         ))}
@@ -757,6 +768,26 @@ const OrderDetail = () => {
                                             <div style={{ padding: "5px", fontSize: "14px" }}>
                                                 <strong>{selectedPickupMarker.name}</strong> <br />
                                                 {selectedPickupMarker.address}
+                                            </div>
+                                            </InfoWindow>
+                                        )}
+                                        <Marker 
+                                            position={dropLocation}
+                                            icon={{
+                                                url: "../../../public/Droppoint.png",
+                                            }}
+                                            onClick={() => setSelectedDropMarker(dropLocation)}
+                                        />
+
+                                        {selectedDroppMarker && (
+                                            <InfoWindow 
+                                            position={selectedDroppMarker} 
+                                            
+                                            onCloseClick={() => setSelectedDropMarker(null)}
+                                            >
+                                            <div style={{ padding: "5px", fontSize: "14px" }}>
+                                                <strong>{selectedDroppMarker.name}</strong> <br />
+                                                {selectedDroppMarker.address}
                                             </div>
                                             </InfoWindow>
                                         )}
