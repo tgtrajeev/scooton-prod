@@ -13,7 +13,7 @@ const Modal = ({
   centered,
   scrollContent,
   themeClass = "dark:bg-slate-800 dark:border-b dark:border-slate-700",
-  title = "Basic Modal",
+  title = "",
   uncontrol,
   label = "Basic Modal",
   labelClass,

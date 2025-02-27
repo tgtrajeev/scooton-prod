@@ -230,6 +230,7 @@ const COLUMNS = (openIsNotificationModel, openIsDeleteOrder, ordersType) => [
       const navigate = useNavigate();
       const handleViewClick = () => {
         const orderId = row.row.original.order_Id;
+        
         navigate(`/order-detail/${orderId}`);
       };
       return (
@@ -299,6 +300,15 @@ const AllOrders = () => {
         toast.error("This order can't be cancel");
       }
     )
+  }
+
+  const reorderPlaceOrder = () => {
+    axiosInstance.get(`${BASE_URL}/order/accepted-order-reorder/${orderdeleteid}`).then((response)=>{
+      toast.success(response)
+      setOrderData((prevList) => prevList.filter((item) => item.order_Id !== orderdeleteid));
+    }).catch((error) => {
+      console.error(error);
+    })
   }
 
   const handleMobileNumber = (event) => {
@@ -908,7 +918,7 @@ const AllOrders = () => {
           activeModal={notificationModel}
           uncontrol
           className="max-w-md"
-
+           
           onClose={() => setNotificationModel(false)}
         >
           <div className="">
@@ -958,20 +968,32 @@ const AllOrders = () => {
           onClose={() => setDeleteOrderModel(false)}
         >
           <div className="">
-            <h5 className="text-center">Are you sure to cancel?</h5>
-            <Select className="w-full my-4">
+            <div className="d-flex gap-2 justify-content-between align-items-center mt-4">
+                <h6 className="text-center">Are you sure to cancel?</h6>
+                <Button className="btn btn-outline-light" type="button" onClick={() => { deletePlaceOrder(); setDeleteOrderModel(false) }}>
+                  Yes
+                </Button>
+            </div>
+            {ordersType === 'ACCEPTED' && (
+                 <div className="d-flex gap-2 justify-content-between align-items-center mt-4">
+                    <h6 className="text-center">Are you want to Replace Order?</h6>
+                    <Button className="btn btn-outline-light" type="button" onClick={() => { reorderPlaceOrder(); setDeleteOrderModel(false) }}>
+                      Yes
+                    </Button>
+               </div>
+            )}
+           
+            {/* <Select className="w-full my-4">
                 <MenuItem selected>Select a Reason</MenuItem>
                 <MenuItem value="cancelfromadmin">Cancel from admin</MenuItem>
                 <MenuItem value="other">Other</MenuItem>
-            </Select>
+            </Select> */}
             <div className="d-flex gap-2 justify-content-center mt-4">
                
-              <Button className="btn btn-dark" type="button" onClick={() => setDeleteOrderModel(false)}>
+              {/* <Button className="btn btn-dark" type="button" onClick={() => setDeleteOrderModel(false)}>
                 No
-              </Button>
-              <Button className="btn btn-outline-light" type="button" onClick={() => { deletePlaceOrder(); setDeleteOrderModel(false) }}>
-                Yes
-              </Button>
+              </Button> */}
+             
             </div>
           </div>
         </Modal>

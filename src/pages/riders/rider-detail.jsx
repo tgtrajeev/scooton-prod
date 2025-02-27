@@ -1,7 +1,7 @@
 import React, { useEffect, useState,useRef } from "react";
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import 'react-tabs/style/react-tabs.css';
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link,useSearchParams  } from "react-router-dom";
 import Card from "../../components/ui/Card";
 import { Icon } from "@iconify/react/dist/iconify.js";
 import { BASE_URL } from "../../api";
@@ -35,6 +35,11 @@ const markers = [
 
 const RiderDetail = () => {
     const { riderId } = useParams();
+    const [searchParams] = useSearchParams();
+    const documentStatus = searchParams.get("documentStatus");  
+    const riderStatus = searchParams.get("riderStatus");   
+    const vehicleId = searchParams.get("vehicleid"); 
+    const pagenumber = searchParams.get("page");
     const [riderOrderDetail, setRiderOrderDetail] = useState(null);
     const [riderWalletDetail, setRiderWalletDetail] = useState(null);
     const [riderTripDetail, setRiderTripDetail] = useState(null);
@@ -63,6 +68,7 @@ const RiderDetail = () => {
     const[riderLatitude, setRiderLatitude]= useState(null);
     const[riderLongitude, setRiderLongitude] = useState(null);
     const mapRef = useRef(null);
+    console.log("documentStatus",documentStatus)
 
     // useEffect(() => {
     //     if (mapRef.current && window.google) {
@@ -106,10 +112,10 @@ const RiderDetail = () => {
             });
 
             
-            setRiderOrderDetail(riderOrderResponse.data.jsonData.orderDetails);
-            setRiderWalletDetail(riderWalletResponse.data.jsonData.walletTxn);
-            setWalletAmount(riderWalletResponse.data.jsonData.balance);
-            setRiderTripDetail(riderTripResponse.data.jsonData.tripDetails);
+            setRiderOrderDetail(riderOrderResponse?.data?.jsonData?.orderDetails);
+            setRiderWalletDetail(riderWalletResponse?.data?.jsonData?.walletTxn);
+            setWalletAmount(riderWalletResponse?.data?.jsonData?.balance);
+            setRiderTripDetail(riderTripResponse?.data?.jsonData?.tripDetails);
             // setDocumentDetail(documentResponse.data.jsonData.documentDetails || []);
             setDocumentDetail(
                 (documentResponse.data.jsonData.documentDetails || []).map(order => ({
@@ -298,69 +304,7 @@ const RiderDetail = () => {
         lng: riderLongitude || 79.826660 
     }
 
-    // const updateRiderRegistration = () =>{
-        
-    //     const payload ={
-    //         vehicleNumber: vehicleDetails?.vehicleNumber,
-    //         ownerName: vehicleDetails?.ownerName,
-    //         ownerMobileNumber: vehicleDetails?.ownerMobileNumber,
-    //         vehicleType: vehicleDetails?.vehicleType,
-    //         driverName: driverDetails?.driverName,
-    //         city: driverDetails?.driverCity,
-    //         state: driverDetails?.driverState,
-    //         driverMobileNumber:driverDetails?.driverMobileNumber,
-    //         riderReferralCode: driverDetails?.riderReferralCode,
-    //         fcmId: driverDetails?.fcmId,
-    //         documentDetails: documentDetail,
-    //         rejectedReason: documentRejectDetails?.rejectedReason,
-    //         accountHolderName: "",
-    //         accountsNumber: "",
-    //         accountsIFSC: "",
-    //         language: language.language,
-    //         rejectedType: documentRejectDetails?.rejectedType,
-    //         approved: approved
-    //     }
-    //     if(approved && documentRejectDetails.rejectedReason != '' && documentRejectDetails.rejectedReason != undefined){
-    //         try{
-    //             axiosInstance.post(`${BASE_URL}/login/rider-registration`,payload)
-    //             toast.success("Rider information updated successfully!");
-    //             setUpdateErrorMsg(false);
-    //             // setTimeout(() => {
-    //             //     window.location.reload()
-    //             // }, 500);
-    //         }catch{
-    //             toast.error("Rider information not updated successfully!");
-    //         }
-    //     } else if(!approved && documentRejectDetails.rejectedReason!= '' && documentRejectDetails.rejectedReason != undefined){
-    //         try{
-    //             axiosInstance.post(`${BASE_URL}/login/rider-registration`,payload)
-    //             toast.success("Rider information updated successfully!");
-    //             setUpdateErrorMsg(false);
-    //             // setTimeout(() => {
-    //             //     window.location.reload()
-    //             // }, 500);
-    //         }catch{
-    //             toast.error("Rider information not updated successfully!");
-    //         }
-    //     }else if(approved && documentRejectDetails.rejectedReason == ''){
-    //         try{
-    //             axiosInstance.post(`${BASE_URL}/login/rider-registration`,payload)
-    //             toast.success("Rider information updated successfully!");
-    //             setUpdateErrorMsg(false);
-    //             // setTimeout(() => {
-    //             //     window.location.reload()
-    //             // }, 500);
-    //         }catch{
-    //             toast.error("Rider information not updated successfully!");
-    //         }
-    //     }
-    //     else{
-    //         setUpdateErrorMsg(true)
-    //        toast.error("Not Updated")
-    //     }
-        
-        
-    // }
+  
     const updateRiderRegistration = async () => {
         const payload = {
             vehicleNumber: vehicleDetails?.vehicleNumber,
@@ -525,9 +469,16 @@ const RiderDetail = () => {
         <Card>
             <div className="card-header md:flex justify-between items-center mb-5 px-0 pt-0">
                 <div className="flex items-center">
-                    <Link to="/all-riders">
-                        <Icon icon="heroicons:arrow-left-circle" className="text-xl font-bold text-scooton-500" />
-                    </Link>
+                    {documentStatus && riderStatus && pagenumber && riderStatus && vehicleId ? (
+                        <Link to={`/all-riders?page=${pagenumber || 0}&documentStatus=${documentStatus}&riderStatus=${riderStatus}&vehicleid=${vehicleId}`}>
+                           <Icon icon="heroicons:arrow-left-circle" className="text-xl font-bold text-scooton-500" />
+                        </Link>
+                    ) : (
+                        <Link to="/all-riders">
+                             <Icon icon="heroicons:arrow-left-circle" className="text-xl font-bold text-scooton-500" />
+                        </Link>
+                    )}
+                    
                     <h4 className="card-title ms-2 mb-0">Rider Details  <span className="px-2 py-1 text-sm rounded-[6px] bg-danger-500 text-white">Rider Id: {riderId}</span></h4>
                 </div>
 
@@ -965,7 +916,7 @@ const RiderDetail = () => {
                                         <td colSpan="6" className="text-center p-4">No orders found.</td>
                                         </tr>
                                     ) : (
-                                        paginatedOrders.map((order, index) => (
+                                        paginatedOrders?.map((order, index) => (
                                         <tr key={index} onClick={() => handleViewClick(order.order_Id)}>
                                             <td className="table-td">{startIndex + index + 1}</td>
                                             <td className="table-td">{order.order_Id}</td>
@@ -1050,7 +1001,7 @@ const RiderDetail = () => {
                                             <td colSpan="8" className="text-center p-4">No orders found.</td>
                                         </tr>
                                     ) : (
-                                        walletpaginatedOrders.map((order, index) => (
+                                        walletpaginatedOrders?.map((order, index) => (
                                             <tr key={index}>
                                                 <td className="table-td">{index + 1}</td>
                                                 <td className="table-td">{order.tripId}</td>
@@ -1122,7 +1073,7 @@ const RiderDetail = () => {
                                             <td colSpan="4" className="text-center p-4">No orders found.</td>
                                         </tr>
                                     ) : (
-                                        earringpaginatedOrders.map((order, index) => (
+                                        earringpaginatedOrders?.map((order, index) => (
                                             <tr key={index}>
                                                 <td className="table-td">{index + 1}</td>
                                                 <td className="table-td">{order.tripId}</td>

@@ -237,7 +237,9 @@ const OrderDetail = () => {
             <div className="order-header">
                 <div className="md:flex justify-between items-center mb-4 border-bottom">
                     <div className="flex items-center mb-2">
-                        <Link to="/all-orders">
+                        {/* //serviceAreaId=0;customRadio=CANCELLED;page=5;searchId=NONE;searchText=undefined */}
+                        {/* ?orderstatus=${orderDetails?.orderStatus};page=${pageno};searchId=${};searchText=${} */}
+                        <Link to={`/all-orders`}>
                             <Icon icon="heroicons:arrow-left-circle" className="text-xl font-bold text-scooton-500" />
                         </Link>
                         <h4 className="card-title ms-2 mb-0">Order Details</h4>
@@ -570,10 +572,10 @@ const OrderDetail = () => {
                                             <td className=" px-6 py-2"> Instruction </td>
                                             <td className=" px-6 py-2 text-end">{orderDetails?.instructionText}</td>
                                         </tr>
-                                        <tr className="border-b border-slate-100 dark:border-slate-700">
+                                        {/* <tr className="border-b border-slate-100 dark:border-slate-700">
                                             <td className=" px-6 py-2"> Type Of Package </td>
                                             <td className=" px-6 py-2 text-end">{packageDetails?.packageType}</td>
-                                        </tr>
+                                        </tr> */}
                                     </>
                                 )}
                                 
@@ -589,10 +591,10 @@ const OrderDetail = () => {
                                             <td className=" px-6 py-2"> Package Value</td>
                                             <td className=" px-6 py-2 text-end">{packageDetails?.packageValue}</td>
                                         </tr>
-                                        <tr className="border-b border-slate-100 dark:border-slate-700">
+                                        {/* <tr className="border-b border-slate-100 dark:border-slate-700">
                                             <td className=" px-6 py-2"> Package Type</td>
                                             <td className=" px-6 py-2 text-end">{packageDetails?.isFragile}</td>
-                                        </tr>
+                                        </tr> */}
                                     </>
                                 )}
                             </tbody>
@@ -605,9 +607,9 @@ const OrderDetail = () => {
                         <table className="w-full border-collapse table-fixed dark:border-slate-700 dark:border">
                             <tbody>
                                 <tr className="border-b border-slate-100 dark:border-slate-700">
-                                    <td className="px-6 py-2"> Rider Name </td>
+                                    <td className="px-6 py-2"> Rider Name</td>
                                     <td className="text-end px-6 py-2">
-                                        {riderDetails?.riderName || ""}
+                                      <Link to={`/rider-detail/${riderDetails?.riderId}`} className="hover:underline">  {riderDetails?.riderName || ""} </Link>
                                     </td>
                                 </tr>
                                 <tr className="border-b border-slate-100 dark:border-slate-700">

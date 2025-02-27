@@ -94,6 +94,7 @@ function App() {
           <Route path="rider-detail/:riderId" element={<RiderDetail />} />
           <Route path="all-orders" element={<AllOrders />} />
           <Route path="all-orders/:id/:ordertype/:search" element={<AllOrders />} />
+          <Route path="all-orders/:ordertype" element={<AllOrders />} />
           <Route path="citywide-orders" element={<CityWideOrders />} />
           <Route path="offline-orders" element={<OfflineOrders />} />
           <Route path="create-orders" element={<CreateOrder />} />

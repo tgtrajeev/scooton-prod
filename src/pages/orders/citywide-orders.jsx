@@ -430,6 +430,15 @@ const CityWideOrders = () => {
     )
   }
 
+  const reorderPlaceOrder = () => {
+    axiosInstance.get(`${BASE_URL}/order/accepted-order-reorder/${orderdeleteid}`).then((response)=>{
+      toast.success(response)
+      setOrderData((prevList) => prevList.filter((item) => item.order_Id !== orderdeleteid));
+    }).catch((error) => {
+      console.error(error);
+    })
+  }
+
   const timeDiffClass = (acceptedDate, orderDate, orderStatus) => {
    
     if(orderStatus == 'PLACED' || orderStatus == 'ACCEPTED'){
@@ -948,7 +957,7 @@ const CityWideOrders = () => {
 
           onClose={() => setDeleteOrderModel(false)}
         >
-          <div className="">
+          {/* <div className="">
             <h5 className="text-center">Are you sure to cancel?</h5>
             <div className="d-flex gap-2 justify-content-center mt-4">
               <Button className="btn btn-dark" type="button" onClick={() => setDeleteOrderModel(false)}>
@@ -957,6 +966,25 @@ const CityWideOrders = () => {
               <Button className="btn btn-outline-light" type="button" onClick={() => { deletePlaceOrder(); setDeleteOrderModel(false) }}>
                 Yes
               </Button>
+            </div>
+          </div> */}
+          <div className="">
+            <div className="d-flex gap-2 justify-content-between align-items-center mt-4">
+                <h6 className="text-center">Are you sure to cancel?</h6>
+                <Button className="btn btn-outline-light" type="button" onClick={() => { deletePlaceOrder(); setDeleteOrderModel(false) }}>
+                  Yes
+                </Button>
+            </div>
+            {ordersType === 'ACCEPTED' && (
+                  <div className="d-flex gap-2 justify-content-between align-items-center mt-4">
+                    <h6 className="text-center">Are you want to Replace Order?</h6>
+                    <Button className="btn btn-outline-light" type="button" onClick={() => { reorderPlaceOrder(); setDeleteOrderModel(false) }}>
+                      Yes
+                    </Button>
+                </div>
+            )}
+            
+            <div className="d-flex gap-2 justify-content-center mt-4">
             </div>
           </div>
         </Modal>

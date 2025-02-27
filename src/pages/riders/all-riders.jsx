@@ -3,7 +3,7 @@ import Icon from "@/components/ui/Icon";
 import { useTable, useRowSelect, useSortBy, usePagination, } from "react-table";
 import Card from "../../components/ui/Card";
 import { BASE_URL } from "../../api";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import Tooltip from "@/components/ui/Tooltip";
 import Loading from "../../components/Loading";
 import TextField from "@mui/material/TextField";
@@ -18,7 +18,7 @@ import Button from "../../components/ui/Button";
 import axiosInstance from "../../api";
 
 
-const COLUMNS = [
+const COLUMNS = ({ currentPage, documentstatus, riderstatus,vehicleid }) =>[
   {
     Header: "Sr. No.",
     accessor: (row, i) => i + 1,
@@ -154,7 +154,7 @@ const COLUMNS = [
       const navigate = useNavigate();
       const handleViewClick = () => {
         const riderId = row.row.original.riderInfo.id;
-        navigate(`/rider-detail/${riderId}`);
+        navigate(`/rider-detail/${riderId}?page=${currentPage || 0}&documentStatus=${documentstatus}&riderStatus=${riderstatus}&vehicleid=${vehicleid}`);
       };
       return (
         <div className="flex space-x-3 rtl:space-x-reverse">
@@ -184,35 +184,56 @@ const AllRiders = () => {
   const [serviceArea, setServiceArea] = useState([]);
   const [serviceAreaStatus, setServiceAreaStatus] = useState('ALL');
   const [totalCount, setTotalCount] = useState(0);
+  const[paramslength, setParamLength] = useState(0);
   const maxPagesToShow = 5;
+  const [searchParams] = useSearchParams();
+
+  useEffect(() => {
+    console.log([...searchParams.entries()].length);  
+    setParamLength([...searchParams.entries()].length);
+    const statusFromUrl = searchParams.get("riderStatus") || "ALL";
+    const docStatusFromUrl = searchParams.get("documentStatus") || "ALL";
+    const vehicleIdFromUrl = searchParams.get("vehicleid") || "0";
+    const pageFromUrl = searchParams.get("page") || "0";
+  
+    setRiderStatus(statusFromUrl);
+    setDocumentStatus(docStatusFromUrl);
+    setVehicleId(vehicleIdFromUrl);
+    setCurrentPage(pageFromUrl);
+  }, [searchParams]);  
 
 
   useEffect(() => {
-    
+    console.log("riderstatus",riderstatus)
     setLoading(true);
     const token = localStorage.getItem("jwtToken");
     if (token) {
-      if (serviceAreaStatus == "ALL" && riderstatus == "ALL" && documentstatus === "ALL" && vehicleid === "0" && filterby == "RIDERID"){
-        axiosInstance
-          .get(`${BASE_URL}/register/v2/rider/get-all-service-area-by-registration-status/ALL/0/ALL/0?page=${currentPage}&size=${pagesizedata}`, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          })
-          .then((response) => {
-            setRiderData(response.data);
-            setTotalCount(Number(response.headers["x-total-count"])); 
-            setPageCount(Math.ceil(Number(response.headers["x-total-count"]) / pageSize)); 
-          })
-          .catch((error) => {
-            console.error("Error fetching user data:", error);
-          })
-          .finally(() => {
-            setLoading(false);
-          });
+      if(paramslength > 0){
+        if (serviceAreaStatus == "ALL" && riderstatus == "ALL" && documentstatus === "ALL" && vehicleid === "0" && filterby == "RIDERID"){
+          axiosInstance
+            .get(`${BASE_URL}/register/v2/rider/get-all-service-area-by-registration-status/ALL/0/ALL/0?page=${currentPage}&size=${pagesizedata}`, {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            })
+            .then((response) => {
+              
+              setRiderData(response.data);
+              setTotalCount(Number(response.headers["x-total-count"])); 
+              setPageCount(Math.ceil(Number(response.headers["x-total-count"]) / pageSize)); 
+              console.log("this")
+            })
+            .catch((error) => {
+              console.error("Error fetching user data:", error);
+            })
+            .finally(() => {
+              setLoading(false);
+            });
+        }
       }
     }
-  }, [currentPage,pagesizedata]); 
+    
+  }, [riderstatus, documentstatus, vehicleid,currentPage,pagesizedata]); 
 
   useEffect(() => {
     try {
@@ -236,9 +257,10 @@ const AllRiders = () => {
   };
   
   const filterRiders = () => {
-    
     setLoading(true);
-    if(riderstatus == "All" && documentstatus === "All" && vehicleid === "0") return;
+    debugger
+    if(riderstatus == "ALL" && documentstatus === "ALL" && vehicleid === "0" && currentPage === 0) return;
+    debugger
     const token = localStorage.getItem("jwtToken");
     try {
       axiosInstance
@@ -254,6 +276,7 @@ const AllRiders = () => {
           setFilterBy("RIDERID");
           setSearch("");
           setRiderData(response.data);
+          console.log("ertyd")
         })
         .catch((error) => {
           console.error("Error fetching rider data:", error);
@@ -292,26 +315,29 @@ const AllRiders = () => {
     }
    
     const token = localStorage.getItem("jwtToken");
-    const endpoint =
-      filterby === "RIDERID" && riderstatus == "ALL" && documentstatus === "ALL" && vehicleid === "0"
-        ? `${BASE_URL}/register/v2/rider/get-all-service-area-by-registration-status/ALL/0/ALL/0?page=0&size=${pagesizedata}`
-        : `${BASE_URL}/register/rider/get-rider-by-mobilenumber-or-riderid/${filterby}/${search}?page=0&size=${pagesizedata}`;
-    
-    axiosInstance
-      .get(endpoint,{
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      .then((response) => {
-        setRiderData(response.data); 
-      })
-      .catch((error) => {
-        console.error("Error fetching rider data:", error);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
+    if(paramslength > 0){
+      const endpoint =
+        filterby === "RIDERID" && riderstatus == "ALL" && documentstatus === "ALL" && vehicleid === "0"
+          ? `${BASE_URL}/register/v2/rider/get-all-service-area-by-registration-status/ALL/0/ALL/0?page=0&size=${pagesizedata}`
+          : `${BASE_URL}/register/rider/get-rider-by-mobilenumber-or-riderid/${filterby}/${search}?page=0&size=${pagesizedata}`;
+      
+      axiosInstance
+        .get(endpoint,{
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        .then((response) => {
+          setRiderData(response.data); 
+          console.log("ertyui")
+        })
+        .catch((error) => {
+          console.error("Error fetching rider data:", error);
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+    }
   };
 
   useEffect(() => {
@@ -319,7 +345,7 @@ const AllRiders = () => {
   }, [filterby, search, currentPage,pagesizedata]);
 
 
-  const columns = useMemo(() => COLUMNS, []);
+  const columns = useMemo(() => COLUMNS( {currentPage, documentstatus, riderstatus,vehicleid} ), [ currentPage, documentstatus, riderstatus,vehicleid ]);
   const tableInstance = useTable(
     {
       columns,

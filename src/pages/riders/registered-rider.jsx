@@ -184,15 +184,21 @@ const RegisteredRiders = () => {
   const [pagesizedata, setpagesizedata]=useState(10);
   const [totalCount, setTotalCount] = useState(0);
   const [filterby, setFilterBy] = React.useState('NONE');
+   const [vehicleid, setVehicleId]= useState('0');
   const maxPagesToShow = 5;
   useEffect(() => {
     fetchRegisterOrder();
   }, [currentPage,pagesizedata]);
 
+
+  const vehicleIdFilter = (event) => {
+    setVehicleId(event.target.value);
+  };
+
   const fetchRegisterOrder = () =>{
     const token = localStorage.getItem("jwtToken");
     if (token) {
-      if (riderstatus === "All" && filterby == "NONE"){
+      if (riderstatus === "All" && vehicleid === "0" && filterby == "NONE"){
         axiosInstance
           .get(`${BASE_URL}/register/v2/rider/get-all-service-area-by-registration-status/REGISTERED/0/ALL/0?page=${currentPage}&size=${pagesizedata}`, {
             headers: {
@@ -226,12 +232,12 @@ const RegisteredRiders = () => {
   // End
   const filterRiders = () => {
     
-    if(riderstatus == "All") return;
+    if(riderstatus == "All" && vehicleid === "0") return;
     const token = localStorage.getItem("jwtToken");
     try {
       axiosInstance
         .get(
-          `${BASE_URL}/register/v2/rider/get-all-service-area-by-registration-status/REGISTERED/0/${riderstatus}/0?page=${currentPage}&size=${pagesizedata}`, {
+          `${BASE_URL}/register/v2/rider/get-all-service-area-by-registration-status/REGISTERED/0/${riderstatus}/${vehicleid}?page=${currentPage}&size=${pagesizedata}`, {
             headers: {
               Authorization: `Bearer ${token}`,
             },
@@ -255,7 +261,7 @@ const RegisteredRiders = () => {
   
   useEffect(() => {
     filterRiders();
-  }, [riderstatus, currentPage,pagesizedata]);
+  }, [riderstatus, vehicleid,currentPage,pagesizedata]);
 
   const riderStatusFilter = (event) => {
     setRiderStatus(event.target.value);
@@ -353,12 +359,14 @@ const RegisteredRiders = () => {
   };
    // Clear the search input field
    const resetFilters = () => {
-    setServiceAreaStatus("ALL");
+    debugger
+    // setServiceAreaStatus("ALL");
     setRiderStatus("ALL");
-    setDocumentStatus("ALL");
+    //setDocumentStatus("ALL");
     setVehicleId("0");
     setFilterBy("NONE");
     setSearch(""); 
+    debugger
   }
 
   
@@ -443,7 +451,27 @@ const RegisteredRiders = () => {
                         <MenuItem value="OFFLINE">OFFLINE</MenuItem>
                       </Select>
                     </FormControl>
-                  </div>                  
+                  </div> 
+                  <div className="flex-1">
+                  <FormControl fullWidth className="">
+                    <label className="text-sm mb-1">Vehicle Type</label>
+                    <Select
+                      id="demo-simple-select"
+                      //label="Vehicle_Status"
+                      value={vehicleid}
+                      onChange={vehicleIdFilter}
+                      displayEmpty
+                      inputProps={{ 'aria-label': 'Without label' }}
+                    >
+                      <MenuItem value="0">ALL</MenuItem>
+                      <MenuItem value="1">Two Wheeler</MenuItem>
+                      <MenuItem value="2">Two Wheeler EV</MenuItem>
+                      <MenuItem value="4">Three Wheeler</MenuItem>
+                      <MenuItem value="7">Pickup 8ft</MenuItem>
+                      <MenuItem value="3">TATA Ace</MenuItem>
+                    </Select>
+                  </FormControl>
+                </div>                 
                   <div className="flex-1">
                     <FormControl fullWidth className="">
                       <label className="text-sm mb-1">Filter By</label>

@@ -837,6 +837,7 @@ const Vendor = () => {
                 </div>
               )}
             </div>
+            
             <div className="d-flex gap-2 justify-content-center mt-4">
               <Button className="btn btn-dark" type="button" onClick={() => setDeleteOrderModel(false)}>
                 No

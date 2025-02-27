@@ -252,7 +252,7 @@ const OfflineOrders = () => {
   }
 
   const replaceOrder = () => {
-    axiosInstance.post(`${BASE_URL}/order/accepted-order-reorder/${orderid}`).then((response)=>{
+    axiosInstance.get(`${BASE_URL}/order/accepted-order-reorder/${orderid}`).then((response)=>{
       toast.success(response)
     }).catch((error) => {
       console.error(error);
