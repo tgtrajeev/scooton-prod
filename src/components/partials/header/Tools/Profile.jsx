@@ -9,12 +9,22 @@ import { handleLogout } from "@/pages/auth/common/store";
 import UserAvatar from "@/assets/images/all-img/user.png";
 import { BASE_URL } from "../../../../api";
 import axiosInstance from "../../../../api";
+import requestFCMToken from "../../../../requestFCMToken";
 
 const profileLabel = () => {
   const [userData, setUserData] = useState({
     user: "",
   });
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (userData?.id) {
+      //const notficationDone = localStorage.getItem("notficationDone");
+      //if(!notficationDone){
+        requestFCMToken(userData.id);
+     // }
+   }
+  }, [userData?.id]);
   
   useEffect(() => {
     const token = localStorage.getItem("jwtToken");

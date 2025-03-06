@@ -38,6 +38,7 @@
     "d3-array": "^3.2.2",
     "date-fns": "^3.6.0",
     "dayjs": "^1.11.7",
+    "firebase": "^11.4.0",
     "framer-motion": "^10.12.12",
     "google-map-react": "^2.2.1",
     "leaflet": "^1.9.3",

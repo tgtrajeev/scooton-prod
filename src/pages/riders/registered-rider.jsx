@@ -20,8 +20,9 @@ import Select from '@mui/material/Select';
 import TextField from "@mui/material/TextField";
 import Button from "../../components/ui/Button";
 import axiosInstance from "../../api";
+import { useSearchParams  } from "react-router-dom";
 
-const COLUMNS = [
+const COLUMNS = ({ currentPage, riderstatus, vehicleid }) => [
   {
     Header: "Sr. No.",
     accessor: (row, i) => i + 1,
@@ -158,7 +159,8 @@ const COLUMNS = [
       const navigate = useNavigate();
       const handleViewClick = () => {
         const riderId = row.row.original.riderInfo.id;
-        navigate(`/rider-detail/${riderId}`);
+        //navigate(`/rider-detail/${riderId}`);
+        navigate(`/rider-detail/${riderId}?page=${currentPage || 0}&riderStatus=${riderstatus}&vehicleid=${vehicleid}&rider=register`);
       };
       return (
         <div className="flex space-x-3 rtl:space-x-reverse">
@@ -178,17 +180,43 @@ const RegisteredRiders = () => {
   const [riderData, setRiderData] = useState([]);
   const [activeridercount, setActiveRiderCount] = useState([])
   const [search, setSearch] = useState("");
-  const [riderstatus, setRiderStatus]= useState('All')
+  const [riderstatus, setRiderStatus]= useState('ALL')
   const [currentPage, setCurrentPage] = useState(0);
   const [pageCount, setPageCount] = useState(0);
   const [pagesizedata, setpagesizedata]=useState(10);
   const [totalCount, setTotalCount] = useState(0);
   const [filterby, setFilterBy] = React.useState('NONE');
-   const [vehicleid, setVehicleId]= useState('0');
+  const [vehicleid, setVehicleId]= useState('0');
   const maxPagesToShow = 5;
+  const [paramslength, setParamLength] = useState(0);
+  const [searchParams] = useSearchParams();
+  const [rapf, setRapf] = useState(false)
+
+  useEffect(() => {
+    console.log([...searchParams.entries()].length);
+    setParamLength([...searchParams.entries()].length);
+    const statusFromUrl = searchParams.get("riderStatus") || "ALL";
+    const vehicleIdFromUrl = searchParams.get("vehicleid") || "0";
+    const pageFromUrl = searchParams.get("page") || "0";
+    console.log("statusFromUrl",statusFromUrl)
+    setRiderStatus(statusFromUrl);
+    setVehicleId(vehicleIdFromUrl);
+    setCurrentPage(pageFromUrl);
+    setRapf(true);
+    
+  }, [searchParams]);
+
+
+  useEffect(() => {
+    if (!searchParams) {
+      setRapf(true);
+    }
+  }, [])
+
+
   useEffect(() => {
     fetchRegisterOrder();
-  }, [currentPage,pagesizedata]);
+  }, [currentPage,pagesizedata,rapf]);
 
 
   const vehicleIdFilter = (event) => {
@@ -198,7 +226,7 @@ const RegisteredRiders = () => {
   const fetchRegisterOrder = () =>{
     const token = localStorage.getItem("jwtToken");
     if (token) {
-      if (riderstatus === "All" && vehicleid === "0" && filterby == "NONE"){
+      if (rapf == true && riderstatus === "ALL" && vehicleid === "0" && filterby == "NONE"){
         axiosInstance
           .get(`${BASE_URL}/register/v2/rider/get-all-service-area-by-registration-status/REGISTERED/0/ALL/0?page=${currentPage}&size=${pagesizedata}`, {
             headers: {
@@ -208,7 +236,8 @@ const RegisteredRiders = () => {
           .then((response) => {
             setRiderData(response.data);
             setTotalCount(Number(response.headers["x-total-count"])); 
-            setPageCount(Math.ceil(Number(response.headers["x-total-count"]) / pageSize)); 
+            //setPageCount(Math.ceil(Number(response.headers["x-total-count"]) / pageSize)); 
+            setPageCount(Number(response.headers["x-total-pages"]));
           })
           .catch((error) => {
             console.error("Error fetching user data:", error);
@@ -231,8 +260,9 @@ const RegisteredRiders = () => {
   }, [])
   // End
   const filterRiders = () => {
-    
-    if(riderstatus == "All" && vehicleid === "0") return;
+    if(rapf == false){
+      if(riderstatus == "ALL" && vehicleid === "0") return;
+    }
     const token = localStorage.getItem("jwtToken");
     try {
       axiosInstance
@@ -248,6 +278,8 @@ const RegisteredRiders = () => {
           setFilterBy("NONE");
           setSearch("");
           setRiderData(response.data);
+          setTotalCount(Number(response.headers["x-total-count"]));
+          setPageCount(Number(response.headers["x-total-pages"]));
         })
         .catch((error) => {
           console.error("Error fetching rider data:", error);
@@ -268,7 +300,7 @@ const RegisteredRiders = () => {
   };
   
 
-  const columns = useMemo(() => COLUMNS, []);
+  const columns = useMemo(() => COLUMNS({ currentPage,riderstatus, vehicleid }), [currentPage,  riderstatus, vehicleid]);
   const tableInstance = useTable(
     {
       columns,
@@ -332,7 +364,7 @@ const RegisteredRiders = () => {
 
   const FilterRiders = () =>{
     if(filterby !== "NONE"){
-      setRiderStatus('All');
+      setRiderStatus('ALL');
     }
     
     const token = localStorage.getItem("jwtToken");
@@ -344,6 +376,8 @@ const RegisteredRiders = () => {
     ).then((response) => {
     
       setRiderData(response.data);
+      setTotalCount(Number(response.headers["x-total-count"]));
+      setPageCount(Number(response.headers["x-total-pages"]));
     })
     .catch((error) => {
       console.error("Error fetching user data:", error);
@@ -352,21 +386,48 @@ const RegisteredRiders = () => {
       setLoading(false); 
     });
   }
+
+  useEffect(() => {
+    if(search == ''){
+      setLoading(true);
+      const token = localStorage.getItem("jwtToken");
+      if (token) {
+        if(rapf == true && riderstatus === "ALL" 
+          && vehicleid === "0" ){
+          axiosInstance
+            .get(`${BASE_URL}/register/v2/rider/get-all-service-area-by-registration-status/REGISTERED/0/ALL/0?page=${currentPage}&size=${pagesizedata}`, {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            })
+            .then((response) => {
+              setRiderData(response.data);
+              setTotalCount(Number(response.headers["x-total-count"]));
+              setPageCount(Number(response.headers["x-total-pages"])); 
+            })
+            .catch((error) => {
+              console.error("Error fetching user data:", error);
+            })
+            .finally(() => {
+              setLoading(false);
+            });
+        }
+      }
+    }
+  }, [search]); 
   // show hide
-  const [isVisible, setIsVisible] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
   const handleShow = () => {
     setIsVisible(!isVisible); 
   };
    // Clear the search input field
    const resetFilters = () => {
-    debugger
     // setServiceAreaStatus("ALL");
     setRiderStatus("ALL");
     //setDocumentStatus("ALL");
     setVehicleId("0");
     setFilterBy("NONE");
     setSearch(""); 
-    debugger
   }
 
   
@@ -425,6 +486,33 @@ const RegisteredRiders = () => {
                 })}             
               </div>
             </div>
+            <div className="filterbyRider me-3">
+              <FormControl fullWidth className="">
+                <div className="filterbyRider">                    
+                  <Select
+                    id="demo-simple-select"
+                    value={filterby}
+                    onChange={handleChange}
+                    displayEmpty
+                    inputProps={{ 'aria-label': 'Without label' }}
+                  >
+                    <MenuItem value="NONE">Select</MenuItem>
+                    <MenuItem value="RIDERID">Rider ID</MenuItem>
+                    <MenuItem value="MOBILE">Mobile Number</MenuItem>
+                    <MenuItem value="RIDERNAME">Rider Name</MenuItem>
+                  </Select>
+                  <TextField
+                    id="search"
+                    type="text"
+                    name="search"
+                    className=""
+                    placeholder="Filter By"
+                    value={search}
+                    onChange={handleSearchChange}
+                  />
+                </div>
+              </FormControl>
+            </div>
             <div className="rider-filter">            
               <div className="d-flex justify-content-end">              
                 <Button className="btn btn-dark desktop-view-filter" onClick={handleShow}>
@@ -472,40 +560,13 @@ const RegisteredRiders = () => {
                     </Select>
                   </FormControl>
                 </div>                 
-                  <div className="flex-1">
-                    <FormControl fullWidth className="">
-                      <label className="text-sm mb-1">Filter By</label>
-                      <div className="filterbyRider">                    
-                        <Select
-                          id="demo-simple-select"
-                          value={filterby}
-                          onChange={handleChange}
-                          displayEmpty
-                          inputProps={{ 'aria-label': 'Without label' }}
-                        >
-                          <MenuItem value="NONE">NONE</MenuItem>
-                          <MenuItem value="RIDERID">Rider ID</MenuItem>
-                          <MenuItem value="MOBILE">Mobile Number</MenuItem>
-                          <MenuItem value="RIDERNAME">Rider Name</MenuItem>
-                        </Select>
-                        <TextField
-                          id="search"
-                          type="text"
-                          name="search"
-                          className=""
-                          placeholder="Filter By"
-                          value={search}
-                          onChange={handleSearchChange}
-                        />
-                      </div>
-                    </FormControl>
-                  </div>
+                  
                   <div className="d-flex gap-2 justify-content-end">
                     <div className="h-100">
                       <button className="btn btn-dark h-100 text-xl" onClick={resetFilters}><Icon icon="heroicons:arrow-path" /></button>
                     </div>
                     <div className="h-100">
-                      <button className="btn btn-dark h-100 py-2" onClick={() => setIsVisible(false)}>Submit</button>
+                      <button className="btn btn-dark h-100 py-2" onClick={() => handleShow}>Submit</button>
                     </div>
                   </div>
                 </div>
@@ -588,7 +649,7 @@ const RegisteredRiders = () => {
               value={pagesizedata}
               onChange={(e) => handlePageSizeChange(Number(e.target.value))}
             >
-              {[10, 25, 50].map((pageSize) => (
+              {[10, 20, 30,40,50].map((pageSize) => (
                 <option key={pageSize} value={pageSize}>
                   Show {pageSize}
                 </option>

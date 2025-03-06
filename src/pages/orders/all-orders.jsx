@@ -27,6 +27,22 @@ import { toast, ToastContainer } from "react-toastify";
 import { useLocation, useParams } from "react-router-dom";
 import axiosInstance from "../../api";
 
+// Notification
+import { getMessaging, onMessage } from "firebase/messaging";
+import { initializeApp } from "firebase/app";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBGvEB_pxl_Wh_8mEiH8TzRmjOMpi6RtwE",
+  authDomain: "scooton-debug.firebaseapp.com",
+  projectId: "scooton-debug",
+  storageBucket: "scooton-debug.firebasestorage.app",
+  messagingSenderId: "767080447811",
+  appId: "1:767080447811:web:c6a3ec4edd3f2f300a39f6",
+};
+const app = initializeApp(firebaseConfig);
+const messaging = getMessaging(app);
+// Notification
+
 
 const COLUMNS = (openIsNotificationModel, openIsDeleteOrder, ordersType) => [
   {
@@ -247,7 +263,7 @@ const COLUMNS = (openIsNotificationModel, openIsDeleteOrder, ordersType) => [
 
 ];
 
-const AllOrders = () => {
+const AllOrders = ({notificationCount}) => {
   const [loading, setLoading] = useState(true);
   const [orderData, setOrderData] = useState([]);
   const [search, setSearch] = useState("");
@@ -261,7 +277,7 @@ const AllOrders = () => {
   const [notification, setNotification] = useState("ALL");
   const [mobile, setMobile]= useState();
   const [notificationid,setNotifictionId]= useState();
-  const [pagesizedata, setpagesizedata]=useState(50);
+  const [pagesizedata, setpagesizedata]=useState(10);
   const [totalCount, setTotalCount] = useState(0);
   const [serviceArea, setServiceArea] = useState([]);
   const [serviceAreaStatus, setServiceAreaStatus] = useState('All');
@@ -396,10 +412,18 @@ const AllOrders = () => {
   useEffect(() => {
     if(filterby && search){
       FilterOrder();
-    }
-   
+    }    
       
   }, [filterby, search,currentPage,pagesizedata]);
+
+  useEffect(() => {
+    console.log("notificationCount",notificationCount)
+    FilterOrder();
+  }, [notificationCount]);
+
+  useEffect(() =>{
+    fetchOrders(ordersType)
+  },[search])
 
   const fetchOrders = (orderType) => {
     console.log("this")
@@ -420,9 +444,11 @@ const AllOrders = () => {
           { headers: { Authorization: `Bearer ${token}` } },
         )
         .then((response) => {
+          console.log("resp", response)
           setOrderData(response.data);
           setTotalCount(Number(response.headers["x-total-count"])); 
-          setPageCount(Math.ceil(Number(response.headers["x-total-count"]) / pagesizedata)); 
+          setPageCount(Number(response.headers["x-total-pages"]));
+          console.log("1")
         })
         .catch((error) => {
           console.error("Error fetching order data:", error);
@@ -443,7 +469,9 @@ const AllOrders = () => {
       )
       .then((response) => {
         setOrderData(response.data);
-        setPageCount(response.data.totalPages);
+        setTotalCount(Number(response.headers["x-total-count"])); 
+        setPageCount(Number(response.headers["x-total-pages"]));
+        console.log("2")
       })
       .catch((error) => {
         console.error("Error fetching order data:", error);
@@ -575,7 +603,9 @@ const AllOrders = () => {
           if (response.data) {
             setOrderData(response.data); 
             SetOrderType(id.ordertype);
-            setPageCount(response.data.totalPages || 0);
+            setTotalCount(Number(response.headers["x-total-count"])); 
+            setPageCount(Number(response.headers["x-total-pages"]) || 0);
+            console.log("3")
             
           }
         })
@@ -586,17 +616,44 @@ const AllOrders = () => {
         });
       
     } else {
-      console.log("Fetching default orders...");
-      setLoading(true);
-      if(filterby == 'NONE'){
-      fetchOrders("PLACED");
+        console.log("Fetching default orders...");
+        setLoading(true);
+        if(filterby == 'NONE' && ordersType == 'PLACED'){
+        fetchOrders("PLACED");
       }
     }
   }, [id?.ordertype, currentPage,pagesizedata]);
 
+  useEffect (() => {
+    const dataToSend ={
+      "orderType": ordersType, "searchType": filterby
+    }
+    if (filterby && search) {
+      dataToSend.number = search; 
+    }
+ 
+    setLoading(true);
+    axiosInstance
+      .post(
+        `${BASE_URL}/order-history/search-city-wide-orders-all-service-area/0?page=${currentPage}&size=${pagesizedata}`,
+        dataToSend 
+      )
+      .then((response) => {
+        setOrderData(response.data);
+        setTotalCount(Number(response.headers["x-total-count"])); 
+        setPageCount(Number(response.headers["x-total-pages"]));
+        console.log("1")
+      })
+      .catch((error) => {
+        console.error("Error fetching order data:", error);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  },[currentPage,pagesizedata])
+
   return (
     <>
-      <ToastContainer/>
       <Card>
         <div className="order-header">
           <div className=" mb-6">
@@ -807,7 +864,7 @@ const AllOrders = () => {
               value={pagesizedata}
               onChange={(e) => handlePageSizeChange(Number(e.target.value))}
             >
-              {[100, 300, 500].map((pageSize) => (
+              {[10,20, 30,40, 50].map((pageSize) => (
                 <option key={pageSize} value={pageSize}>
                   Show {pageSize}
                 </option>

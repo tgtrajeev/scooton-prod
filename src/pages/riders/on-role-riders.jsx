@@ -154,7 +154,7 @@ const COLUMNS = [
       const navigate = useNavigate();
       const handleViewClick = () => {
         const riderId = row.row.original.riderInfo.id;
-        navigate(`/rider-detail/${riderId}`);
+        navigate(`/rider-detail/${riderId}?rider=onroleriders`);
       };
       return (
         <div className="flex space-x-3 rtl:space-x-reverse">
@@ -175,18 +175,23 @@ const OnRoleRiders = () => {
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(0);
   const [pageCount, setPageCount] = useState(0);
+  const [pagesizedata, setpagesizedata]=useState(10);
+  const [totalCount, setTotalCount] = useState(0);
+  const maxPagesToShow = 5;
   useEffect(() => {
     const token = localStorage.getItem("jwtToken");
     if (token) {
       axiosInstance
-        .get(`${BASE_URL}/register/rider/get-all-service-area-by-on-role-status?page=${currentPage}&size=100`, {
+        .get(`${BASE_URL}/register/rider/get-all-service-area-by-on-role-status?page=${currentPage}&size=${pagesizedata}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         })
         .then((response) => {
+          console.log("res", response)
           setRiderData(response.data);
-          setPageCount(response.data.totalPages);
+          setTotalCount(Number(response.headers["x-total-count"]));  
+          setPageCount(Number(response.headers["x-total-pages"]));
         })
         .catch((error) => {
           console.error("Error fetching user data:", error);
@@ -195,7 +200,7 @@ const OnRoleRiders = () => {
           setLoading(false); 
         });
     }
-  }, []);
+  }, [currentPage,pagesizedata]);
   useEffect(() => {
     const token = localStorage.getItem("jwtToken");
     if (token && search) {
@@ -227,6 +232,8 @@ const OnRoleRiders = () => {
       initialState: {
         pageSize: 10,
       },
+      manualPagination: true, 
+      pageCount, 
     },
     useSortBy,
     usePagination,
@@ -253,6 +260,11 @@ const OnRoleRiders = () => {
   useEffect(() => {
     setCurrentPage(pageIndex);
   }, [pageIndex]);
+
+  const handlePageSizeChange = (newSize) => {
+    setpagesizedata(newSize); 
+    setCurrentPage(0);  
+  };
   
   return (
     <>
@@ -333,10 +345,10 @@ const OnRoleRiders = () => {
           <div className=" flex items-center space-x-3 rtl:space-x-reverse">
             <select
               className="form-control py-2 w-max"
-              value={pageSize}
-              onChange={(e) => setPageSize(Number(e.target.value))}
+              value={pagesizedata}
+              onChange={(e) => handlePageSizeChange(Number(e.target.value))}
             >
-              {[10, 25, 50].map((pageSize) => (
+              {[10, 20, 30, 40, 50].map((pageSize) => (
                 <option key={pageSize} value={pageSize}>
                   Show {pageSize}
                 </option>
@@ -349,67 +361,92 @@ const OnRoleRiders = () => {
               </span>
             </span>
           </div>
-          <ul className="flex items-center  space-x-3  rtl:space-x-reverse">
-            <li className="text-xl leading-4 text-slate-900 dark:text-white rtl:rotate-180">
-              <button
-                className={` ${
-                  !canPreviousPage ? "opacity-50 cursor-not-allowed" : ""
-                }`}
-                onClick={() => gotoPage(0)}
-                disabled={!canPreviousPage}
-              >
-                <Icon icon="heroicons:chevron-double-left-solid" />
-              </button>
-            </li>
-            <li className="text-sm leading-4 text-slate-900 dark:text-white rtl:rotate-180">
-              <button
-                className={` ${
-                  !canPreviousPage ? "opacity-50 cursor-not-allowed" : ""
-                }`}
-                onClick={() => previousPage()}
-                disabled={!canPreviousPage}
-              >
-                Prev
-              </button>
-            </li>
-            {pageOptions.map((page, pageIdx) => (
-              <li key={pageIdx}>
-                <button
-                  href="#"
-                  aria-current="page"
-                  className={` ${
-                    pageIdx === pageIndex
-                      ? "bg-scooton-900 dark:bg-slate-600  dark:text-slate-200 text-white font-medium "
-                      : "bg-slate-100 dark:bg-slate-700 dark:text-slate-400 text-slate-900  font-normal  "
-                  }    text-sm rounded leading-[16px] flex h-6 w-6 items-center justify-center transition-all duration-150`}
-                  onClick={() => gotoPage(pageIdx)}
-                >
-                  {page + 1}
-                </button>
-              </li>
-            ))}
-            <li className="text-sm leading-4 text-slate-900 dark:text-white rtl:rotate-180">
-              <button
-                className={` ${
-                  !canNextPage ? "opacity-50 cursor-not-allowed" : ""
-                }`}
-                onClick={() => nextPage()}
-                disabled={!canNextPage}
-              >
-                Next
-              </button>
-            </li>
-            <li className="text-xl leading-4 text-slate-900 dark:text-white rtl:rotate-180">
-              <button
-                onClick={() => gotoPage(pageCount - 1)}
-                disabled={!canNextPage}
-                className={` ${
-                  !canNextPage ? "opacity-50 cursor-not-allowed" : ""
-                }`}
-              >
-                <Icon icon="heroicons:chevron-double-right-solid" />
-              </button>
-            </li>
+          <ul className="flex items-center space-x-3 rtl:space-x-reverse">
+            {totalCount > pagesizedata && (
+              <>
+                <li>
+                  <button
+                    onClick={() => gotoPage(0)}
+                    disabled={currentPage === 0}
+                    className={currentPage === 0 ? "opacity-50 cursor-not-allowed" : ""}
+                  >
+                    <Icon icon="heroicons:chevron-double-left-solid" />
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onClick={() => setCurrentPage(currentPage - 1)}
+                    disabled={currentPage === 0}
+                    className={currentPage === 0 ? "opacity-50 cursor-not-allowed" : ""}
+                  >
+                    Prev
+                  </button>
+                </li>
+                {(() => {
+                  const totalPages = pageCount; 
+                  const currentGroup = Math.floor(currentPage / maxPagesToShow); 
+                  const startPage = currentGroup * maxPagesToShow; 
+                  const endPage = Math.min(startPage + maxPagesToShow, totalPages); 
+
+                  return (
+                    <>
+                      {startPage > 0 && (
+                        <li>
+                          <button onClick={() => setCurrentPage(startPage - 1)}>
+                            ...
+                          </button>
+                        </li>
+                      )}
+                      {Array.from({ length: endPage - startPage }).map((_, idx) => {
+                        const pageNumber = startPage + idx;
+                        return (
+                          <li key={pageNumber}>
+                            <button
+                              className={` ${pageNumber === currentPage
+                                  ? "bg-scooton-900 dark:bg-slate-600  dark:text-slate-200 text-white font-medium"
+                                  : "bg-slate-100 dark:bg-slate-700 dark:text-slate-400 text-slate-900  font-normal"
+                                } text-sm rounded leading-[16px] flex h-6 w-6 items-center justify-center transition-all duration-150 `}
+                              onClick={() => setCurrentPage(pageNumber)}
+                            >
+                              {pageNumber + 1}
+                            </button>
+                          </li>
+                        );
+                      })}
+                      {endPage < totalPages && (
+                        <li>
+                          <button onClick={() => setCurrentPage(endPage)}>
+                            ...
+                          </button>
+                        </li>
+                      )}
+                    </>
+                  );
+                })()}
+                <li>
+                  <button
+                    onClick={() => setCurrentPage(currentPage + 1)}
+                    disabled={currentPage >= pageCount - 1}
+                    className={
+                      currentPage >= pageCount - 1 ? "opacity-50 cursor-not-allowed" : ""
+                    }
+                  >
+                    Next
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onClick={() => gotoPage(pageCount - 1)}
+                    disabled={currentPage >= pageCount - 1}
+                    className={
+                      currentPage >= pageCount - 1 ? "opacity-50 cursor-not-allowed" : ""
+                    }
+                  >
+                    <Icon icon="heroicons:chevron-double-right-solid" />
+                  </button>
+                </li>
+              </>
+            )}
           </ul>
         </div>
       </Card>

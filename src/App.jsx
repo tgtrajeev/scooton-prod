@@ -1,4 +1,4 @@
-import React, { lazy, Suspense } from "react";
+import React, { lazy, Suspense, useEffect, useState } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 
 // home pages  & dashboard
@@ -42,12 +42,66 @@ import Settings from "./pages/configuration/setting";
 import AddHomePage from "./pages/home-page/add-homepage";
 import Vendor from "./pages/orders/vendor-order";
 import ProtectedRoute from "./layout/ProtectedRoute";
+import { ToastContainer, toast } from 'react-toastify';
+import "react-toastify/dist/ReactToastify.css";
+
+import { getMessaging, onMessage } from "firebase/messaging";
+import { initializeApp } from "firebase/app";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBGvEB_pxl_Wh_8mEiH8TzRmjOMpi6RtwE",
+  authDomain: "scooton-debug.firebaseapp.com",
+  projectId: "scooton-debug",
+  storageBucket: "scooton-debug.firebasestorage.app",
+  messagingSenderId: "767080447811",
+  appId: "1:767080447811:web:c6a3ec4edd3f2f300a39f6",
+};
+const app = initializeApp(firebaseConfig);
+const messaging = getMessaging(app);
+
 function App() {
 
- 
+  const [notificationCount, setNotificationCount] = useState(0);
+
+  // useEffect(() => {
+  //   // Listen for messages when app is in foreground
+  //   onMessage(messaging, (payload) => {
+  //     console.log("Foreground Notification:", payload);
+  //     alert(`Notification: ${payload.notification.title} - ${payload.notification.body}`);
+  //     toast.info(`${payload.notification.title}: ${payload.notification.body}`);
+  //   });
+  // }, []);
+
+  const CustomToast = ({ title, message }) => (
+    <div>
+      <h4 className="font-medium text-base capitalize text-slate-900">{title}</h4>
+      <p className="text-slate-900 text-sm">{message}</p>
+    </div>
+  );
+
+  useEffect(() => {
+    const customSoundUrl = 'https://securestaging.net/scooton/notification.mp3';
+    const customSound = new Audio(customSoundUrl);
+
+    const unsubscribe = onMessage(messaging, (payload) => {
+        customSound.play();
+        // Update notification count correctly
+        setNotificationCount((prevCount) => prevCount + 1); // Correct way to update state
+
+        toast(<CustomToast title={payload.notification.title} message={payload.notification.body} />, {
+            type: "error",
+            autoClose: 10000,
+            icon: "🔔", // Custom emoji icon
+        });
+    });
+
+    return () => unsubscribe(); // Clean up listener on component unmount
+}, []);
+
  
   return (
     <main className="App  relative h-100">
+      <ToastContainer />
       <Routes>
         
         <Route
@@ -92,9 +146,9 @@ function App() {
           <Route path="non-registered-riders" element={<NonRegisteredRiders />} />
           <Route path="on-role-riders" element={<OnRoleRiders />} />
           <Route path="rider-detail/:riderId" element={<RiderDetail />} />
-          <Route path="all-orders" element={<AllOrders />} />
-          <Route path="all-orders/:id/:ordertype/:search" element={<AllOrders />} />
-          <Route path="all-orders/:ordertype" element={<AllOrders />} />
+          <Route path="all-orders" element={<AllOrders notificationCount={notificationCount} />} />
+          <Route path="all-orders/:id/:ordertype/:search" element={<AllOrders notificationCount={notificationCount}  />} />
+          <Route path="all-orders/:ordertype" element={<AllOrders notificationCount={notificationCount}  />} />
           <Route path="citywide-orders" element={<CityWideOrders />} />
           <Route path="offline-orders" element={<OfflineOrders />} />
           <Route path="create-orders" element={<CreateOrder />} />
