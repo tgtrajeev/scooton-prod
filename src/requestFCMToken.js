@@ -5,7 +5,8 @@ const requestFCMToken = async (userId) => {
     const permission = await Notification.requestPermission();
     if (permission === "granted") {
       const token = await getToken(messaging, {
-        vapidKey: "BLZ7kya0uWE7w3PN1zgT3JG_swrSdWfX5g5PAaXhuAXXCldFtGMkv2TDDcmB7ESCv3A7IpW9W-wSpTBJJ76mHCY", // Replace with your VAPID Key
+        //vapidKey: "BLZ7kya0uWE7w3PN1zgT3JG_swrSdWfX5g5PAaXhuAXXCldFtGMkv2TDDcmB7ESCv3A7IpW9W-wSpTBJJ76mHCY", // Replace with your VAPID Key
+        vapidKey: "BJcfP_nr6yHTQ4Hw8UhHPfvvlVsVHb-s-Nj-sW1L5f_VLWDvIHxnXh-Y6OFKHA2jYg0Mobsik2SAlo7-y12IcjY", // Replace with your VAPID Key
       });
 
       if (token) {
