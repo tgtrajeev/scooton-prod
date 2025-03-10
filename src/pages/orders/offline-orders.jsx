@@ -21,10 +21,10 @@ import Button from "@/components/ui/Button";
 import Loading from "../../components/Loading";
 import Tooltip from "@/components/ui/Tooltip";
 import { toast, ToastContainer } from "react-toastify";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams,useSearchParams } from "react-router-dom";
 import axiosInstance from "../../api";
 
-const COLUMNS = (openIsDeleteOrder,ordersType) => [
+const COLUMNS = (openIsDeleteOrder,ordersType,currentPage,filterby,search) => [
   {
     Header: "Sr. No.",
     accessor: (row, i) => i + 1,
@@ -180,7 +180,8 @@ const COLUMNS = (openIsDeleteOrder,ordersType) => [
       const navigate = useNavigate();
       const handleViewClick = () => {
         const orderId = row.row.original.orderHistory.orderId;
-        navigate(`/order-detail/${orderId}`);
+        //navigate(`/order-detail/${orderId}`);
+        navigate(`/order-detail/${orderId}?customRadio=${ordersType}&page=${currentPage || 0}&searchId=${filterby || ''}&searchText=${search || ''}&orders=offline`);
       };
       return (
         <div className="flex space-x-3 rtl:space-x-reverse">
@@ -203,28 +204,77 @@ const OfflineOrders = () => {
   const [currentPage, setCurrentPage] = useState(0);
   const [pageCount, setPageCount] = useState(0);
   const [ordersType, SetOrderType] = useState("PLACED");
-  const [filterby, setFilterBy] = React.useState('NONE');
+  const [filterby, setFilterBy] = useState('NONE');
   const [pagesizedata, setpagesizedata]=useState(10);
   const [totalCount, setTotalCount] = useState(0);
   const [deleteordermodel, setDeleteOrderModel] = useState(false);
   const [orderid, setOrderDeleteId] = useState();
   const [serviceArea, setServiceArea] = useState([]);
   const [serviceAreaStatus, setServiceAreaStatus] = useState('All');
+  const [searchParams] = useSearchParams();
+  const [paramslength, setParamLength] = useState(0);
+  const [rapf, setRapf] = useState(false)
+  const [paramCurrentPage, setParamCurrentPage] = useState(0);
   const maxPagesToShow = 5;
+
   useEffect(() => {
-    if(filterby == 'NONE'){
-      setLoading(true);
-      fetchOrders("PLACED");
+    console.log("asdfghj",[...searchParams.entries()].length);
+    setParamLength([...searchParams.entries()].length);
+    const customRadio = decodeURIComponent(searchParams.get("customRadio") || "PLACED");
+    const searchId = searchParams.get("searchId") || "NONE";
+    const searchText = searchParams.get("searchText") || "";
+    const pageFromUrl = searchParams.get("page") || "0";
+    console.log("customRadio",customRadio)
+    SetOrderType(customRadio);
+    setFilterBy(searchId);
+    setSearch(searchText);
+    setParamCurrentPage(pageFromUrl)
+    setRapf(true);
+    console.log("orders sdfghj",ordersType)
+  }, [searchParams]);
+    
+      
+  useEffect(() => {
+    if (!searchParams) {
+      setRapf(true);
     }
-  }, [currentPage,pagesizedata]);
+  }, [])
+    
+  useEffect(() => {
+    setCurrentPage(Number(paramCurrentPage) || 0); 
+  }, [paramCurrentPage]);
+
+  // useEffect(() =>{
+  //   if(rapf == true && search =='')
+  //     console.log("1")
+  //     fetchOrders(ordersType)
+  // },[search])
+
+  useEffect(() => {
+    if(rapf == true){
+      if(filterby == 'NONE' ){
+        console.log("2")
+        setLoading(true);
+        fetchOrders(ordersType);
+      }
+    }
+  }, [rapf,currentPage,pagesizedata]);
 
   const fetchOrders = (orderType) => {
+    
     setLoading(true);
     SetOrderType(orderType);
-    const dataToSend ={
-      "orderType": orderType, "searchType": filterby
+    let searchtype
+    if(search == ''){
+      searchtype = 'NONE'
+    }else{
+      searchtype = filterby
     }
-    if (filterby && search) {
+    const dataToSend ={
+      "orderType": orderType, "searchType": searchtype
+    }
+    
+    if (filterby != 'NONE' && search != '') {
       dataToSend.number = search; 
     }
     axiosInstance
@@ -234,9 +284,10 @@ const OfflineOrders = () => {
 
       )
       .then((response) => {
+        console.log("off 11")
         setOrderData(response.data);
         setTotalCount(Number(response.headers["x-total-count"])); 
-        setPageCount(Math.ceil(Number(response.headers["x-total-count"]) / pagesizedata)); 
+        setPageCount(Number(response.headers["x-total-pages"]));
       })
       .catch((error) => {
         console.error("Error fetching order data:", error);
@@ -244,6 +295,7 @@ const OfflineOrders = () => {
       .finally(() => {
         setLoading(false);
       });
+    
   };
 
   const openIsDeleteOrder = async (id) => {
@@ -269,7 +321,7 @@ const OfflineOrders = () => {
   
   
 
-  const columns = useMemo(() => COLUMNS(openIsDeleteOrder,ordersType), [ordersType]);
+  const columns = useMemo(() => COLUMNS(openIsDeleteOrder,ordersType,currentPage,filterby,search), [ordersType,currentPage,filterby,search]);
   const tableInstance = useTable(
     {
       columns,
@@ -314,31 +366,52 @@ const OfflineOrders = () => {
   };
 
   const handleChange = (event) => {
-    setFilterBy(event.target.value);
-    if (event.target.value === 'NONE') {
+    const value = event.target.value;
+   
+      setFilterBy(value);
+      console.log(filterby,value)
+      console.log("entry11")
+    
+    if (value == "NONE") {
+      console.log("entry111")
       setSearch("");
-      fetchOrders(ordersType)
     }
   };
 
   useEffect(() => {
-    if(filterby && search){
-      FilterOrder();
+    if (rapf == true) {
+      if (filterby == 'NONE') {
+        setSearch("")
+        setFilterBy("NONE")
+        FilterOrder();
+
+      }
+    }
+  }, [filterby]);
+
+  useEffect(() => {
+    if (rapf == true) {
+      if(filterby !='NONE' && search != ''){
+        console.log("entry")
+        FilterOrder();
+      }
     }
       
-  }, [filterby, search,currentPage]);
+  }, [filterby, search,currentPage,pagesizedata, rapf]);
 
   const FilterOrder = () => {
     setLoading(true);
     axiosInstance
       .post(
-        `${BASE_URL}/order-history/search-city-wide-orders-all-service-area-isOfflineOrder/0/true?page=${currentPage}&size=100`,
+        `${BASE_URL}/order-history/search-city-wide-orders-all-service-area-isOfflineOrder/0/true?page=${currentPage}&size=${pagesizedata}`,
         { "number": search, "orderType": ordersType, "searchType": filterby },
 
       )
       .then((response) => {
+        console.log("off 22")
         setOrderData(response.data);
-        setPageCount(response.data.totalPages);
+        setTotalCount(Number(response.headers["x-total-count"])); 
+        setPageCount(Number(response.headers["x-total-pages"]));
       })
       .catch((error) => {
         console.error("Error fetching order data:", error);
@@ -380,6 +453,8 @@ const OfflineOrders = () => {
         )
         .then((response) => {
           setOrderData(response.data);
+          setTotalCount(Number(response.headers["x-total-count"])); 
+          setPageCount(Number(response.headers["x-total-pages"]));
         })
         .catch((error) => {
           console.error("Error fetching rider data:", error);
@@ -390,6 +465,30 @@ const OfflineOrders = () => {
       console.error("Error fetching user data:", error);
     }
   };
+
+  useEffect(() => {
+    if(search == ''){
+      setLoading(true);
+      axiosInstance
+        .post(
+          `${BASE_URL}/order-history/search-city-wide-orders-all-service-area-isOfflineOrder/0/true?page=${currentPage}&size=${pagesizedata}`,
+          { "number": search, "orderType": ordersType, "searchType": 'NONE' },
+
+        )
+        .then((response) => {
+          console.log("off 22")
+          setOrderData(response.data);
+          setTotalCount(Number(response.headers["x-total-count"])); 
+          setPageCount(Number(response.headers["x-total-pages"]));
+        })
+        .catch((error) => {
+          console.error("Error fetching order data:", error);
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+      }
+  },[search])
 
   // useEffect(() => {
   //   filterOrders();
@@ -506,7 +605,7 @@ const OfflineOrders = () => {
                   aria-labelledby="demo-row-radio-buttons-group-label"
                   name="row-radio-buttons-group"
                   onChange={(e) => fetchOrders(e.target.value)}
-                  defaultValue="PLACED"
+                  value={ordersType}
                 >
                   <FormControlLabel value="PLACED" control={<Radio />} label="PLACED" />
                   <FormControlLabel value="ACCEPTED" control={<Radio />} label="ACCEPTED" />
@@ -526,7 +625,6 @@ const OfflineOrders = () => {
                       value={filterby}
                       //label="Filter By"
                       onChange={handleChange}
-                      displayEmpty
                       inputProps={{ 'aria-label': 'Without label' }}
                     >
                       <MenuItem value="NONE">Select</MenuItem>
@@ -538,6 +636,7 @@ const OfflineOrders = () => {
                       type="text"
                       name="search"
                       value={search}
+                      disabled={filterby == 'NONE'}
                       onChange={handleSearchChange}
                     />
                   </div>
@@ -622,7 +721,7 @@ const OfflineOrders = () => {
               value={pagesizedata}
               onChange={(e) => handlePageSizeChange(Number(e.target.value))}
             >
-              {[100, 300, 500].map((pageSize) => (
+              {[10,20,30,40,50].map((pageSize) => (
                 <option key={pageSize} value={pageSize}>
                   Show {pageSize}
                 </option>

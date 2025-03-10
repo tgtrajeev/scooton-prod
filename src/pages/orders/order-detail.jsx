@@ -1,5 +1,5 @@
 import React, { useEffect, useState,useRef } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link,useSearchParams } from "react-router-dom";
 import Card from "../../components/ui/Card";
 import { Icon } from "@iconify/react/dist/iconify.js";
 import { BASE_URL } from "../../api";
@@ -43,6 +43,12 @@ const OrderDetail = () => {
     const [selectedPickupMarker, setSelectedPickupMarker] = useState(null);
     const [selectedDroppMarker, setSelectedDropMarker] = useState(null);
     const mapRef = useRef(null);
+    const [searchParams] = useSearchParams();
+    const customRadio = searchParams.get("customRadio") || '';  
+    const searchId = searchParams.get("searchId") || '';   
+    const searchText = searchParams.get("searchText") || ''; 
+    const pagenumber = searchParams.get("page");
+    const orders = searchParams?.get("orders") 
 
     const openPickupModal = async () => {
         setisPickupModal(true);
@@ -239,9 +245,25 @@ const OrderDetail = () => {
                     <div className="flex items-center mb-2">
                         {/* //serviceAreaId=0;customRadio=CANCELLED;page=5;searchId=NONE;searchText=undefined */}
                         {/* ?orderstatus=${orderDetails?.orderStatus};page=${pageno};searchId=${};searchText=${} */}
-                        <Link to={`/all-orders`}>
+                        {/* <Link to={`/all-orders`}>
                             <Icon icon="heroicons:arrow-left-circle" className="text-xl font-bold text-scooton-500" />
-                        </Link>
+                        </Link> */}
+                        {customRadio && pagenumber ? (
+                            orders =='ALL' ? (
+                                <Link to={`/all-orders?customRadio=${customRadio}&page=${pagenumber || 0}&searchId=${searchId || ''}&searchText=${searchText || ''}&orders=ALL`}>
+                                    <Icon icon="heroicons:arrow-left-circle" className="text-xl font-bold text-scooton-500" />
+                                </Link> 
+                            ) : orders == 'citywide' ? (
+                                <Link to={`/citywide-orders?customRadio=${customRadio}&page=${pagenumber || 0}&searchId=${searchId || ''}&searchText=${searchText || ''}&orders=citywide`}>
+                                    <Icon icon="heroicons:arrow-left-circle" className="text-xl font-bold text-scooton-500" />
+                                </Link> 
+                            ) : orders == 'offline' ? (
+                                <Link to={`/offline-orders?customRadio=${customRadio}&page=${pagenumber || 0}&searchId=${searchId || ''}&searchText=${searchText || ''}&orders=offline`}>
+                                    <Icon icon="heroicons:arrow-left-circle" className="text-xl font-bold text-scooton-500" />
+                                </Link> 
+                            ) : null
+                            
+                        ) : null}
                         <h4 className="card-title ms-2 mb-0">Order Details</h4>
                     </div>
                     <div className="mb-2 d-flex gap-4">
@@ -495,19 +517,19 @@ const OrderDetail = () => {
                         <table className="w-full border-collapse table-fixed dark:border-slate-700 dark:border">
                             <tbody>
                                 <tr className="border-b border-slate-100 dark:border-slate-700">
-                                    <td className="text-slate-900 dark:text-slate-300 text-sm  font-normal ltr:text-left ltr:last:text-right rtl:text-right rtl:last:text-left px-6 py-2">
+                                    <td className="px-6 py-2">
                                         Order Id
                                     </td>
-                                    <td className="text-slate-900 dark:text-slate-300 text-sm  font-normal ltr:text-left ltr:last:text-right rtl:text-right rtl:last:text-left px-6 py-2">
+                                    <td className="px-6 py-2 text-end">
                                      
                                         {thirdPartyUsername ? orderDetails.orderId : orderDetails.order_Id}
                                     </td>
                                 </tr>
                                 <tr className="border-b border-slate-100 dark:border-slate-700">
-                                    <td className="text-slate-900 dark:text-slate-300 text-sm  font-normal ltr:text-left ltr:last:text-right rtl:text-right rtl:last:text-left px-6 py-2">
+                                    <td className="px-6 py-2">
                                         Order Date
                                     </td>
-                                    <td className="text-slate-900 dark:text-slate-300 text-sm  font-normal ltr:text-left ltr:last:text-right rtl:text-right rtl:last:text-left px-6 py-2">
+                                    <td className="px-6 py-2 text-end">
                                         {thirdPartyUsername ? new Date(orderDetails.orderDateTime).toLocaleString("en-US", {
                                             year: "numeric",
                                             month: "short",

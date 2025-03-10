@@ -7,7 +7,7 @@ import Textinput from "@/components/ui/Textinput";
 import { BASE_URL } from "../../api";
 import Loading from "../../components/Loading";
 import Tooltip from "@/components/ui/Tooltip";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams,useSearchParams } from "react-router-dom";
 import RadioGroup from '@mui/material/RadioGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import TextField from "@mui/material/TextField";
@@ -27,7 +27,7 @@ import axiosInstance from "../../api";
 
 const notificationtype =['All','INDIVIDUAL']
 
-const COLUMNS = (openIsNotificationModel,openIsDeleteOrder,ordersType) => [
+const COLUMNS = (openIsNotificationModel,openIsDeleteOrder,ordersType,currentPage,filterby,search) => [
   {
     Header: "Sr. No.",
     accessor: (row, i) => i + 1,
@@ -216,7 +216,8 @@ const COLUMNS = (openIsNotificationModel,openIsDeleteOrder,ordersType) => [
       const navigate = useNavigate();
       const handleViewClick = () => {
         const orderId = row.row.original.order_Id;
-        navigate(`/order-detail/${orderId}`);
+        //navigate(`/order-detail/${orderId}`);
+        navigate(`/order-detail/${orderId}?customRadio=${ordersType}&page=${currentPage || 0}&searchId=${filterby || ''}&searchText=${search || ''}&orders=citywide`);
       };
       return (
         <div className="flex space-x-3 rtl:space-x-reverse">
@@ -247,19 +248,54 @@ const CityWideOrders = () => {
   const [notificationModel, setNotificationModel] = useState(false);
   const [serviceArea, setServiceArea] = useState([]);
   const [serviceAreaStatus, setServiceAreaStatus] = useState('All');
-  const [pagesizedata, setpagesizedata]=useState(50);
+  const [pagesizedata, setpagesizedata]=useState(10);
   const [totalCount, setTotalCount] = useState(0);
   const maxPagesToShow = 5;
   const [messages, setMessages] = useState([]);
   const [ws, setWs] = useState(null);
   const [message, setMessage] = useState('');
   const [clientId, setClientId] = useState('');
+  const [searchParams] = useSearchParams();
+  const [paramslength, setParamLength] = useState(0);
+  const [rapf, setRapf] = useState(false)
+  const [paramCurrentPage, setParamCurrentPage] = useState(0);
+
+  useEffect(() => {
+    console.log("asdfghj",[...searchParams.entries()].length);
+    setParamLength([...searchParams.entries()].length);
+    const customRadio = decodeURIComponent(searchParams.get("customRadio") || "PLACED");
+    const searchId = searchParams.get("searchId") || "NONE";
+    const searchText = searchParams.get("searchText") || "";
+    const pageFromUrl = searchParams.get("page") || "0";
+    console.log("customRadio",customRadio)
+    SetOrderType(customRadio);
+    setFilterBy(searchId);
+    setSearch(searchText);
+    setParamCurrentPage(pageFromUrl)
+    setRapf(true);
+    console.log("orders sdfghj",ordersType)
+  }, [searchParams]);
+  
+    
+  useEffect(() => {
+    if (!searchParams) {
+      setRapf(true);
+    }
+  }, [])
   
   useEffect(() => {
-    if(filterby == 'NONE'){
-      fetchOrders("PLACED");
+    setCurrentPage(Number(paramCurrentPage) || 0); 
+  }, [paramCurrentPage]);
+
+  
+  useEffect(() => {
+    if(rapf == true){
+      if(filterby == 'NONE' ){
+        console.log("this one")
+        fetchOrders(ordersType);
+      }
     }
-  }, [currentPage,pagesizedata]);
+  }, [currentPage,pagesizedata,rapf,search]);
 
 
   const openIsNotificationModel = async (id) => {
@@ -308,6 +344,7 @@ const CityWideOrders = () => {
   const handleChange = (event) => {
     setFilterBy(event.target.value);
     if (event.target.value === 'NONE') {
+      console.log("this one 2")
       setSearch("");
       fetchOrders(ordersType)
     }
@@ -325,15 +362,26 @@ const CityWideOrders = () => {
     setOrderDeleteId(id)
   }
 
+  useEffect(() =>{
+    if(rapf == true && search =='')
+      fetchOrders(ordersType)
+  },[search])
+
   const fetchOrders = (orderType) => {
-    setLoading(true);
+    let searchtype;
+    if(search == ''){
+      searchtype = 'NONE'
+    }else{
+      searchtype = filterby
+    }
     SetOrderType(orderType)
     const dataToSend ={
-      "orderType": orderType, "searchType": filterby
+      "orderType": orderType, "searchType": searchtype
     }
     if (filterby && search) {
       dataToSend.number = search; 
     }
+    setLoading(true);
     axiosInstance
       .post(
         `${BASE_URL}/order-history/search-city-wide-orders-all-service-area-isOfflineOrder/0/false?page=${currentPage}&size=${pagesizedata}`,
@@ -341,10 +389,10 @@ const CityWideOrders = () => {
 
       )
       .then((response) => {
+        console.log("22")
         setOrderData(response.data);
-        setLoading(true);
         setTotalCount(Number(response.headers["x-total-count"])); 
-        setPageCount(Math.ceil(Number(response.headers["x-total-count"]) / pagesizedata));
+        setPageCount(Number(response.headers["x-total-pages"]));
       })
       .catch((error) => {
         console.error("Error fetching order data:", error);
@@ -355,51 +403,28 @@ const CityWideOrders = () => {
   };
 
 
-  // useEffect(() => {
-  //   const websocket = new WebSocket('wss://echo.websocket.org');
-
-  //   websocket.onopen = () => {
-  //       console.log('WebSocket is connected');
-  //   };
-
-  //   websocket.onmessage = (evt) => {
-  //       const message = (evt.data);
-  //       setMessages((prevMessages) =>
-  //           [...prevMessages, message]);
-  //   };
-
-  //   console.log("message",messages)
-
-  //   websocket.onclose = () => {
-  //       console.log('WebSocket is closed');
-  //   };
-
-  //   setWs(websocket);
-
-  //   return () => {
-  //       websocket.close();
-  //   };
-  // }, []);
 
   useEffect(() => {
     if(filterby && search){
       FilterOrder();
     }      
-  }, [filterby, search,currentPage]);
+  }, [filterby, search,currentPage,pagesizedata]);
 
 
   const FilterOrder = () => {
     setLoading(true);
     axiosInstance
       .post(
-        `${BASE_URL}/order-history/search-city-wide-orders-all-service-area-isOfflineOrder/0/false?page=${currentPage}&size=100`,
+        `${BASE_URL}/order-history/search-city-wide-orders-all-service-area-isOfflineOrder/0/false?page=${currentPage}&size=${pagesizedata}`,
         { "number": search, "orderType": ordersType, "searchType": filterby },
 
       )
       .then((response) => {
+        console.log("11")
         setLoading(true);
         setOrderData(response.data);
-        setPageCount(response.data.totalPages);
+        setTotalCount(Number(response.headers["x-total-count"])); 
+        setPageCount(Number(response.headers["x-total-pages"]));
       })
       .catch((error) => {
         console.error("Error fetching order data:", error);
@@ -464,14 +489,8 @@ const CityWideOrders = () => {
   
     }
   };
-  
-  
-  
-  
-  
-  
 
-  const columns = useMemo(() => COLUMNS(openIsNotificationModel,openIsDeleteOrder,ordersType), [ordersType]);
+  const columns = useMemo(() => COLUMNS(openIsNotificationModel,openIsDeleteOrder,ordersType,currentPage,filterby,search), [ordersType,currentPage,filterby,search]);
   const tableInstance = useTable(
     {
       columns,
@@ -543,6 +562,8 @@ const CityWideOrders = () => {
         )
         .then((response) => {
           setOrderData(response.data);
+          setTotalCount(Number(response.headers["x-total-count"])); 
+          setPageCount(Number(response.headers["x-total-pages"]));
         })
         .catch((error) => {
           console.error("Error fetching rider data:", error);
@@ -667,7 +688,7 @@ const CityWideOrders = () => {
                   aria-labelledby="demo-row-radio-buttons-group-label"
                   name="row-radio-buttons-group"
                   onChange={(e) => fetchOrders(e.target.value)}
-                  defaultValue="PLACED"
+                  value={ordersType}
                 >
                   <FormControlLabel value="PLACED" control={<Radio />} label="PLACED" />
                   <FormControlLabel value="ACCEPTED" control={<Radio />} label="ACCEPTED" />
@@ -699,6 +720,7 @@ const CityWideOrders = () => {
                           type="text"
                           name="search"
                           value={search}
+                          disabled={filterby == 'NONE'}
                           onChange={handleSearchChange}
                         />
                       </div>
@@ -793,7 +815,7 @@ const CityWideOrders = () => {
               value={pagesizedata}
               onChange={(e) => handlePageSizeChange(Number(e.target.value))}
             >
-              {[100, 300, 500].map((pageSize) => (
+              {[10,20,30,40,50].map((pageSize) => (
                 <option key={pageSize} value={pageSize}>
                   Show {pageSize}
                 </option>

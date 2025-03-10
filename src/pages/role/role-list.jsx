@@ -101,8 +101,8 @@ const RoleList = () => {
         .then((response) => {
           
           setRoleList(response.data); 
-          setTotalCount(Number(response.headers["x-total-count"])); 
-          setPageCount(Math.ceil(Number(response.headers["x-total-count"]) / pageSize));
+          setTotalCount(Number(response.headers["x-total-count"]));
+          setPageCount(Number(response.headers["x-total-pages"]));
           
         })
         .catch((error) => {
@@ -352,7 +352,7 @@ const RoleList = () => {
               value={pagesizedata}
               onChange={(e) => handlePageSizeChange(Number(e.target.value))}
             >
-              {['',15, 25, 50].map((size) => (
+              {[10,20,30,40, 50].map((size) => (
                 <option key={size} value={size}>
                   Show {size}
                 </option>

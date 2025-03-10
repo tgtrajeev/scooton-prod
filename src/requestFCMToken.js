@@ -28,7 +28,7 @@ const sendTokenToServer = async (userId, token) => {
   try {
     const usertoken = localStorage.getItem("jwtToken");
     await fetch(
-      `https://scooton-api-dev.el.r.appspot.com/notification/admin/${userId}/update-fcm`,
+      `https://scootin-300701.el.r.appspot.com/notification/admin/${userId}/update-fcm`,
       {
         method: "POST",
         headers: {

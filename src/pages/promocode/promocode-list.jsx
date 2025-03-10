@@ -139,8 +139,8 @@ const PromocodeList = () => {
         )
         .then((response) => {
           setprocodeList(response.data);
-          setTotalCount(Number(response.headers["x-total-count"])); 
-          setPageCount(Math.ceil(Number(response.headers["x-total-count"]) / pagesizedata)); 
+          setTotalCount(Number(response.headers["x-total-count"]));
+          setPageCount(Number(response.headers["x-total-pages"]));
         })
         .catch((error) => {
           console.error("Error fetching user data:", error);
@@ -364,7 +364,7 @@ const PromocodeList = () => {
               value={pagesizedata}
               onChange={(e) => handlePageSizeChange(Number(e.target.value))}
             >
-              {[10, 25, 50].map((pageSize) => (
+              {[10, 20, 30,40,50].map((pageSize) => (
                 <option key={pageSize} value={pageSize}>
                   Show {pageSize}
                 </option>

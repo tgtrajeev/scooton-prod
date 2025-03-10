@@ -189,6 +189,7 @@ const AllRiders = () => {
   const maxPagesToShow = 5;
   const [searchParams] = useSearchParams();
   const [rapf, setRapf] = useState(false)
+  const [paramCurrentPage, setParamCurrentPage] = useState(0);
 
   useEffect(() => {
     console.log([...searchParams.entries()].length);
@@ -197,12 +198,11 @@ const AllRiders = () => {
     const docStatusFromUrl = searchParams.get("documentStatus") || "ALL";
     const vehicleIdFromUrl = searchParams.get("vehicleid") || "0";
     const pageFromUrl = searchParams.get("page") || "0";
-    console.log("statusFromUrl",statusFromUrl)
+    console.log("statusFromUrl", statusFromUrl)
     setRiderStatus(statusFromUrl);
-    setDocumentStatus(docStatusFromUrl);
     setVehicleId(vehicleIdFromUrl);
-    setCurrentPage(pageFromUrl);
-    console.log("currentPage",currentPage)
+    setParamCurrentPage(pageFromUrl);
+    setDocumentStatus(docStatusFromUrl);
     setRapf(true);
 
   }, [searchParams]);
@@ -213,12 +213,15 @@ const AllRiders = () => {
     }
   }, [])
 
+  useEffect(() => {
+    setCurrentPage(Number(paramCurrentPage) || 0); 
+  }, [paramCurrentPage]);
 
   useEffect(() => {
     setLoading(true);
     const token = localStorage.getItem("jwtToken");
     if (token) {
-      if (rapf == true && serviceAreaStatus == "ALL" && riderstatus == "ALL" && documentstatus === "ALL" && vehicleid === "0" && filterby == "NONE" ) {
+      if (rapf == true && serviceAreaStatus == "ALL" && riderstatus == "ALL" && documentstatus === "ALL" && vehicleid === "0" && filterby == "NONE") {
         axiosInstance
           .get(`${BASE_URL}/register/v2/rider/get-all-service-area-by-registration-status/ALL/0/ALL/0?page=${currentPage}&size=${pagesizedata}`, {
             headers: {
@@ -268,10 +271,10 @@ const AllRiders = () => {
 
   const filterRiders = () => {
     setLoading(true);
-    if(rapf == false){
+    if (rapf == false) {
       if (riderstatus == "ALL" && documentstatus === "ALL" && vehicleid === "0" && currentPage === 0) return;
     }
-    
+
 
     const token = localStorage.getItem("jwtToken");
     try {
@@ -305,7 +308,9 @@ const AllRiders = () => {
 
 
   useEffect(() => {
-    filterRiders();
+    if(riderstatus !== "ALL" || documentstatus !== "ALL" || vehicleid !== "0"){
+      filterRiders();
+    }
   }, [riderstatus, documentstatus, vehicleid, currentPage, pagesizedata]);
 
   const handleChange = (event) => {
@@ -324,21 +329,27 @@ const AllRiders = () => {
   const FilterOrder = () => {
     setLoading(true);
     if (filterby == "NONE") {
-      if(riderstatus == "ALL" && documentstatus === "ALL" && vehicleid === "0"){
+      if (riderstatus == "ALL" && documentstatus === "ALL" && vehicleid === "0") {
         setVehicleId('0');
         setDocumentStatus('ALL');
         setRiderStatus('ALL');
       }
-      
+
     }
-  
+
+    if(filterby !== "NONE"){
+      setVehicleId('0');
+      setDocumentStatus('ALL');
+      setRiderStatus('ALL');
+    }
+
     const token = localStorage.getItem("jwtToken");
-  
+
     const endpoint =
       filterby === "NONE" && riderstatus == "ALL" && documentstatus === "ALL" && vehicleid === "0"
         ? `${BASE_URL}/register/v2/rider/get-all-service-area-by-registration-status/ALL/0/ALL/0?page=0&size=${pagesizedata}`
         : `${BASE_URL}/register/rider/get-rider-by-mobilenumber-or-riderid/${filterby}/${search}?page=0&size=${pagesizedata}`;
-  
+
     axiosInstance
       .get(endpoint, {
         headers: {
@@ -361,28 +372,28 @@ const AllRiders = () => {
 
   useEffect(() => {
     if (rapf == true) {
-      if(filterby !== 'NONE' && search !== "")
+      if (filterby !== 'NONE' && search !== "")
         FilterOrder();
     }
-  }, [filterby,search, currentPage, pagesizedata, rapf]);
+  }, [filterby, search, currentPage, pagesizedata, rapf]);
 
   useEffect(() => {
     if (rapf == true) {
-      if(filterby == 'NONE'){
+      if (filterby == 'NONE') {
         setSearch("")
         setFilterBy("NONE")
         FilterOrder();
-        
+
       }
     }
   }, [filterby]);
 
   useEffect(() => {
-    if(search == ''){
+    if (search == '') {
       setLoading(true);
       const token = localStorage.getItem("jwtToken");
       if (token) {
-        if(rapf == true && riderstatus === "ALL" && documentstatus === "ALL" && vehicleid === "0" ){
+        if (rapf == true && riderstatus === "ALL" && documentstatus === "ALL" && vehicleid === "0") {
           axiosInstance
             .get(`${BASE_URL}/register/v2/rider/get-all-service-area-by-registration-status/ALL/0/ALL/0?page=${currentPage}&size=${pagesizedata}`, {
               headers: {
@@ -403,7 +414,7 @@ const AllRiders = () => {
         }
       }
     }
-  }, [search]); 
+  }, [search]);
 
 
   const columns = useMemo(() => COLUMNS({ currentPage, documentstatus, riderstatus, vehicleid }), [currentPage, documentstatus, riderstatus, vehicleid]);
@@ -441,6 +452,7 @@ const AllRiders = () => {
   } = tableInstance;
 
   const { pageIndex, pageSize } = state;
+
   useEffect(() => {
     setCurrentPage(pageIndex);
   }, [pageIndex]);
@@ -541,7 +553,7 @@ const AllRiders = () => {
                 onChange={handleChange}
                 inputProps={{ 'aria-label': 'Without label' }}
               >
-                <MenuItem value="NONE">Select</MenuItem> 
+                <MenuItem value="NONE">Select</MenuItem>
                 <MenuItem value="RIDERID">Rider ID</MenuItem>
                 <MenuItem value="MOBILE">Mobile Number</MenuItem>
                 <MenuItem value="RIDERNAME">Rider Name</MenuItem>
@@ -729,7 +741,7 @@ const AllRiders = () => {
                         prepareRow(row);
                         return (
                           <tr {...row.getRowProps()} key={row.id}>
-                            
+
                             {row.cells.map((cell) => (
                               <td {...cell.getCellProps()} className="table-td" key={cell.column.id}>
                                 {cell.render("Cell")}
@@ -813,15 +825,15 @@ const AllRiders = () => {
                       {Array.from({ length: endPage - startPage }).map((_, idx) => {
                         const pageNumber = startPage + idx;
                         return (
-                          <li key={pageNumber}>
+                          <li key={pageNumber}>                           
                             <button
                               className={` ${pageNumber === currentPage
-                                ? "bg-scooton-900 dark:bg-slate-600  dark:text-slate-200 text-white font-medium"
+                                ? " bg-scooton-900 dark:bg-slate-600  dark:text-slate-200 text-white font-medium text-sm rounded leading-[16px] flex h-6 w-6 items-center justify-center transition-all duration-150 "
                                 : "bg-slate-100 dark:bg-slate-700 dark:text-slate-400 text-slate-900  font-normal"
                                 } text-sm rounded leading-[16px] flex h-6 w-6 items-center justify-center transition-all duration-150 `}
                               onClick={() => setCurrentPage(pageNumber)}
                             >
-                            {pageNumber + 1}
+                              {pageNumber + 1}
                             </button>
                           </li>
                         );
@@ -847,7 +859,7 @@ const AllRiders = () => {
                     Next
                   </button>
                 </li>
-                <li>
+                <li>                  
                   <button
                     onClick={() => gotoPage(pageCount - 1)}
                     disabled={currentPage >= pageCount - 1}
