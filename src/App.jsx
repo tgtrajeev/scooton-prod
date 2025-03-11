@@ -48,14 +48,6 @@ import "react-toastify/dist/ReactToastify.css";
 import { getMessaging, onMessage } from "firebase/messaging";
 import { initializeApp } from "firebase/app";
 
-// const firebaseConfig = {
-//   apiKey: "AIzaSyBGvEB_pxl_Wh_8mEiH8TzRmjOMpi6RtwE",
-//   authDomain: "scooton-debug.firebaseapp.com",
-//   projectId: "scooton-debug",
-//   storageBucket: "scooton-debug.firebasestorage.app",
-//   messagingSenderId: "767080447811",
-//   appId: "1:767080447811:web:c6a3ec4edd3f2f300a39f6",
-// };
 const firebaseConfig = {
   apiKey: "AIzaSyCgkJwfKIAEW6mE-mQI-qVrg4-xz1_Z4KE",
   authDomain: "scootin-620c6.firebaseapp.com",
@@ -164,7 +156,7 @@ function App() {
           <Route path="order-detail/:thirdPartyUsername/:orderId" element={<OrderDetail />} />
           <Route path="add-homepage" element={<AddHomePage />} />
           <Route path="homepage-list" element={<HomepageList />} />
-          <Route path = ":vendor" element={<Vendor />} />
+          <Route path = ":vendor" element={<Vendor notificationCount={notificationCount} />} />
           <Route element={<ProtectedRoute isAuthRoute={"ROLE_SUPER_ADMIN"} />}>
             <Route path="setting" element={<Settings />} />
             <Route path="role-list" element={<RoleList />} />

@@ -261,19 +261,16 @@ const CityWideOrders = () => {
   const [paramCurrentPage, setParamCurrentPage] = useState(0);
 
   useEffect(() => {
-    console.log("asdfghj",[...searchParams.entries()].length);
     setParamLength([...searchParams.entries()].length);
     const customRadio = decodeURIComponent(searchParams.get("customRadio") || "PLACED");
     const searchId = searchParams.get("searchId") || "NONE";
     const searchText = searchParams.get("searchText") || "";
     const pageFromUrl = searchParams.get("page") || "0";
-    console.log("customRadio",customRadio)
     SetOrderType(customRadio);
     setFilterBy(searchId);
     setSearch(searchText);
     setParamCurrentPage(pageFromUrl)
     setRapf(true);
-    console.log("orders sdfghj",ordersType)
   }, [searchParams]);
   
     
@@ -291,7 +288,6 @@ const CityWideOrders = () => {
   useEffect(() => {
     if(rapf == true){
       if(filterby == 'NONE' ){
-        console.log("this one")
         fetchOrders(ordersType);
       }
     }
@@ -344,7 +340,6 @@ const CityWideOrders = () => {
   const handleChange = (event) => {
     setFilterBy(event.target.value);
     if (event.target.value === 'NONE') {
-      console.log("this one 2")
       setSearch("");
       fetchOrders(ordersType)
     }
@@ -389,7 +384,6 @@ const CityWideOrders = () => {
 
       )
       .then((response) => {
-        console.log("22")
         setOrderData(response.data);
         setTotalCount(Number(response.headers["x-total-count"])); 
         setPageCount(Number(response.headers["x-total-pages"]));
@@ -420,7 +414,6 @@ const CityWideOrders = () => {
 
       )
       .then((response) => {
-        console.log("11")
         setLoading(true);
         setOrderData(response.data);
         setTotalCount(Number(response.headers["x-total-count"])); 

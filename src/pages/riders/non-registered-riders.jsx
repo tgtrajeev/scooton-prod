@@ -70,40 +70,38 @@ const COLUMNS = ({ currentPage, documentstatus, riderstatus, vehicleid }) => [
     Header: "Created Date",
     accessor: "riderInfo.createdDate",
     Cell: ({ cell }) => {
-      const date = new Date(cell.value);
-      const formattedDate = date.toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "short",
-        day: "2-digit"
-      });
-      const formattedTime = date.toLocaleTimeString("en-US", {
+      const formattedDate = new Date(cell.value).toLocaleString("en-US", {
+        timeZone: "UTC",
+        year: "numeric",  
+        month: "short",   
+        day: "2-digit",   
         hour: "2-digit",
         minute: "2-digit",
         second: "2-digit",
-        hour12: true
+        hour12: true,     
       });
-      return <div className="rider-datetime"><span className="riderDate">{`${formattedDate}`}</span><br/><span className="riderTime">{`${formattedTime}`}</span></div>;
+  
+      return <div className="rider-datetime">{formattedDate}</div>;
     },
-  },
+  },  
   {
     Header: "Last Activity Date",
     accessor: "riderInfo.lastActivity",
     Cell: ({ cell }) => {
-      const date = new Date(cell.value);
-      const formattedDate = date.toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "short",
-        day: "2-digit"
-      });
-      const formattedTime = date.toLocaleTimeString("en-US", {
+      const formattedDate = new Date(cell.value).toLocaleString("en-US", {
+        timeZone: "UTC",
+        year: "numeric",  
+        month: "short",  
+        day: "2-digit",   
         hour: "2-digit",
         minute: "2-digit",
         second: "2-digit",
-        hour12: true
+        hour12: true,    
       });
-      return <div className="rider-datetime"><span className="riderDate">{`${formattedDate}`}</span><br/><span className="riderTime">{`${formattedTime}`}</span></div>;
+  
+      return <div className="rider-datetime">{formattedDate}</div>;
     },
-  },
+  },  
   {
     Header: "Status",
     accessor: "riderInfo.status"
@@ -196,13 +194,11 @@ const NonRegisteredRiders = () => {
   const [paramCurrentPage, setParamCurrentPage] = useState(0);
 
   useEffect(() => {
-    console.log([...searchParams.entries()].length);
     setParamLength([...searchParams.entries()].length);
     const statusFromUrl = searchParams.get("riderStatus") || "ALL";
     const docStatusFromUrl = searchParams.get("documentStatus") || "ALL";
     const vehicleIdFromUrl = searchParams.get("vehicleid") || "0";
     const pageFromUrl = searchParams.get("page") || "0";
-    console.log("statusFromUrl",statusFromUrl)
     setRiderStatus(statusFromUrl);
     setDocumentStatus(docStatusFromUrl);
     setVehicleId(vehicleIdFromUrl);
@@ -285,7 +281,6 @@ const NonRegisteredRiders = () => {
       )
       .then((response) => {
         try {
-          console.log("API Response Data:", response.data);
           setFilterBy("NONE");
           setSearch("");
           setRiderData(response.data?.riders || response.data); 

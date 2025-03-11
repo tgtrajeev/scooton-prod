@@ -51,7 +51,7 @@ const COLUMNS = (deleteUser, openEditModal) => [
         second: "2-digit",
         hour12: true
       });
-      return <div className="rider-datetime"><span className="riderDate">{`${formattedDate}`}</span>, <span className="riderTime">{`${formattedTime}`}</span></div>;
+      return <div className="rider-datetime"><span className="riderDate">{`${formattedDate}`}{`${formattedTime}`}</span></div>;
     },
   },
   {

@@ -218,19 +218,16 @@ const OfflineOrders = () => {
   const maxPagesToShow = 5;
 
   useEffect(() => {
-    console.log("asdfghj",[...searchParams.entries()].length);
     setParamLength([...searchParams.entries()].length);
     const customRadio = decodeURIComponent(searchParams.get("customRadio") || "PLACED");
     const searchId = searchParams.get("searchId") || "NONE";
     const searchText = searchParams.get("searchText") || "";
     const pageFromUrl = searchParams.get("page") || "0";
-    console.log("customRadio",customRadio)
     SetOrderType(customRadio);
     setFilterBy(searchId);
     setSearch(searchText);
     setParamCurrentPage(pageFromUrl)
     setRapf(true);
-    console.log("orders sdfghj",ordersType)
   }, [searchParams]);
     
       
@@ -253,7 +250,6 @@ const OfflineOrders = () => {
   useEffect(() => {
     if(rapf == true){
       if(filterby == 'NONE' ){
-        console.log("2")
         setLoading(true);
         fetchOrders(ordersType);
       }
@@ -284,7 +280,6 @@ const OfflineOrders = () => {
 
       )
       .then((response) => {
-        console.log("off 11")
         setOrderData(response.data);
         setTotalCount(Number(response.headers["x-total-count"])); 
         setPageCount(Number(response.headers["x-total-pages"]));
@@ -369,11 +364,8 @@ const OfflineOrders = () => {
     const value = event.target.value;
    
       setFilterBy(value);
-      console.log(filterby,value)
-      console.log("entry11")
     
     if (value == "NONE") {
-      console.log("entry111")
       setSearch("");
     }
   };
@@ -392,7 +384,6 @@ const OfflineOrders = () => {
   useEffect(() => {
     if (rapf == true) {
       if(filterby !='NONE' && search != ''){
-        console.log("entry")
         FilterOrder();
       }
     }
@@ -408,7 +399,6 @@ const OfflineOrders = () => {
 
       )
       .then((response) => {
-        console.log("off 22")
         setOrderData(response.data);
         setTotalCount(Number(response.headers["x-total-count"])); 
         setPageCount(Number(response.headers["x-total-pages"]));
@@ -476,7 +466,6 @@ const OfflineOrders = () => {
 
         )
         .then((response) => {
-          console.log("off 22")
           setOrderData(response.data);
           setTotalCount(Number(response.headers["x-total-count"])); 
           setPageCount(Number(response.headers["x-total-pages"]));

@@ -66,42 +66,38 @@ const COLUMNS = [
     Header: "Created Date",
     accessor: "riderInfo.createdDate",
     Cell: ({ cell }) => {
-      const date = new Date(cell.value);
-      const formattedDate = date.toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "short",
-        day: "2-digit",
-        timeZone: "UTC"
-      });
-      const formattedTime = date.toLocaleTimeString("en-US", {
+      const formattedDate = new Date(cell.value).toLocaleString("en-US", {
+        timeZone: "UTC",
+        year: "numeric",  
+        month: "short",   
+        day: "2-digit",   
         hour: "2-digit",
         minute: "2-digit",
         second: "2-digit",
-        hour12: true,
-        timeZone: "UTC"
+        hour12: true,     
       });
-      return <div className="rider-datetime"><span className="riderDate">{`${formattedDate}`}</span><br/><span className="riderTime">{`${formattedTime}`}</span></div>;
+  
+      return <div className="rider-datetime">{formattedDate}</div>;
     },
-  },
+  },  
   {
     Header: "Last Activity Date",
     accessor: "riderInfo.lastActivity",
     Cell: ({ cell }) => {
-      const date = new Date(cell.value);
-      const formattedDate = date.toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "short",
-        day: "2-digit"
-      });
-      const formattedTime = date.toLocaleTimeString("en-US", {
+      const formattedDate = new Date(cell.value).toLocaleString("en-US", {
+        timeZone: "UTC",
+        year: "numeric",  
+        month: "short",  
+        day: "2-digit",   
         hour: "2-digit",
         minute: "2-digit",
         second: "2-digit",
-        hour12: true
+        hour12: true,    
       });
-      return <div className="rider-datetime"><span className="riderDate">{`${formattedDate}`}</span><br/><span className="riderTime">{`${formattedTime}`}</span></div>;
+  
+      return <div className="rider-datetime">{formattedDate}</div>;
     },
-  },
+  }, 
   {
     Header: "Status",
     accessor: "riderInfo.status"
@@ -188,7 +184,6 @@ const OnRoleRiders = () => {
           },
         })
         .then((response) => {
-          console.log("res", response)
           setRiderData(response.data);
           setTotalCount(Number(response.headers["x-total-count"]));  
           setPageCount(Number(response.headers["x-total-pages"]));

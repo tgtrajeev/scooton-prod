@@ -197,8 +197,6 @@ const OrderDetail = () => {
         try{
            await axiosInstance.get(`${BASE_URL}/rider/nearby-riders`,{params}).then((response) => {
                 if(response.data.length > 0){
-                    debugger
-                    console.log("response", response.data);
                     setNearRiderMap(true);
                     setRiderNearLocation(response.data)
                     const activeRiders = response.data.filter(rider => rider.riderActiveForOrders === true);
@@ -211,7 +209,6 @@ const OrderDetail = () => {
         
                     const totalRiders = response.data.length;
                     setNearTotalRider(totalRiders)
-                    debugger
                 }
                 else {
                     toast.error("Sorry, no rider available at the moment. Please try again later.")
@@ -261,7 +258,11 @@ const OrderDetail = () => {
                                 <Link to={`/offline-orders?customRadio=${customRadio}&page=${pagenumber || 0}&searchId=${searchId || ''}&searchText=${searchText || ''}&orders=offline`}>
                                     <Icon icon="heroicons:arrow-left-circle" className="text-xl font-bold text-scooton-500" />
                                 </Link> 
-                            ) : null
+                            ) : orders == 'SparksPlus' || orders == 'ShipRocket' ? (
+                                <Link to={`/${orders}?customRadio=${customRadio}&page=${pagenumber || 0}&searchId=${searchId || ''}&searchText=${searchText || ''}&orders=${orders}`}>
+                                    <Icon icon="heroicons:arrow-left-circle" className="text-xl font-bold text-scooton-500" />
+                                </Link> 
+                            ) :null
                             
                         ) : null}
                         <h4 className="card-title ms-2 mb-0">Order Details</h4>

@@ -70,7 +70,6 @@ const RiderDetail = () => {
     const[riderLongitude, setRiderLongitude] = useState(null);
     const mapRef = useRef(null);
     const [activeTab, setActiveTab] = useState(0);
-    console.log("documentStatus",documentStatus)
 
     // useEffect(() => {
     //     if (mapRef.current && window.google) {
@@ -244,7 +243,6 @@ const RiderDetail = () => {
             if (updatedDetails[index]?.status !== newStatus) { 
                 updatedDetails[index].status = newStatus;
             }
-            console.log("updatedDetails",updatedDetails)
             return updatedDetails;
         });
         debugger

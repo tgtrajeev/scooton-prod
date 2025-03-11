@@ -26,6 +26,23 @@ import Button from "@/components/ui/Button";
 import { toast, ToastContainer } from "react-toastify";
 import axiosInstance from "../../api";
 
+// Notification
+import { getMessaging, onMessage } from "firebase/messaging";
+import { initializeApp } from "firebase/app";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCgkJwfKIAEW6mE-mQI-qVrg4-xz1_Z4KE",
+  authDomain: "scootin-620c6.firebaseapp.com",
+  projectId: "scootin-620c6",
+  storageBucket: "scootin-620c6.firebasestorage.app",
+  messagingSenderId: "268585781596",
+  appId: "1:268585781596:web:6416f6ca75b228017a9999"
+};
+const app = initializeApp(firebaseConfig);
+const messaging = getMessaging(app);
+// Notification
+
+
 const COLUMNS = (openIsNotificationModel, openIsDeleteOrder, ordersType,currentPage,filterby,search) => [
   {
     Header: "Sr. No.",
@@ -272,19 +289,16 @@ const AllOrders = ({notificationCount}) => {
   const id = useParams();
 
   useEffect(() => {
-    console.log("asdfghj",[...searchParams.entries()].length);
     setParamLength([...searchParams.entries()].length);
     const customRadio = decodeURIComponent(searchParams.get("customRadio") || "PLACED");
     const searchId = searchParams.get("searchId") || "NONE";
     const searchText = searchParams.get("searchText") || "";
     const pageFromUrl = searchParams.get("page") || "0";
-    console.log("customRadio",customRadio)
     SetOrderType(customRadio);
     setFilterBy(searchId);
     setSearch(searchText);
     setParamCurrentPage(pageFromUrl)
     setRapf(true);
-    console.log("orders sdfghj",ordersType)
   }, [searchParams]);
 
   
@@ -333,7 +347,7 @@ const AllOrders = ({notificationCount}) => {
 
   const reorderPlaceOrder = () => {
     axiosInstance.get(`${BASE_URL}/order/accepted-order-reorder/${orderdeleteid}`).then((response)=>{
-      toast.success(response)
+      toast.success("Order Reorder Successfully");
       setOrderData((prevList) => prevList.filter((item) => item.order_Id !== orderdeleteid));
     }).catch((error) => {
       console.error(error);
@@ -375,35 +389,7 @@ const AllOrders = ({notificationCount}) => {
       toast.error("Notification not Sended");
     }
   }
-  // const sendNotification = async () => {
-  //   const token = localStorage.getItem('jwtToken');
-  //   if (!token) {
-  //     toast.error("Authorization token not found");
-  //     return;
-  //   }  
-  //   try {
-  //     const url = mobile
-  //       ? `${BASE_URL}/order/v2/send-order-notification-particular-rider/${notificationid}/${mobile}`
-  //       : `${BASE_URL}/order/v2/send-order-notification/${notificationid}`;
-  
-  //     const response = await axios.get(url, {
-  //       headers: { Authorization: `Bearer ${token}` },
-  //     });
-  
-  //     if (response.status === 200) {
-  //       toast.success("Notification sent successfully!");
-  //       setNotificationModel(false);
-  //     } else {
-  //       toast.error("Failed to send notification");
-  //     }
-  //   } catch (error) {
-  //     console.error("Error sending notification:", error);
-  //     toast.error(
-  //       error.response?.data?.message || "Notification not sent. Please try again."
-  //     );
-  //   }
-  // };
-  
+ 
 
   const handleChange = (event) => {
     setFilterBy(event.target.value);
@@ -440,7 +426,6 @@ const AllOrders = ({notificationCount}) => {
   },[search])
 
   const fetchOrders = (orderType) => {
-    console.log("this")
     let searchtype
     if(search == ''){
       searchtype = 'NONE'
@@ -465,11 +450,9 @@ const AllOrders = ({notificationCount}) => {
           { headers: { Authorization: `Bearer ${token}` } },
         )
         .then((response) => {
-          console.log("resp", response)
           setOrderData([...response.data]);
           setTotalCount(Number(response.headers["x-total-count"])); 
           setPageCount(Number(response.headers["x-total-pages"]));
-          console.log("11")
         })
         .catch((error) => {
           console.error("Error fetching order data:", error);
@@ -493,10 +476,8 @@ const AllOrders = ({notificationCount}) => {
       )
       .then((response) => {
         setOrderData(response.data);
-        console.log("response.data",response.data)
         setTotalCount(Number(response.headers["x-total-count"])); 
         setPageCount(Number(response.headers["x-total-pages"]));
-        console.log("22")
       })
       .catch((error) => {
         console.error("Error fetching order data:", error);
@@ -630,7 +611,6 @@ const AllOrders = ({notificationCount}) => {
             SetOrderType(id.ordertype);
             setTotalCount(Number(response.headers["x-total-count"])); 
             setPageCount(Number(response.headers["x-total-pages"]) || 0);
-            console.log("33")
             
           }
         })
@@ -670,7 +650,6 @@ const AllOrders = ({notificationCount}) => {
           setOrderData(response.data);
           setTotalCount(Number(response.headers["x-total-count"])); 
           setPageCount(Number(response.headers["x-total-pages"]));
-          console.log("1")
         })
         .catch((error) => {
           console.error("Error fetching order data:", error);
@@ -700,7 +679,6 @@ const AllOrders = ({notificationCount}) => {
           setOrderData(response.data);
           setTotalCount(Number(response.headers["x-total-count"])); 
           setPageCount(Number(response.headers["x-total-pages"]));
-          console.log("1")
         })
         .catch((error) => {
           console.error("Error fetching order data:", error);
