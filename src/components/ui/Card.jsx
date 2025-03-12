@@ -6,7 +6,7 @@ const Card = ({
   title,
   subtitle,
   headerslot,
-  className = "custom-class",
+  className = "custom-class h-full",
   bodyClass = "p-6",
   noborder,
   titleClass = "custom-class",

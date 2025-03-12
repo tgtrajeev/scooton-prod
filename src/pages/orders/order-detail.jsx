@@ -702,7 +702,7 @@ const OrderDetail = () => {
                                     <tr className="border-b border-slate-100 dark:border-slate-700">
                                         <td className="px-6 py-2">Refund Message</td>
                                         {/* <td className="text-end px-6 py-2">Cancelled</td> */}
-                                        <td className="text-end px-6 py-2">{orderDetails?.refundStatus}</td>
+                                        <td className="text-end px-6 py-2">{orderDetails?.refundStatus || ""}</td>
                                     </tr>
                                 )}
                                 {/* {orderDetails.paymentMode === 'PREPAID' && (
@@ -712,13 +712,12 @@ const OrderDetail = () => {
                                     </tr>
                                 )} */}
                                 
-                                {(orderDetails.orderStatus === 'In Progress' && orderDetails.paymentMode === 'PREPAID') && (
+                                {/* {(orderDetails.orderStatus === 'In Progress' && orderDetails.paymentMode === 'PREPAID') && (
                                     <tr className="border-b border-slate-100 dark:border-slate-700">
                                         <td className="px-6 py-2">Payment Status</td>
-                                        {/* <td className="text-end px-6 py-2">Completed</td> */}
                                         <td className="text-end px-6 py-2">{orderDetails?.paymentStatus}</td>
                                     </tr>
-                                )}
+                                )} */}
                                 <tr className="border-b border-slate-100 dark:border-slate-700">
                                     <td className="px-6 py-2">MRP</td>
                                     <td className="text-end px-6 py-2">

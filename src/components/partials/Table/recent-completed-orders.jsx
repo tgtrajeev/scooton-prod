@@ -69,7 +69,7 @@ const RecentCompletedOrders = () => {
       columns,
       data: orderData,
       initialState: {
-        pageSize: 6,
+        pageSize: 10,
       },
     },
     useSortBy,

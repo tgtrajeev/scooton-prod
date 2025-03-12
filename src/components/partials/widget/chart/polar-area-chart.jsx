@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
 import Chart from "react-apexcharts";
+import ApexCharts from "apexcharts";
 import useDarkMode from "@/hooks/useDarkMode";
 import useWidth from "@/hooks/useWidth";
 import axiosInstance from "../../../../api";
 import { BASE_URL } from "../../../../api";
 
-const RadialsChart = () => {
+const PolarAreaChart = () => {
   const [isDark] = useDarkMode();
   const { width, breakpoints } = useWidth();
   const [activeRiders, setActiveRiders] = useState(0);
@@ -34,59 +35,38 @@ const RadialsChart = () => {
     fetchOrderData();
   }, []);
 
-  const total = activeRiders + onRoleRiders + unregisteredRiders;
-  console.log("totaltotal",total)
+  const series = [activeRiders, onRoleRiders, totalRiders, unregisteredRiders];
 
-  const series = [ onRoleRiders, unregisteredRiders, activeRiders,totalRiders];
   const options = {
     chart: {
-      toolbar: {
-        show: false,
-      },
+      toolbar: { show: false },
     },
     plotOptions: {
       radialBar: {
         dataLabels: {
-          name: {
-            fontSize: "16px",
+          name: { fontSize: "22px", color: isDark ? "#CBD5E1" : "#475569" },
+          value: { fontSize: "16px", color: isDark ? "#CBD5E1" : "#475569" },
+          total: {
+            show: true,
+            label: "Total",
             color: isDark ? "#CBD5E1" : "#475569",
-          },
-          value: {
-            fontSize: "16px",
-            color: isDark ? "#CBD5E1" : "#475569",
-            formatter: function (val) {
-              return val; 
+            formatter: function () {
+              return activeRiders + onRoleRiders + totalRiders + unregisteredRiders;
             },
           },
-          // total: {
-          //   show: true,
-          //   label: "Total",
-          //   color: isDark ? "#CBD5E1" : "#475569",
-          //   formatter: function () {
-          //     return totalRiders
-          //   },
-          // },
         },
-        track: {
-          background: "#E2E8F0",
-          strokeWidth: "97%",
-        },
+        track: { background: "#E2E8F0", strokeWidth: "97%" },
       },
     },
-    labels: [ "OnRole Riders", "Unregistered Riders", "Active Riders", "Total Riders"],
-    colors: ["#4669FA"  ,"#FA916B", "#50C793","#FFC75F"],
+    labels: ["Active Riders", "On Role Riders", "Total Riders", "Unregistered Riders"],
+    colors: ["#4669FA", "#FA916B", "#50C793", "#0CE7FA"],
   };
 
   return (
-    <div>
-      <Chart
-        options={options}
-        series={series}
-        type="radialBar"
-        height={width > breakpoints.md ? 360 : 250}
-      />
+    <div id="chart">
+      <Chart type="polarArea" options={options} series={series} />
     </div>
   );
 };
 
-export default RadialsChart;
+export default PolarAreaChart;
