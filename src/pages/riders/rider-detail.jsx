@@ -70,6 +70,7 @@ const RiderDetail = () => {
     const[riderLongitude, setRiderLongitude] = useState(null);
     const mapRef = useRef(null);
     const [activeTab, setActiveTab] = useState(0);
+    const [selectedOrderIndex, setSelectedOrderIndex] = useState(null);
 
     // useEffect(() => {
     //     if (mapRef.current && window.google) {
@@ -233,7 +234,27 @@ const RiderDetail = () => {
         }
     }
 
+    const viewDocument = async (id,fileName,index) => {
+        setIsDocumentModel(true);
+        setSelectedOrderIndex(index); 
+        setDocumentModelDetail(id,fileName);
+    }
 
+    const handleStatusChange = (newStatus) => {
+        debugger
+        if (selectedOrderIndex !== null) {
+            setDocumentDetail((prevDetails) => {
+                const updatedDetails = [...prevDetails];
+                if (updatedDetails[selectedOrderIndex]?.status !== newStatus) { 
+                    updatedDetails[selectedOrderIndex].status = newStatus;
+                }
+                return updatedDetails;
+            });
+            console.log("documentDetaildocumentDetail",documentDetail)
+        }
+        debugger
+        setIsDocumentModel(false);
+    };
 
     const handleDocumentStatus = (event, index) => {
         debugger
@@ -355,10 +376,7 @@ const RiderDetail = () => {
      }
     }
 
-    const viewDocument = async (id,fileName) => {
-        setIsDocumentModel(true)
-        setDocumentModelDetail(id,fileName)
-    }
+    
 
     const [currentPage, setCurrentPage] = useState(1); 
     const itemsPerPage = 50; 
@@ -826,7 +844,7 @@ const RiderDetail = () => {
                                                     <Textinput defaultValue={order.documentType}  />                                                
                                                 </td>                                            
                                                 <td className="px-6 py-3">
-                                                    <Button text="button" className="btn-dark" onClick={() => viewDocument(order.url, order.fileName)}>View Document</Button>
+                                                    <Button text="button" className="btn-dark" onClick={() => viewDocument(order.url, order.fileName, index)}>View Document</Button>
                                                 </td>
                                                 {/* <td className="px-6 py-4">{order.status}</td> */}
                                                 <td className="px-6 py-3">   
@@ -1191,13 +1209,22 @@ const RiderDetail = () => {
             centered            
             onClose={() => setIsDocumentModel(false)}
         >
-            <div className="viewdocument-frame">
+            <div className="viewdocument-frame"> 
+                {viewDocumentModelDetail.id}
                 <iframe
                     src={viewDocumentModelDetail}
                     width="100%"
                     height="400px"
                     title="Document Viewer"
                 />         
+            </div>
+            <div className="d-flex gap-2 justify-content-end mt-4">
+                <Button className="btn btn-dark" type="button" onClick={() => handleStatusChange("Reject")}> 
+                    Reject
+                </Button>
+                <Button className="btn btn-outline-light" type="button" onClick={() => handleStatusChange("Accepted")}>
+                    Accept
+                </Button>
             </div>
         </Modal>
       )} 

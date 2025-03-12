@@ -330,7 +330,7 @@ const NonRegisteredRiders = () => {
       setRiderStatus('ALL');
     }
       const endpoint =
-          `${BASE_URL}/register/rider/get-rider-by-mobilenumber-or-riderid/${filterby}/${search}?page=${currentPage}&size=${pagesizedata}`;
+          `${BASE_URL}/register/rider/get-rider-by-mobilenumber-or-riderid/${filterby}/${search}?page=0&size=${pagesizedata}`;
       
       axiosInstance
         .get(endpoint)

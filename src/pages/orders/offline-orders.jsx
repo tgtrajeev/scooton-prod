@@ -394,7 +394,7 @@ const OfflineOrders = () => {
     setLoading(true);
     axiosInstance
       .post(
-        `${BASE_URL}/order-history/search-city-wide-orders-all-service-area-isOfflineOrder/0/true?page=${currentPage}&size=${pagesizedata}`,
+        `${BASE_URL}/order-history/search-city-wide-orders-all-service-area-isOfflineOrder/0/true?page=0&size=${pagesizedata}`,
         { "number": search, "orderType": ordersType, "searchType": filterby },
 
       )

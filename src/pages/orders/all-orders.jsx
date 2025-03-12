@@ -26,22 +26,6 @@ import Button from "@/components/ui/Button";
 import { toast, ToastContainer } from "react-toastify";
 import axiosInstance from "../../api";
 
-// Notification
-import { getMessaging, onMessage } from "firebase/messaging";
-import { initializeApp } from "firebase/app";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyCgkJwfKIAEW6mE-mQI-qVrg4-xz1_Z4KE",
-  authDomain: "scootin-620c6.firebaseapp.com",
-  projectId: "scootin-620c6",
-  storageBucket: "scootin-620c6.firebasestorage.app",
-  messagingSenderId: "268585781596",
-  appId: "1:268585781596:web:6416f6ca75b228017a9999"
-};
-const app = initializeApp(firebaseConfig);
-const messaging = getMessaging(app);
-// Notification
-
 
 const COLUMNS = (openIsNotificationModel, openIsDeleteOrder, ordersType,currentPage,filterby,search) => [
   {
@@ -453,6 +437,7 @@ const AllOrders = ({notificationCount}) => {
           setOrderData([...response.data]);
           setTotalCount(Number(response.headers["x-total-count"])); 
           setPageCount(Number(response.headers["x-total-pages"]));
+          console.log("1")
         })
         .catch((error) => {
           console.error("Error fetching order data:", error);
@@ -466,11 +451,11 @@ const AllOrders = ({notificationCount}) => {
   };
   const FilterOrder = () => {
     setLoading(true);
-
+    
     const token = localStorage.getItem("jwtToken");
     axiosInstance
       .post(
-        `${BASE_URL}/order-history/search-city-wide-orders-all-service-area/0?page=${currentPage}&size=${pagesizedata}`,
+        `${BASE_URL}/order-history/search-city-wide-orders-all-service-area/0?page=0&size=${pagesizedata}`,
         { "number": search, "orderType": ordersType, "searchType": filterby },
         { headers: { Authorization: `Bearer ${token}` } },
       )
@@ -478,6 +463,7 @@ const AllOrders = ({notificationCount}) => {
         setOrderData(response.data);
         setTotalCount(Number(response.headers["x-total-count"])); 
         setPageCount(Number(response.headers["x-total-pages"]));
+        console.log("2")
       })
       .catch((error) => {
         console.error("Error fetching order data:", error);
@@ -611,6 +597,7 @@ const AllOrders = ({notificationCount}) => {
             SetOrderType(id.ordertype);
             setTotalCount(Number(response.headers["x-total-count"])); 
             setPageCount(Number(response.headers["x-total-pages"]) || 0);
+            console.log("3")
             
           }
         })
@@ -650,6 +637,7 @@ const AllOrders = ({notificationCount}) => {
           setOrderData(response.data);
           setTotalCount(Number(response.headers["x-total-count"])); 
           setPageCount(Number(response.headers["x-total-pages"]));
+          console.log("4")
         })
         .catch((error) => {
           console.error("Error fetching order data:", error);
@@ -679,6 +667,7 @@ const AllOrders = ({notificationCount}) => {
           setOrderData(response.data);
           setTotalCount(Number(response.headers["x-total-count"])); 
           setPageCount(Number(response.headers["x-total-pages"]));
+          console.log("5")
         })
         .catch((error) => {
           console.error("Error fetching order data:", error);

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useLocation, NavLink } from "react-router-dom";
 import { menuItems } from "@/constant/data";
 import Icon from "@/components/ui/Icon";
+import { split } from "postcss/lib/list";
 
 const Breadcrumbs = () => {
   const location = useLocation();
@@ -51,7 +52,7 @@ const Breadcrumbs = () => {
               </li>
             )}
             <li className="capitalize text-slate-500 dark:text-slate-400">
-              {locationName}
+              {locationName?.split("/")[0]}
             </li>
           </ul>
         </div>

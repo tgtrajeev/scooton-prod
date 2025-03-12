@@ -26,19 +26,6 @@ import Button from "@/components/ui/Button";
 import { toast, ToastContainer } from "react-toastify";
 import { useLocation, useParams } from "react-router-dom";
 import axiosInstance from "../../api";
-import { getMessaging, onMessage } from "firebase/messaging";
-import { initializeApp } from "firebase/app";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyCgkJwfKIAEW6mE-mQI-qVrg4-xz1_Z4KE",
-  authDomain: "scootin-620c6.firebaseapp.com",
-  projectId: "scootin-620c6",
-  storageBucket: "scootin-620c6.firebasestorage.app",
-  messagingSenderId: "268585781596",
-  appId: "1:268585781596:web:6416f6ca75b228017a9999"
-};
-const app = initializeApp(firebaseConfig);
-const messaging = getMessaging(app);
 
 
 const COLUMNS = (openIsNotificationModel, openIsDeleteOrder, ordersType,currentPage,filterby,search) => [

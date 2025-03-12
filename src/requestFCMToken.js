@@ -1,11 +1,13 @@
 import { messaging, getToken } from "./firebaseConfig";
+import { BASE_URL } from "./api";
+import { fireconfigkey } from "./firebasekeys";
 
 const requestFCMToken = async (userId) => {
   try {
     const permission = await Notification.requestPermission();
     if (permission === "granted") {
       const token = await getToken(messaging, {
-        vapidKey: "BJcfP_nr6yHTQ4Hw8UhHPfvvlVsVHb-s-Nj-sW1L5f_VLWDvIHxnXh-Y6OFKHA2jYg0Mobsik2SAlo7-y12IcjY", // Replace with your VAPID Key
+        vapidKey: `${fireconfigkey}`
       });
 
       if (token) {
@@ -28,7 +30,7 @@ const sendTokenToServer = async (userId, token) => {
   try {
     const usertoken = localStorage.getItem("jwtToken");
     await fetch(
-      `https://scootin-300701.el.r.appspot.com/notification/admin/${userId}/update-fcm`,
+      `${BASE_URL}/notification/admin/${userId}/update-fcm`,
       {
         method: "POST",
         headers: {

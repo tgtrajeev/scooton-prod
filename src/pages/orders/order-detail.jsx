@@ -581,14 +581,33 @@ const OrderDetail = () => {
                                     <td className=" px-6 py-2"> Distance (KM) </td>
                                     <td className=" px-6 py-2 text-end">{orderDetails?.distance}</td>
                                 </tr>
-                                <tr className="border-b border-slate-100 dark:border-slate-700">
-                                    <td className=" px-6 py-2"> Pickup OTP </td>
-                                    <td className=" px-6 py-2 text-end">{orderDetails?.pickupOtp}</td>
-                                </tr>
-                                <tr className="border-b border-slate-100 dark:border-slate-700">
-                                    <td className=" px-6 py-2"> Delivery OTP </td>
-                                    <td className=" px-6 py-2 text-end">{orderDetails?.deiveryOtp}</td>
-                                </tr>
+                                
+
+                                {thirdPartyUsername ? (
+                                    <>
+                                        <tr className="border-b border-slate-100 dark:border-slate-700">
+                                            <td className=" px-6 py-2"> Pickup OTP </td>
+                                            <td className=" px-6 py-2 text-end">{orderDetails?.pickupOtp}</td>
+                                        </tr>
+                                        <tr className="border-b border-slate-100 dark:border-slate-700">
+                                            <td className=" px-6 py-2"> Delivery OTP</td>
+                                            <td className=" px-6 py-2 text-end">{orderDetails?.deiveryOtp}</td>
+                                        </tr>
+                                    </>
+                                    
+                                ) : (
+                                    <>
+                                       <tr className="border-b border-slate-100 dark:border-slate-700">
+                                            <td className=" px-6 py-2"> Pickup OTP </td>
+                                            <td className=" px-6 py-2 text-end">{orderDetails?.pickupOtp}</td>
+                                        </tr>
+                                        <tr className="border-b border-slate-100 dark:border-slate-700">
+                                            <td className=" px-6 py-2"> Delivery OTP</td>
+                                            <td className=" px-6 py-2 text-end">{orderDetails?.deliveryOtp}</td>
+                                        </tr>
+                                    </>
+                                )}
+                                
                                 {!thirdPartyUsername && (
                                     <>
                                         <tr className="border-b border-slate-100 dark:border-slate-700">
@@ -672,10 +691,18 @@ const OrderDetail = () => {
                                         <td className="text-end px-6 py-2">PENDING</td>
                                     </tr>
                                 )}
-                                {(orderDetails.orderStatus === 'Cancelled' && orderDetails.paymentMode === 'PREPAID') && (
+                                {( orderDetails.paymentMode === 'PREPAID') && (
                                     <tr className="border-b border-slate-100 dark:border-slate-700">
                                         <td className="px-6 py-2">Payment Status</td>
-                                        <td className="text-end px-6 py-2">Cancelled</td>
+                                        {/* <td className="text-end px-6 py-2">Cancelled</td> */}
+                                        <td className="text-end px-6 py-2">{orderDetails?.paymentStatus}</td>
+                                    </tr>
+                                )}
+                                {(orderDetails.paymentMode === 'PREPAID') && (
+                                    <tr className="border-b border-slate-100 dark:border-slate-700">
+                                        <td className="px-6 py-2">Refund Message</td>
+                                        {/* <td className="text-end px-6 py-2">Cancelled</td> */}
+                                        <td className="text-end px-6 py-2">{orderDetails?.refundStatus}</td>
                                     </tr>
                                 )}
                                 {/* {orderDetails.paymentMode === 'PREPAID' && (
@@ -688,7 +715,8 @@ const OrderDetail = () => {
                                 {(orderDetails.orderStatus === 'In Progress' && orderDetails.paymentMode === 'PREPAID') && (
                                     <tr className="border-b border-slate-100 dark:border-slate-700">
                                         <td className="px-6 py-2">Payment Status</td>
-                                        <td className="text-end px-6 py-2">Completed</td>
+                                        {/* <td className="text-end px-6 py-2">Completed</td> */}
+                                        <td className="text-end px-6 py-2">{orderDetails?.paymentStatus}</td>
                                     </tr>
                                 )}
                                 <tr className="border-b border-slate-100 dark:border-slate-700">

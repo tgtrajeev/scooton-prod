@@ -373,7 +373,7 @@ const RegisteredRiders = () => {
     }
     
     const token = localStorage.getItem("jwtToken");
-    axiosInstance.get(`${BASE_URL}/register/rider/get-rider-by-mobilenumber-or-riderid/${filterby}/${search}?page=${currentPage}&size=30`, {
+    axiosInstance.get(`${BASE_URL}/register/rider/get-rider-by-mobilenumber-or-riderid/${filterby}/${search}?page=0&size=30`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
