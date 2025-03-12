@@ -495,6 +495,18 @@ const Vendor = ({notificationCount}) => {
     setMobile(event.target.value);
   };
 
+  const reorderPlaceOrder = () => {
+    const dataToSend ={
+      "orderType" : 'THIRDPARTY'
+    }
+    axiosInstance.post(`${BASE_URL}/order/accepted-order-reorder/${orderdeleteid}`, dataToSend).then((response)=>{
+      toast.success("Order Reorder Successfully");
+      setOrderData((prevList) => prevList.filter((item) => item.order_Id !== orderdeleteid));
+    }).catch((error) => {
+      console.error(error);
+    })
+  }
+
 
   const columns = useMemo(() => COLUMNS(openIsNotificationModel, openIsDeleteOrder, ordersType,currentPage,filterby,search), [ordersType,currentPage,filterby,search]);
 
@@ -849,7 +861,7 @@ const Vendor = ({notificationCount}) => {
           centered
           onClose={() => setDeleteOrderModel(false)}
         >
-          <div className="">
+          <div className="mb-4">
             <h5 className="text-center">Are you sure to cancel?</h5>
             <div className="mt-3">
               <div className="my-3 selcted-reason">
@@ -885,6 +897,15 @@ const Vendor = ({notificationCount}) => {
               </Button>
             </div>
           </div>
+          <hr></hr>
+          {ordersType === 'ACCEPTED' && (
+                <div className="d-flex gap-2 justify-content-between align-items-center mt-4">
+                  <h6 className="text-center">Are you want to Replace Order?</h6>
+                  <Button className="btn btn-outline-light" type="button" onClick={() => { reorderPlaceOrder(); setDeleteOrderModel(false) }}>
+                    Yes
+                  </Button>
+              </div>
+          )}
         </Modal>
       )}
 

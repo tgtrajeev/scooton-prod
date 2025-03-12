@@ -417,7 +417,7 @@ const AllOrders = ({notificationCount}) => {
       searchtype = filterby
     }
     const dataToSend ={
-      "orderType": orderType, "searchType": searchtype
+      "orderType": orderType, "searchType": searchtype.trim()
     }
     if (filterby && search) {
       dataToSend.number = search; 
@@ -619,8 +619,15 @@ const AllOrders = ({notificationCount}) => {
   }, [id?.ordertype, currentPage,pagesizedata,rapf]);
 
   useEffect (() => {
+
+    let searchtype
+    if(search == ''){
+      searchtype = 'NONE'
+    }else{
+      searchtype = filterby
+    }
     const dataToSend ={
-      "orderType": ordersType, "searchType": filterby
+      "orderType": ordersType, "searchType": searchtype.trim()
     }
     if (filterby && search) {
       dataToSend.number = search; 
@@ -649,8 +656,14 @@ const AllOrders = ({notificationCount}) => {
   },[currentPage,pagesizedata,rapf])
 
   useEffect (() => {
+    let searchtype
+    if(search == ''){
+      searchtype = 'NONE'
+    }else{
+      searchtype = filterby
+    }
     const dataToSend ={
-      "orderType": "PLACED", "searchType": filterby
+      "orderType": "PLACED", "searchType": searchtype.trim()
     }
     if (filterby && search) {
       dataToSend.number = search; 
