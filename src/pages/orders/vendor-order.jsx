@@ -38,6 +38,10 @@ const COLUMNS = (openIsNotificationModel, openIsDeleteOrder, ordersType,currentP
     accessor: "order_Id",
   },
   {
+    Header: "Client Order ID",
+    accessor: "thirdPartyOrders.clientOrderId",
+  },
+  {
     Header: "Mobile Number",
     accessor: "thirdPartyOrders.pickupAddressDetails.mobileNumber",
   },
@@ -566,7 +570,7 @@ const Vendor = ({notificationCount}) => {
 
   return (
     <>
-      <ToastContainer/>
+      {/* <ToastContainer/> */}
       <Card>
         <div className="order-header">
           <div className=" mb-6">

@@ -27,7 +27,7 @@ import axiosInstance from "../../api";
 
 const notificationtype =['All','INDIVIDUAL']
 
-const COLUMNS = (openIsNotificationModel,openIsDeleteOrder,ordersType,currentPage,filterby,search) => [
+const COLUMNS = (openIsNotificationModel,openIsDeleteOrder,ordersType,currentPage,filterby,search,pagesizedata) => [
   {
     Header: "Sr. No.",
     accessor: (row, i) => i + 1,
@@ -217,7 +217,7 @@ const COLUMNS = (openIsNotificationModel,openIsDeleteOrder,ordersType,currentPag
       const handleViewClick = () => {
         const orderId = row.row.original.order_Id;
         //navigate(`/order-detail/${orderId}`);
-        navigate(`/order-detail/${orderId}?customRadio=${ordersType}&page=${currentPage || 0}&searchId=${filterby || ''}&searchText=${search || ''}&orders=citywide`);
+        navigate(`/order-detail/${orderId}?customRadio=${ordersType}&page=${currentPage || 0}&searchId=${filterby || ''}&searchText=${search || ''}&orders=citywide&pagesizedata=${pagesizedata}`);
       };
       return (
         <div className="flex space-x-3 rtl:space-x-reverse">
@@ -266,10 +266,13 @@ const CityWideOrders = () => {
     const searchId = searchParams.get("searchId") || "NONE";
     const searchText = searchParams.get("searchText") || "";
     const pageFromUrl = searchParams.get("page") || "0";
+    const pagesizedata1 = searchParams.get("pagesizedata") || 10;
+
     SetOrderType(customRadio);
     setFilterBy(searchId);
     setSearch(searchText);
-    setParamCurrentPage(pageFromUrl)
+    setParamCurrentPage(pageFromUrl);
+    setpagesizedata(Number(pagesizedata1) || 10); 
     setRapf(true);
   }, [searchParams]);
   
@@ -449,7 +452,10 @@ const CityWideOrders = () => {
   }
 
   const reorderPlaceOrder = () => {
-    axiosInstance.get(`${BASE_URL}/order/accepted-order-reorder/${orderdeleteid}`).then((response)=>{
+    const dataToSend ={
+      "orderType" : 'CITYWIDE'
+    }
+    axiosInstance.post(`${BASE_URL}/order/accepted-order-reorder/${orderdeleteid},`,dataToSend).then((response)=>{
       toast.success(response)
       setOrderData((prevList) => prevList.filter((item) => item.order_Id !== orderdeleteid));
     }).catch((error) => {
@@ -483,7 +489,7 @@ const CityWideOrders = () => {
     }
   };
 
-  const columns = useMemo(() => COLUMNS(openIsNotificationModel,openIsDeleteOrder,ordersType,currentPage,filterby,search), [ordersType,currentPage,filterby,search]);
+  const columns = useMemo(() => COLUMNS(openIsNotificationModel,openIsDeleteOrder,ordersType,currentPage,filterby,search,pagesizedata), [ordersType,currentPage,filterby,search,pagesizedata]);
   const tableInstance = useTable(
     {
       columns,

@@ -41,6 +41,7 @@ const RiderDetail = () => {
     const vehicleId = searchParams.get("vehicleid"); 
     const pagenumber = searchParams.get("page");
     const riderstype = searchParams?.get("rider") || '';
+    const pagesizedata = searchParams?.get("pagesizedata") || '';
     const [riderOrderDetail, setRiderOrderDetail] = useState(null);
     const [riderWalletDetail, setRiderWalletDetail] = useState(null);
     const [riderTripDetail, setRiderTripDetail] = useState(null);
@@ -502,24 +503,24 @@ const RiderDetail = () => {
                     )} */}
                     { riderStatus && pagenumber && vehicleId ? (
                         riderstype === 'nonregister' ? (
-                            <Link to={`/non-registered-riders?page=${pagenumber || 0}&documentStatus=${documentStatus}&riderStatus=${riderStatus}&vehicleid=${vehicleId}&rider=${riderstype}`}>
+                            <Link to={`/non-registered-riders?page=${pagenumber || 0}&documentStatus=${documentStatus}&riderStatus=${riderStatus}&vehicleid=${vehicleId}&rider=${riderstype}&pagesizedata=${pagesizedata}`}>
                                 <Icon icon="heroicons:arrow-left-circle" className="text-xl font-bold text-scooton-500" />
                             </Link>
                         ) : riderstype === 'register' ? (
-                            <Link to={`/registered-riders?page=${pagenumber || 0}&documentStatus=${documentStatus}&riderStatus=${riderStatus}&vehicleid=${vehicleId}&rider=${riderstype}`}>
+                            <Link to={`/registered-riders?page=${pagenumber || 0}&documentStatus=${documentStatus}&riderStatus=${riderStatus}&vehicleid=${vehicleId}&rider=${riderstype}&pagesizedata=${pagesizedata}`}>
                                 <Icon icon="heroicons:arrow-left-circle" className="text-xl font-bold text-scooton-500" />
                             </Link>
                         )  : (
-                            <Link to={`/all-riders?page=${pagenumber || 0}&documentStatus=${documentStatus}&riderStatus=${riderStatus}&vehicleid=${vehicleId}`}>
+                            <Link to={`/all-riders?page=${pagenumber || 0}&documentStatus=${documentStatus}&riderStatus=${riderStatus}&vehicleid=${vehicleId}&pagesizedata=${pagesizedata}`}>
                                 <Icon icon="heroicons:arrow-left-circle" className="text-xl font-bold text-scooton-500" />
                             </Link>
                         )
                     ) : null}
 
                     {riderstype === 'onroleriders' ? (
-                    <Link to="/on-role-riders">
-                    <Icon icon="heroicons:arrow-left-circle" className="text-xl font-bold text-scooton-500" />
-                    </Link>
+                        <Link to="/on-role-riders">
+                            <Icon icon="heroicons:arrow-left-circle" className="text-xl font-bold text-scooton-500" />
+                        </Link>
                     ) : null}
 
 

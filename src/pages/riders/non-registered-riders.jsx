@@ -19,7 +19,7 @@ import { useNavigate } from "react-router-dom";
 import Tooltip from "@/components/ui/Tooltip";
 import axiosInstance from "../../api";
 
-const COLUMNS = ({ currentPage, documentstatus, riderstatus, vehicleid }) => [
+const COLUMNS = ({ currentPage, documentstatus, riderstatus, vehicleid,pagesizedata }) => [
   {
     Header: "Sr. No.",
     accessor: (row, i) => i + 1,
@@ -156,7 +156,7 @@ const COLUMNS = ({ currentPage, documentstatus, riderstatus, vehicleid }) => [
       const handleViewClick = () => {
         const riderId = row.row.original.riderInfo.id;
         //navigate(`/rider-detail/${riderId}`);
-        navigate(`/rider-detail/${riderId}?page=${currentPage || 0}&documentStatus=${documentstatus}&riderStatus=${riderstatus}&vehicleid=${vehicleid}&rider=nonregister`);
+        navigate(`/rider-detail/${riderId}?page=${currentPage || 0}&documentStatus=${documentstatus}&riderStatus=${riderstatus}&vehicleid=${vehicleid}&rider=nonregister&pagesizedata=${pagesizedata}`);
       };
       return (
         <div className="flex space-x-3 rtl:space-x-reverse">
@@ -198,12 +198,16 @@ const NonRegisteredRiders = () => {
     const statusFromUrl = searchParams.get("riderStatus") || "ALL";
     const docStatusFromUrl = searchParams.get("documentStatus") || "ALL";
     const vehicleIdFromUrl = searchParams.get("vehicleid") || "0";
-    const pageFromUrl = searchParams.get("page") || "0";
+    const pageFromUrl = searchParams.get("page") || "0" ;
+    const pagesizedata1 = searchParams.get("pagesizedata") || 10;
     setRiderStatus(statusFromUrl);
     setDocumentStatus(docStatusFromUrl);
     setVehicleId(vehicleIdFromUrl);
+    console.log("pageFromUrl",pageFromUrl)
     // setCurrentPage(pageFromUrl);
     setParamCurrentPage(pageFromUrl);
+    setpagesizedata(Number(pagesizedata1) || 10); 
+    console.log("paramCurrentPage,",paramCurrentPage)
     setRapf(true);
   
   }, [searchParams]);
@@ -218,8 +222,15 @@ const NonRegisteredRiders = () => {
     setCurrentPage(Number(paramCurrentPage) || 0); 
   }, [paramCurrentPage]);
 
-
+  
   useEffect(() => {
+      fetchRegisterOrder();
+  }, [currentPage,pagesizedata,rapf]);
+
+
+
+  const fetchRegisterOrder = () =>{
+    console.log("currentPage",currentPage)
     setLoading(true);
     const token = localStorage.getItem("jwtToken");
     if (token) {
@@ -232,6 +243,7 @@ const NonRegisteredRiders = () => {
           })
           .then((response) => {
             setRiderData(response.data);
+            console.log("1")
             setTotalCount(Number(response.headers["x-total-count"])); 
             setPageCount(Number(response.headers["x-total-pages"]));
           })
@@ -243,7 +255,8 @@ const NonRegisteredRiders = () => {
           });
       }
     }
-  }, [riderstatus, documentstatus, vehicleid,currentPage,pagesizedata,rapf]);
+   
+  }
 
 
   useEffect(() => {
@@ -286,6 +299,7 @@ const NonRegisteredRiders = () => {
           setRiderData(response.data?.riders || response.data); 
           setTotalCount(Number(response.headers["x-total-count"] || 0));
           setPageCount(Number(response.headers["x-total-pages"] || 1));
+          console.log("qq")
         } catch (err) {
           console.error("Error processing response:", err);
         }
@@ -338,6 +352,7 @@ const NonRegisteredRiders = () => {
           setRiderData(response.data);
           setTotalCount(Number(response.headers["x-total-count"]));
           setPageCount(Number(response.headers["x-total-pages"]));
+          console.log("345")
         })
         .catch((error) => {
           console.error("Error fetching rider data:", error);
@@ -374,6 +389,7 @@ const NonRegisteredRiders = () => {
               setRiderData(response.data);
               setTotalCount(Number(response.headers["x-total-count"]));
               setPageCount(Number(response.headers["x-total-pages"]));
+              console.log("3")
             })
             .catch((error) => {
               console.error("Error fetching user data:", error);
@@ -387,7 +403,7 @@ const NonRegisteredRiders = () => {
   }, [search]); 
   
 
-  const columns = useMemo(() => COLUMNS({ currentPage, documentstatus, riderstatus, vehicleid }), [currentPage, documentstatus, riderstatus, vehicleid]);
+  const columns = useMemo(() => COLUMNS({ currentPage, documentstatus, riderstatus, vehicleid ,pagesizedata}), [currentPage, documentstatus, riderstatus, vehicleid,pagesizedata]);
   const tableInstance = useTable(
     {
       columns,

@@ -27,7 +27,7 @@ import { toast, ToastContainer } from "react-toastify";
 import axiosInstance from "../../api";
 
 
-const COLUMNS = (openIsNotificationModel, openIsDeleteOrder, ordersType,currentPage,filterby,search) => [
+const COLUMNS = (openIsNotificationModel, openIsDeleteOrder, ordersType,currentPage,filterby,search,pagesizedata) => [
   {
     Header: "Sr. No.",
     accessor: (row, i) => i + 1,
@@ -230,7 +230,7 @@ const COLUMNS = (openIsNotificationModel, openIsDeleteOrder, ordersType,currentP
       const handleViewClick = () => {
         const orderId = row.row.original.order_Id;
         //id=353672;directOrder=false;cityWide=true;serviceAreaId=0;customRadio=ALL%20ORDERS;page=1;searchId=ORDERID;searchText=353672;pageType=ALL
-        navigate(`/order-detail/${orderId}?customRadio=${ordersType}&page=${currentPage || 0}&searchId=${filterby || ''}&searchText=${search || ''}&orders=ALL`);
+        navigate(`/order-detail/${orderId}?customRadio=${ordersType}&page=${currentPage || 0}&searchId=${filterby || ''}&searchText=${search || ''}&orders=ALL&pagesizedata=${pagesizedata}`);
       };
       return (
         <div className="flex space-x-3 rtl:space-x-reverse">
@@ -277,11 +277,13 @@ const AllOrders = ({notificationCount}) => {
     const customRadio = decodeURIComponent(searchParams.get("customRadio") || "PLACED");
     const searchId = searchParams.get("searchId") || "NONE";
     const searchText = searchParams.get("searchText") || "";
-    const pageFromUrl = searchParams.get("page") || "0";
+    const pageFromUrl = searchParams.get("page") || 0;
+    const pagesizedata1 = searchParams.get("pagesizedata") || 10;
     SetOrderType(customRadio);
     setFilterBy(searchId);
     setSearch(searchText);
     setParamCurrentPage(pageFromUrl)
+    setpagesizedata(Number(pagesizedata1) || 10); 
     setRapf(true);
   }, [searchParams]);
 
@@ -330,7 +332,10 @@ const AllOrders = ({notificationCount}) => {
   }
 
   const reorderPlaceOrder = () => {
-    axiosInstance.get(`${BASE_URL}/order/accepted-order-reorder/${orderdeleteid}`).then((response)=>{
+    const dataToSend ={
+      "orderType" : 'CITYWIDE'
+    }
+    axiosInstance.post(`${BASE_URL}/order/accepted-order-reorder/${orderdeleteid}`,dataToSend).then((response)=>{
       toast.success("Order Reorder Successfully");
       setOrderData((prevList) => prevList.filter((item) => item.order_Id !== orderdeleteid));
     }).catch((error) => {
@@ -524,7 +529,7 @@ const AllOrders = ({notificationCount}) => {
   // };
 
   // const columns = useMemo(() => COLUMNS(openIsNotificationModel), []);
-  const columns = useMemo(() => COLUMNS(openIsNotificationModel, openIsDeleteOrder, ordersType,currentPage,filterby,search), [ordersType,,currentPage,filterby,search]);
+  const columns = useMemo(() => COLUMNS(openIsNotificationModel, openIsDeleteOrder, ordersType,currentPage,filterby,search,pagesizedata), [ordersType,,currentPage,filterby,search,pagesizedata]);
 
  
 
@@ -670,7 +675,7 @@ const AllOrders = ({notificationCount}) => {
     }
  
     setLoading(true);
-    if(paramslength == 0){
+    if(paramslength == 0 && rapf){
       axiosInstance
         .post(
           `${BASE_URL}/order-history/search-city-wide-orders-all-service-area/0?page=${currentPage}&size=${pagesizedata}`,
@@ -689,7 +694,7 @@ const AllOrders = ({notificationCount}) => {
           setLoading(false);
         });
     }
-  },[currentPage,pagesizedata,paramslength])
+  },[currentPage,pagesizedata,paramslength,rapf])
   
 
   return (

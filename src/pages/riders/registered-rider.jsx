@@ -22,7 +22,7 @@ import Button from "../../components/ui/Button";
 import axiosInstance from "../../api";
 import { useSearchParams  } from "react-router-dom";
 
-const COLUMNS = ({ currentPage, riderstatus, vehicleid }) => [
+const COLUMNS = ({ currentPage, riderstatus, vehicleid,pagesizedata }) => [
   {
     Header: "Sr. No.",
     accessor: (row, i) => i + 1,
@@ -158,7 +158,7 @@ const COLUMNS = ({ currentPage, riderstatus, vehicleid }) => [
       const handleViewClick = () => {
         const riderId = row.row.original.riderInfo.id;
         //navigate(`/rider-detail/${riderId}`);
-        navigate(`/rider-detail/${riderId}?page=${currentPage || 0}&riderStatus=${riderstatus}&vehicleid=${vehicleid}&rider=register`);
+        navigate(`/rider-detail/${riderId}?page=${currentPage || 0}&riderStatus=${riderstatus}&vehicleid=${vehicleid}&rider=register&pagesizedata=${pagesizedata}`);
       };
       return (
         <div className="flex space-x-3 rtl:space-x-reverse">
@@ -196,10 +196,13 @@ const RegisteredRiders = () => {
     const statusFromUrl = searchParams.get("riderStatus") || "ALL";
     const vehicleIdFromUrl = searchParams.get("vehicleid") || "0";
     const pageFromUrl = searchParams.get("page") || "0";
+    const pagesizedata1 = searchParams.get("pagesizedata") || 10;
+
     setRiderStatus(statusFromUrl);
     setVehicleId(vehicleIdFromUrl);
     //setCurrentPage(pageFromUrl);
     setParamCurrentPage(pageFromUrl);
+    setpagesizedata(Number(pagesizedata1) || 10); 
     setRapf(true);
     
   }, [searchParams]);
@@ -303,7 +306,7 @@ const RegisteredRiders = () => {
   };
   
 
-  const columns = useMemo(() => COLUMNS({ currentPage,riderstatus, vehicleid }), [currentPage,  riderstatus, vehicleid]);
+  const columns = useMemo(() => COLUMNS({ currentPage,riderstatus, vehicleid ,pagesizedata}), [currentPage,  riderstatus, vehicleid,pagesizedata]);
   const tableInstance = useTable(
     {
       columns,

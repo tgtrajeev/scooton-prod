@@ -19,7 +19,7 @@ import axiosInstance from "../../api";
 import { isRef } from "react-calendar/dist/cjs/shared/propTypes";
 
 
-const COLUMNS = ({ currentPage, documentstatus, riderstatus, vehicleid }) => [
+const COLUMNS = ({ currentPage, documentstatus, riderstatus, vehicleid,pagesizedata }) => [
   {
     Header: "Sr. No.",
     accessor: (row, i) => i + 1,
@@ -153,7 +153,7 @@ const COLUMNS = ({ currentPage, documentstatus, riderstatus, vehicleid }) => [
       const navigate = useNavigate();
       const handleViewClick = () => {
         const riderId = row.row.original.riderInfo.id;
-        navigate(`/rider-detail/${riderId}?page=${currentPage || 0}&documentStatus=${documentstatus}&riderStatus=${riderstatus}&vehicleid=${vehicleid}`);
+        navigate(`/rider-detail/${riderId}?page=${currentPage || 0}&documentStatus=${documentstatus}&riderStatus=${riderstatus}&vehicleid=${vehicleid}&pagesizedata=${pagesizedata}`);
       };
       return (
         <div className="flex space-x-3 rtl:space-x-reverse">
@@ -194,10 +194,13 @@ const AllRiders = () => {
     const docStatusFromUrl = searchParams.get("documentStatus") || "ALL";
     const vehicleIdFromUrl = searchParams.get("vehicleid") || "0";
     const pageFromUrl = searchParams.get("page") || "0";
+    const pagesizedata1 = searchParams.get("pagesizedata") || 10;
+
     setRiderStatus(statusFromUrl);
     setVehicleId(vehicleIdFromUrl);
     setParamCurrentPage(pageFromUrl);
     setDocumentStatus(docStatusFromUrl);
+    setpagesizedata(Number(pagesizedata1) || 10); 
     setRapf(true);
 
   }, [searchParams]);
@@ -237,7 +240,7 @@ const AllRiders = () => {
           });
       }
     }
-  }, [riderstatus, documentstatus, vehicleid, currentPage, pagesizedata, rapf]);
+  }, [serviceAreaStatus, riderstatus, documentstatus, vehicleid, currentPage, pagesizedata, rapf]);
 
 
 
@@ -266,7 +269,7 @@ const AllRiders = () => {
   const filterRiders = () => {
     setLoading(true);
     if (rapf == false) {
-      if (riderstatus == "ALL" && documentstatus === "ALL" && vehicleid === "0" && currentPage === 0) return;
+      if (riderstatus == "ALL" && documentstatus === "ALL" && vehicleid === "0" && currentPage === 0 && serviceAreaStatus === "ALL") return;
     }
 
 
@@ -274,7 +277,7 @@ const AllRiders = () => {
     try {
       axiosInstance
         .get(
-          `${BASE_URL}/register/v2/rider/get-all-service-area-by-registration-status/${documentstatus}/0/${riderstatus}/${vehicleid}?page=${currentPage}&size=${pagesizedata}`,
+          `${BASE_URL}/register/v2/rider/get-all-service-area-by-registration-status/${documentstatus}/${serviceAreaStatus}/${riderstatus}/${vehicleid}?page=${currentPage}&size=${pagesizedata}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -301,10 +304,10 @@ const AllRiders = () => {
 
 
   useEffect(() => {
-    if(riderstatus !== "ALL" || documentstatus !== "ALL" || vehicleid !== "0"){
+    if(riderstatus !== "ALL" || documentstatus !== "ALL" || vehicleid !== "0" || serviceAreaStatus != 'ALL'){
       filterRiders();
     }
-  }, [riderstatus, documentstatus, vehicleid, currentPage, pagesizedata]);
+  }, [serviceAreaStatus,riderstatus, documentstatus, vehicleid, currentPage, pagesizedata]);
 
   const handleChange = (event) => {
     const value = event.target.value;
@@ -322,10 +325,11 @@ const AllRiders = () => {
   const FilterOrder = () => {
     setLoading(true);
     if (filterby == "NONE") {
-      if (riderstatus == "ALL" && documentstatus === "ALL" && vehicleid === "0") {
+      if (riderstatus == "ALL" && documentstatus === "ALL" && vehicleid === "0" && serviceAreaStatus === "ALL") {
         setVehicleId('0');
         setDocumentStatus('ALL');
         setRiderStatus('ALL');
+        setServiceAreaStatus("ALL");
       }
 
     }
@@ -334,6 +338,7 @@ const AllRiders = () => {
       setVehicleId('0');
       setDocumentStatus('ALL');
       setRiderStatus('ALL');
+      setServiceAreaStatus("ALL");
     }
 
     const token = localStorage.getItem("jwtToken");
@@ -410,7 +415,7 @@ const AllRiders = () => {
   }, [search]);
 
 
-  const columns = useMemo(() => COLUMNS({ currentPage, documentstatus, riderstatus, vehicleid }), [currentPage, documentstatus, riderstatus, vehicleid]);
+  const columns = useMemo(() => COLUMNS({ currentPage, documentstatus, riderstatus, vehicleid,pagesizedata }), [currentPage, documentstatus, riderstatus, vehicleid,pagesizedata]);
   const tableInstance = useTable(
     {
       columns,
@@ -476,14 +481,8 @@ const AllRiders = () => {
     const token = localStorage.getItem("jwtToken");
     try {
       axiosInstance
-        .post(
-          `${BASE_URL}/order-history/search-city-wide-orders/${serviceAreaStatus}?page=${currentPage}&size=${pagesizedata}`,
-          {
-            orderType: "PLACED",
-            searchType: "NONE",
-            number: 0,
-          },
-          { headers: { Authorization: `Bearer ${token}` } },
+        .get(
+          `${BASE_URL}/register/v2/rider/get-all-service-area-by-registration-status/ALL/${serviceAreaStatus}/ALL/0?page=${currentPage}&size=${pagesizedata}`
         )
         .then((response) => {
           setRiderData(response.data);
@@ -503,6 +502,7 @@ const AllRiders = () => {
   // }, [serviceAreaStatus, currentPage]);
 
   const serviceAreaStatusFilter = (event) => {
+    console.log("s event,",event)
     setServiceAreaStatus(event.target.value);
   };
   // Clear the search input field
