@@ -645,6 +645,15 @@ const OrderDetail = () => {
                                         </tr> */}
                                     </>
                                 )}
+
+                                {thirdPartyUsername && (
+                                    <>
+                                        <tr className="border-b border-slate-100 dark:border-slate-700">
+                                            <td className=" px-6 py-2">Client Order ID</td>
+                                            <td className=" px-6 py-2 text-end">{orderDetails?.clientOrderId}</td>
+                                        </tr>
+                                    </>
+                                )}
                             </tbody>
                         </table>
                     </div>

@@ -24,7 +24,7 @@ import { useSearchParams  } from "react-router-dom";
 
 const COLUMNS = ({ currentPage, riderstatus, vehicleid,pagesizedata }) => [
   {
-    Header: "Sr. No.",
+    Header: "S. No.",
     accessor: (row, i) => i + 1,
   },
   {
@@ -119,7 +119,7 @@ const COLUMNS = ({ currentPage, riderstatus, vehicleid,pagesizedata }) => [
       return (
         <span className={`block w-full`}>
           <span
-            className={`inline-block px-3 min-w-[90px] text-center mx-auto py-1 rounded-[999px] bg-opacity-25 ${statusClass}`}
+            className={`inline-block text-[10px] px-2 text-center mx-auto py-1 rounded-[999px] bg-opacity-25 ${statusClass}`}
           >
             {statusText}
           </span>
@@ -128,7 +128,7 @@ const COLUMNS = ({ currentPage, riderstatus, vehicleid,pagesizedata }) => [
     },
   },
   {
-    Header: "Vehicle Type",
+    Header: "Veh Type",
     accessor: "riderInfo.vehicleType",
     Cell: (row) => {
       return (

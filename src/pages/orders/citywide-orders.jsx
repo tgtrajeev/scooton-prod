@@ -29,7 +29,7 @@ const notificationtype =['All','INDIVIDUAL']
 
 const COLUMNS = (openIsNotificationModel,openIsDeleteOrder,ordersType,currentPage,filterby,search,pagesizedata) => [
   {
-    Header: "Sr. No.",
+    Header: "S. No.",
     accessor: (row, i) => i + 1,
   },            
   {
@@ -92,7 +92,7 @@ const COLUMNS = (openIsNotificationModel,openIsDeleteOrder,ordersType,currentPag
         return (
             <span className="block w-full">
             <span
-              className={` inline-block px-3 min-w-[90px] text-center mx-auto py-1 rounded-[999px] bg-opacity-25 ${
+              className={` inline-block text-[10px] px-2 text-center mx-auto py-1 rounded-[999px] bg-opacity-25 ${
                 row?.cell?.value === "COMPLETED"
                   ? "text-success-500 bg-success-500"
                   : ""
@@ -134,7 +134,7 @@ const COLUMNS = (openIsNotificationModel,openIsDeleteOrder,ordersType,currentPag
   ...(ordersType === "PLACED" 
     ? [
       {
-        Header: "Notification",
+        Header: "Alert",
         accessor: "",
         Cell: (row) => {
           return (
@@ -172,7 +172,7 @@ const COLUMNS = (openIsNotificationModel,openIsDeleteOrder,ordersType,currentPag
   //   accessor: "orderHistory.deliveryAddressDetails.addressLine1"
   // },
   {
-    Header: "Vehicle Type",
+    Header: "Veh Type",
     accessor: "vehicleId",
     Cell: (row) => {
       return (

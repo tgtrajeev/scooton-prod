@@ -17,7 +17,7 @@ import axiosInstance from "../../api";
 
 const COLUMNS = [
   {
-    Header: "Sr. No.",
+    Header: "S. No.",
     accessor: (row, i) => i + 1,
   },
   {
@@ -112,7 +112,7 @@ const COLUMNS = [
       return (
         <span className={`block w-full`}>
           <span
-            className={`inline-block px-3 min-w-[90px] text-center mx-auto py-1 rounded-[999px] bg-opacity-25 ${statusClass}`}
+            className={`inline-block text-[10px] px-2 text-center mx-auto py-1 rounded-[999px] bg-opacity-25 ${statusClass}`}
           >
             {statusText}
           </span>
@@ -121,7 +121,7 @@ const COLUMNS = [
     },
   },
   {
-    Header: "Vehicle Type",
+    Header: "Veh Type",
     accessor: "riderInfo.vehicleType",
     Cell: (row) => {
       return (
