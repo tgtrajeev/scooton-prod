@@ -26,7 +26,7 @@
 
 .auth-box {
   @apply max-w-[524px] md:px-[42px] md:py-[44px] p-7  mx-auto w-full;
-  h4 {
+  h3 {
     @apply text-2xl text-slate-900 dark:text-white mb-3;
   }
 }

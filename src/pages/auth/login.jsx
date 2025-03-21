@@ -48,7 +48,7 @@ const login = () => {
                   </Link>
                 </div>
                 <div className="text-center 2xl:mb-10 mb-4">
-                  <h4 className="font-medium">Sign in</h4>
+                  <h3 className="font-medium">Sign in</h3>
                   <div className="text-slate-500 text-base">
                     Sign in to your account to start using Scooton
                   </div>

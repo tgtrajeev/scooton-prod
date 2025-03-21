@@ -329,10 +329,10 @@ const Vendor = ({notificationCount}) => {
     }
   }, [])
 
-  useEffect(() => {
-    console.log("notificationCount",notificationCount)
-    fetchOrders(ordersType);
-  }, [notificationCount]);
+  //useEffect(() => {
+  //  console.log("notificationCount",notificationCount)
+  //  fetchOrders(ordersType);
+  //}, [notificationCount]);
 
   useEffect(() => {
     setCurrentPage(Number(paramCurrentPage) || 0); 
