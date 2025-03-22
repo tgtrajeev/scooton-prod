@@ -404,10 +404,10 @@ const AllOrders = ({notificationCount}) => {
       
   }, [filterby, search,currentPage,pagesizedata]);
 
-  useEffect(() => {
-    console.log("notificationCount",notificationCount)
-    FilterOrder();
-  }, [notificationCount]);
+  // useEffect(() => {
+  //   console.log("notificationCount",notificationCount)
+  //   FilterOrder();
+  // }, [notificationCount]);
 
   useEffect(() =>{
     if(rapf == true && search =='')
