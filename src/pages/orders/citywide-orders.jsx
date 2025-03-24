@@ -52,14 +52,14 @@ const COLUMNS = (openIsNotificationModel,openIsDeleteOrder,ordersType,currentPag
     Header: "Delivery Address",
     accessor: "orderHistory.deliveryAddressDetails.addressLine1",
   },
-  {
-    Header: "City",
-    accessor: "City",
-    Cell: () => {
-        const staticValue = "Delhi";
-        return staticValue;
-    },
-  },
+  // {
+  //   Header: "City",
+  //   accessor: "City",
+  //   Cell: () => {
+  //       const staticValue = "Delhi";
+  //       return staticValue;
+  //   },
+  // },
   {
     Header: "Amount",
     accessor: "orderHistory.totalAmount",

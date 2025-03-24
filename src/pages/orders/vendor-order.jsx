@@ -88,14 +88,14 @@ const COLUMNS = (openIsNotificationModel, openIsDeleteOrder, ordersType,currentP
     Header: "Mobile Number",
     accessor: "thirdPartyOrders.pickupAddressDetails.mobileNumber",
   },
-  {
-    Header: "City",
-    accessor: "City",
-    Cell: () => {
-      const staticValue = "Delhi";
-      return staticValue;
-    },
-  },
+  // {
+  //   Header: "City",
+  //   accessor: "City",
+  //   Cell: () => {
+  //     const staticValue = "Delhi";
+  //     return staticValue;
+  //   },
+  // },
   {
     Header: "Amount",
     accessor: "finalPrice",
@@ -533,7 +533,7 @@ const Vendor = ({notificationCount}) => {
       })
     .catch (
       (error) => {
-        toast.error("This order can't be cancel");
+        toast.error("Reason for cancellation is required to cancel the order.");
       }
     )
   }

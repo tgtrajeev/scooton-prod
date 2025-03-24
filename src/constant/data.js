@@ -34,24 +34,20 @@ export const menuItems = [
         childlink: "create-orders",
         childicon: "heroicons:presentation-chart-line",
       },
-      // {
-      //   childtitle: "Vendor",
-      //   icon: "heroicons-outline:clipboard-document-list",
-      //   childlink: "create-orders",
-      //   childicon: "heroicons:presentation-chart-line",
-      //   child: [
-      //     {
-      //       childtitle: "User11",
-      //       childlink: "all-riders",
-      //       childicon: "heroicons:presentation-chart-line",
-      //     },
-      //     {
-      //       childtitle: "UserSR",
-      //       childlink: "all-riders",
-      //       childicon: "heroicons:presentation-chart-line",
-      //     }
-      //   ],
-      // }
+      {
+        childtitle: "Vendor",
+        icon: "heroicons-outline:clipboard-document-list",
+        childlink: "create-orders",
+        childicon: "heroicons:presentation-chart-line",
+        child: [
+          {
+            childtitle: "ShipRocket",
+            childlink: "ShipRocket",
+            childicon: "heroicons:presentation-chart-line",
+          },
+         
+        ],
+      }
     ],
   },
   {

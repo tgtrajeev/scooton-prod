@@ -37,14 +37,14 @@ const COLUMNS = (openIsDeleteOrder,ordersType,currentPage,filterby,search,pagesi
     Header: "Mobile Number",
     accessor: "orderHistory.userInfo.mobileNumber",
   },
-  {
-    Header: "City",
-    accessor: "City",
-    Cell: () => {
-        const staticValue = "Delhi";
-        return staticValue;
-    },
-  },
+  // {
+  //   Header: "City",
+  //   accessor: "City",
+  //   Cell: () => {
+  //       const staticValue = "Delhi";
+  //       return staticValue;
+  //   },
+  // },
   {
     Header: "Order Date",
     accessor: "orderHistory.orderDate",

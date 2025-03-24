@@ -59,39 +59,20 @@ const Navmenu = ({ menus }) => {
   // }, [location]);
   useEffect(() => {
     
-    try{
-      axiosInstance.get(`${BASE_URL}/thirdParty/get-all-thirdParty-client`).then((resp) => {
-      console.log("sidebar", resp.data.jsonData);
-      setVendorUsername(resp.data.jsonData);
-      
-      setFilteredMenus((prevMenu) =>
-        prevMenu.map((item) =>
-          item.title === "Orders"
-            ? {
-                ...item,
+    setFilteredMenus((prevMenu) =>
+      prevMenu.map((item) =>
+        item.title === "Orders"
+          ? {
+              ...item,
+              child: [
+                ...(item.child || []),
                 
-                child: [
-                  ...(item.child || []),
-                  {
-                    childtitle: "Vendor Orders",
-                    icon: "heroicons-outline:clipboard-document-list",
-                    child: resp.data.jsonData.map((user) => ({
-                      childtitle: user.userName,
-                      childlink: user.userName,
-                      childicon: "heroicons:presentation-chart-line"
-                    }))
-                  }
-                ]
-              }
-            : item
-          )
-      );
-      
-      
-      });
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    }
+              ],
+            }
+          : item
+      )
+    );
+    
     const role = getRole();
     let submenuIndex = null;
     const filteredMenus = menus.filter((item) => {

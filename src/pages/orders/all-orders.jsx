@@ -277,7 +277,7 @@ const AllOrders = ({notificationCount}) => {
     const customRadio = decodeURIComponent(searchParams.get("customRadio") || "PLACED");
     const searchId = searchParams.get("searchId") || "NONE";
     const searchText = searchParams.get("searchText") || "";
-    const pageFromUrl = searchParams.get("page") || 0;
+    const pageFromUrl = searchParams.get("page");
     const pagesizedata1 = searchParams.get("pagesizedata") || 10;
     SetOrderType(customRadio);
     setFilterBy(searchId);
