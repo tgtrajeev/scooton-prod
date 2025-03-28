@@ -18,6 +18,7 @@ import Modal from "../../components/ui/Modal";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../../api";
 import { GoogleMap, LoadScript,useLoadScript, Marker } from '@react-google-maps/api';
+import getRole from "../../store/utility";
  
 const RejectionType = ["Information Rejected", "Document Rejected"];
 const DocumentStatus =["Approve","Reject", "VERIFICATION_PENDING"]
@@ -72,6 +73,7 @@ const RiderDetail = () => {
     const mapRef = useRef(null);
     const [activeTab, setActiveTab] = useState(0);
     const [selectedOrderIndex, setSelectedOrderIndex] = useState(null);
+    const role = getRole();
 
     // useEffect(() => {
     //     if (mapRef.current && window.google) {
@@ -1006,10 +1008,17 @@ const RiderDetail = () => {
                         </div>
                     </TabPanel>
                     <TabPanel>
+                       
                         <div className="wallets">
-                           <h6 className="mt-3">Wallet Details <span className="text-sm text-scooton-500">(Balance : {walletAmount})</span></h6>
-                           <button type="button" onClick={ () => rechargeWallet()} className="btn btn-dark p-2"><Icon icon="heroicons:wallet" className="text-[20px]"></Icon></button>
-                        </div>                        
+                            <h6 className="mt-3">Wallet Details <span className="text-sm text-scooton-500">(Balance : {walletAmount})</span></h6>
+                           
+                            { role == 'ROLE_SUPER_ADMIN' && (
+                                <button type="button" onClick={ () => rechargeWallet()} className="btn btn-dark p-2"><Icon icon="heroicons:wallet" className="text-[20px]"></Icon></button>
+                            )}
+                            
+                        </div>  
+                        
+                                             
                         
                         <div className="mx-auto shadow-base dark:shadow-none my-3 rounded-md overflow-x-auto">
                             <table className="min-w-full divide-y divide-slate-100 table-fixed dark:divide-slate-700">

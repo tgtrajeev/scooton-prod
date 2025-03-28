@@ -654,6 +654,14 @@ const OrderDetail = () => {
                                         </tr>
                                     </>
                                 )}
+                                {thirdPartyUsername && (
+                                    <>
+                                        <tr className="border-b border-slate-100 dark:border-slate-700">
+                                            <td className=" px-6 py-2">Cancel By</td>
+                                            <td className=" px-6 py-2 text-end">{cancelDetails?.cancelBy}</td>
+                                        </tr>
+                                    </>
+                                )}
                             </tbody>
                         </table>
                     </div>
