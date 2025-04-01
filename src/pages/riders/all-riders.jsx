@@ -181,7 +181,7 @@ const AllRiders = () => {
   const [filterby, setFilterBy] = React.useState("NONE");
   const [pagesizedata, setpagesizedata] = useState(10);
   const [serviceArea, setServiceArea] = useState([]);
-  const [serviceAreaStatus, setServiceAreaStatus] = useState('ALL');
+  const [serviceAreaStatus, setServiceAreaStatus] = useState('0');
   const [totalCount, setTotalCount] = useState(0);
   const [paramslength, setParamLength] = useState(0);
   const maxPagesToShow = 5;
@@ -219,7 +219,7 @@ const AllRiders = () => {
     setLoading(true);
     const token = localStorage.getItem("jwtToken");
     if (token) {
-      if (rapf == true && serviceAreaStatus == "ALL" && riderstatus == "ALL" && documentstatus === "ALL" && vehicleid === "0" && filterby == "NONE") {
+      if (rapf == true && serviceAreaStatus == "0" && riderstatus == "ALL" && documentstatus === "ALL" && vehicleid === "0" && filterby == "NONE") {
         axiosInstance
           .get(`${BASE_URL}/register/v2/rider/get-all-service-area-by-registration-status/ALL/0/ALL/0?page=${currentPage}&size=${pagesizedata}`, {
             headers: {
@@ -269,7 +269,7 @@ const AllRiders = () => {
   const filterRiders = () => {
     setLoading(true);
     if (rapf == false) {
-      if (riderstatus == "ALL" && documentstatus === "ALL" && vehicleid === "0" && currentPage === 0 && serviceAreaStatus === "ALL") return;
+      if (riderstatus == "ALL" && documentstatus === "ALL" && vehicleid === "0" && currentPage === 0 && serviceAreaStatus === "0") return;
     }
 
 
@@ -304,7 +304,7 @@ const AllRiders = () => {
 
 
   useEffect(() => {
-    if(riderstatus !== "ALL" || documentstatus !== "ALL" || vehicleid !== "0" || serviceAreaStatus != 'ALL'){
+    if(riderstatus !== "ALL" || documentstatus !== "ALL" || vehicleid !== "0" || serviceAreaStatus != '0'){
       filterRiders();
     }
   }, [serviceAreaStatus,riderstatus, documentstatus, vehicleid, currentPage, pagesizedata]);
@@ -325,11 +325,11 @@ const AllRiders = () => {
   const FilterOrder = () => {
     setLoading(true);
     if (filterby == "NONE") {
-      if (riderstatus == "ALL" && documentstatus === "ALL" && vehicleid === "0" && serviceAreaStatus === "ALL") {
+      if (riderstatus == "ALL" && documentstatus === "ALL" && vehicleid === "0" && serviceAreaStatus === "0") {
         setVehicleId('0');
         setDocumentStatus('ALL');
         setRiderStatus('ALL');
-        setServiceAreaStatus("ALL");
+        setServiceAreaStatus("0");
       }
 
     }
@@ -338,7 +338,7 @@ const AllRiders = () => {
       setVehicleId('0');
       setDocumentStatus('ALL');
       setRiderStatus('ALL');
-      setServiceAreaStatus("ALL");
+      setServiceAreaStatus("0");
     }
 
     const token = localStorage.getItem("jwtToken");
@@ -507,7 +507,7 @@ const AllRiders = () => {
   };
   // Clear the search input field
   const resetFilters = () => {
-    setServiceAreaStatus("ALL");
+    setServiceAreaStatus("0");
     setRiderStatus("ALL");
     setDocumentStatus("ALL");
     setVehicleId("0");
@@ -585,7 +585,7 @@ const AllRiders = () => {
                         displayEmpty
                         inputProps={{ 'aria-label': 'Without label' }}
                       >
-                        <MenuItem value="ALL">ALL</MenuItem>
+                        <MenuItem value="0">ALL</MenuItem>
                         {serviceArea.map((city, index) => (
                           <MenuItem value={city.id} key={index} id={city.id}>{city.name}</MenuItem>
                         ))}

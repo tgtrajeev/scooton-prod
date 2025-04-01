@@ -352,8 +352,8 @@ const Vendor = ({notificationCount}) => {
       value : 'DELIVERY_PARTNER_DENIED_DUTY'
     },
     {
-      name : 'DELIVERY PARTNER MISBEHVAIOR',
-      value : 'DELIVERY_PARTNER_MISBEHVAIOR'
+      name : 'DELIVERY PARTNER MISBEHAVIOR',
+      value : 'DELIVERY_PARTNER_MISBEHAVIOR'
     },
     {
       name : 'CHANGE DELIVERY PARTNER',
