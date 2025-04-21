@@ -518,10 +518,13 @@ const Vendor = ({notificationCount}) => {
   const deletePlaceOrder = () => {
     const token = localStorage.getItem('jwtToken');
     const isOtherReason = selectedCancelReason === "OTHERS";
-  
     const cancelOrderReason = isOtherReason ? "OTHERS" : selectedCancelReason;
-    const cancelReasons = isOtherReason ? cancelReason : selectedCancelReason; // Send the entered reason if OTHERS, else selected reason
-
+    const cancelReasons = isOtherReason ? cancelReason : selectedCancelReason; 
+    if (!cancelReasons || cancelReasons.trim() === '') {
+      toast.error("Reason for cancellation is required to cancel the order.");
+      setDeleteOrderModel(true); 
+      return;
+    }
     const payload = {
       userType: "admin",
       cancelReasons: cancelReasons || "", 
@@ -530,10 +533,12 @@ const Vendor = ({notificationCount}) => {
       ).then((response) => {
         toast.success("Order cancel successfully");
         setOrderData((prevList) => prevList.filter((item) => item.order_Id !== orderdeleteid));
+        setDeleteOrderModel(false);
       })
     .catch (
       (error) => {
         toast.error("Reason for cancellation is required to cancel the order.");
+        setDeleteOrderModel(true);
       }
     )
   }
@@ -939,7 +944,7 @@ const Vendor = ({notificationCount}) => {
               <Button className="btn btn-dark" type="button" onClick={() => setDeleteOrderModel(false)}>
                 No
               </Button>
-              <Button className="btn btn-outline-light" type="button" onClick={() => { deletePlaceOrder(); setDeleteOrderModel(false) }}>
+              <Button className="btn btn-outline-light" type="button" onClick={() => { deletePlaceOrder() }}>
                 Yes
               </Button>
             </div>

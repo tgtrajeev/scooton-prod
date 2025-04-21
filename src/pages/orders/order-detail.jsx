@@ -554,14 +554,14 @@ const OrderDetail = () => {
                                         {thirdPartyUsername ? "THIRD PARTY" : orderDetails.orderType}
                                     </td>
                                 </tr>
-                                {cancelDetails?.orderCancelled === true && (
+                                {/* {cancelDetails?.orderCancelled === true && (
                                     <tr className="border-b border-slate-100 dark:border-slate-700">
                                         <td className=" px-6 py-2"> Order Cancel Reason </td>
                                         <td className=" px-6 py-2 text-end">
                                             {cancelDetails?.cancelReasonType?.trim() || cancelDetails?.cancelReasonSelected}
                                         </td>
                                     </tr>
-                                )}
+                                )} */}
                                 <tr className="border-b border-slate-100 dark:border-slate-700">
                                     <td className=" px-6 py-2"> Pickup Address </td>
                                     <td className=" px-6 py-2 text-end">{customerDetails?.pickupAddress}</td>
@@ -646,25 +646,50 @@ const OrderDetail = () => {
                                     </>
                                 )}
 
-                                {thirdPartyUsername && (
+                                {/* {thirdPartyUsername && (
                                     <>
                                         <tr className="border-b border-slate-100 dark:border-slate-700">
                                             <td className=" px-6 py-2">Client Order ID</td>
                                             <td className=" px-6 py-2 text-end">{orderDetails?.clientOrderId}</td>
                                         </tr>
                                     </>
-                                )}
-                                {thirdPartyUsername && (
+                                )} */}
+                                {/* {thirdPartyUsername && (
                                     <>
                                         <tr className="border-b border-slate-100 dark:border-slate-700">
                                             <td className=" px-6 py-2">Cancel By</td>
                                             <td className=" px-6 py-2 text-end">{cancelDetails?.cancelBy}</td>
                                         </tr>
                                     </>
-                                )}
+                                )} */}
                             </tbody>
                         </table>
                     </div>
+                    {thirdPartyUsername && (
+                        <div className="mx-auto shadow-base dark:shadow-none my-8 rounded-md overflow-x-auto">
+                            <h6 className="text-scooton-500 p-3 border-bottom">Vendor Details</h6>
+                            <table className="w-full border-collapse table-fixed dark:border-slate-700 dark:border">
+                                <tbody>
+                                    <tr className="border-b border-slate-100 dark:border-slate-700">
+                                        <td className=" px-6 py-2">Client Order ID</td>
+                                        <td className=" px-6 py-2 text-end">{orderDetails?.clientOrderId}</td>
+                                    </tr>
+                                    <tr className="border-b border-slate-100 dark:border-slate-700">
+                                        <td className=" px-6 py-2">Cancel By</td>
+                                        <td className=" px-6 py-2 text-end">{cancelDetails?.cancelBy}</td>
+                                    </tr>
+                                    {cancelDetails?.orderCancelled === true && (
+                                        <tr className="border-b border-slate-100 dark:border-slate-700">
+                                            <td className=" px-6 py-2">Cancel Reason </td>
+                                            <td className=" px-6 py-2 text-end">
+                                                {cancelDetails?.cancelReasonType?.trim() || cancelDetails?.cancelReasonSelected}
+                                            </td>
+                                        </tr>
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
                 </div>
                 <div className="col-lg-6">
                     <div className="mx-auto shadow-base dark:shadow-none my-8 rounded-md overflow-x-auto">
@@ -803,75 +828,75 @@ const OrderDetail = () => {
                             <div>
                                 {/* <h6 className="text-center mb-2">Near By Rider</h6> */}
                                 <LoadScript googleMapsApiKey="AIzaSyDTetPmohnWdWT0lsYV9iT-58Z5Gm4jmgA" preventGoogleFonts={true}>
-                                <div className="overflow-hidden">
-                                    <GoogleMap
-                                        mapContainerStyle={mapContainerStyle}
-                                        center={pickupLocation}
-                                        zoom={20}
-                                        onLoad={(map) => (mapRef.current = map)}
-                                    >
-                                        {riderNearLocation?.map((marker, index) => (
+                                    <div className="overflow-hidden">
+                                        <GoogleMap
+                                            mapContainerStyle={mapContainerStyle}
+                                            center={pickupLocation}
+                                            zoom={20}
+                                            onLoad={(map) => (mapRef.current = map)}
+                                        >
+                                            {riderNearLocation?.map((marker, index) => (
+                                                <Marker
+                                                    key={index}
+                                                    position={{ lat: marker.latitude, lng: marker.longitude }}
+                                                    icon={marker.riderActiveForOrders ? 'https://securestaging.net/scooton/rider-icon-green.png' : 'https://securestaging.net/scooton/rider-icon-red.png'}
+                                                    onClick={() => setSelectedMarker(marker)}
+                                                />
+                                            ))}
+
+                                            {selectedMarker && selectedMarker.latitude && selectedMarker.longitude && (
+                                                <InfoWindow
+                                                    position={{ lat: selectedMarker.latitude, lng: selectedMarker.longitude }}
+                                                    onCloseClick={() => setSelectedMarker(null)}
+                                                >
+                                                    <div>
+                                                        <h6 className="mb-1 text-base mr-3">{selectedMarker.firstName}</h6>
+                                                        <p className="font-normal">{selectedMarker.mobileNumber}</p>
+                                                    </div>
+                                                </InfoWindow>
+                                            )}
                                             <Marker
-                                                key={index}
-                                                position={{ lat: marker.latitude, lng: marker.longitude }} 
-                                                icon={marker.riderActiveForOrders ? 'https://securestaging.net/scooton/rider-icon-green.png' : 'https://securestaging.net/scooton/rider-icon-red.png'}
-                                                onClick={() => setSelectedMarker(marker)}
+                                                position={pickupLocation}
+                                                icon={{
+                                                    url: "https://securestaging.net/scooton/pickuppoint.png",
+                                                }}
+                                                onClick={() => setSelectedPickupMarker(pickupLocation)}
                                             />
-                                        ))}
 
-                                        {selectedMarker && selectedMarker.latitude && selectedMarker.longitude && (
-                                            <InfoWindow
-                                                position={{ lat: selectedMarker.latitude, lng: selectedMarker.longitude }} 
-                                                onCloseClick={() => setSelectedMarker(null)}
-                                            >
-                                                <div>
-                                                    <h6 className="mb-1 text-base mr-3">{selectedMarker.firstName}</h6>
-                                                    <p className="font-normal">{selectedMarker.mobileNumber}</p>
-                                                </div>
-                                            </InfoWindow>
-                                        )}
-                                        <Marker 
-                                            position={pickupLocation}
-                                            icon={{
-                                                url: "https://securestaging.net/scooton/pickuppoint.png",
-                                            }}
-                                            onClick={() => setSelectedPickupMarker(pickupLocation)}
-                                        />
+                                            {selectedPickupMarker && (
+                                                <InfoWindow
+                                                    position={selectedPickupMarker}
 
-                                        {selectedPickupMarker && (
-                                            <InfoWindow 
-                                            position={selectedPickupMarker} 
-                                            
-                                            onCloseClick={() => setSelectedPickupMarker(null)}
-                                            >
-                                            <div>
-                                                <h6 className="mb-1 text-base mr-3">{selectedPickupMarker.name}</h6>
-                                                <p className="font-normal">{selectedPickupMarker.address}</p>
-                                            </div>
-                                            </InfoWindow>
-                                        )}
-                                        <Marker 
-                                            position={dropLocation}
-                                            icon={{
-                                                url: "https://securestaging.net/scooton/Droppoint.png",
-                                            }}
-                                            onClick={() => setSelectedDropMarker(dropLocation)}
-                                        />
+                                                    onCloseClick={() => setSelectedPickupMarker(null)}
+                                                >
+                                                    <div>
+                                                        <h6 className="mb-1 text-base mr-3">{selectedPickupMarker.name}</h6>
+                                                        <p className="font-normal">{selectedPickupMarker.address}</p>
+                                                    </div>
+                                                </InfoWindow>
+                                            )}
+                                            <Marker
+                                                position={dropLocation}
+                                                icon={{
+                                                    url: "https://securestaging.net/scooton/Droppoint.png",
+                                                }}
+                                                onClick={() => setSelectedDropMarker(dropLocation)}
+                                            />
 
-                                        {selectedDroppMarker && (
-                                            <InfoWindow 
-                                            position={selectedDroppMarker} 
-                                            
-                                            onCloseClick={() => setSelectedDropMarker(null)}
-                                            >
-                                            <div>
-                                                <h6 className="mb-1 text-base mr-3">{selectedDroppMarker.name}</h6>
-                                                <p className="font-normal">{selectedDroppMarker.address}</p> 
-                                            </div>
-                                            </InfoWindow>
-                                        )}
-                                    </GoogleMap>
-                                </div>
+                                            {selectedDroppMarker && (
+                                                <InfoWindow
+                                                    position={selectedDroppMarker}
+
+                                                    onCloseClick={() => setSelectedDropMarker(null)}
+                                                >
+                                                    <div>
+                                                        <h6 className="mb-1 text-base mr-3">{selectedDroppMarker.name}</h6>
+                                                        <p className="font-normal">{selectedDroppMarker.address}</p>
+                                                    </div>
+                                                </InfoWindow>
+                                            )}
+                                        </GoogleMap>
+                                    </div>
                                 </LoadScript>
                             </div>
                             <div className="mt-2 text-center">
