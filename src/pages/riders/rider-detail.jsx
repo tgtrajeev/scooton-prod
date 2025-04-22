@@ -1192,13 +1192,13 @@ const RiderDetail = () => {
                                                                     {(() => {
                                                                         const status = order.paymentStatus.charAt(0).toUpperCase() + order.paymentStatus.slice(1);
 
-                                                                        if (status === 'Success') {
+                                                                        if (status === 'SUCCESS' || status === 'Success') {
                                                                             return (
                                                                                 <p className="inline-block text-[0.875rem] px-2 text-center mx-auto py-1 rounded-[999px] bg-opacity-25 text-success-500 bg-success-500">
                                                                                     {status}
                                                                                 </p>
                                                                             );
-                                                                        } else if (status === 'Pending') {
+                                                                        } else if (status === 'PENDING' || status === 'Pending') {
                                                                             return (
                                                                                 <p className="inline-block text-[0.875rem] px-2 text-center mx-auto py-1 rounded-[999px] bg-opacity-25 text-yellow-500 bg-yellow-200">
                                                                                     {status}
