@@ -372,9 +372,14 @@ const RiderDetail = () => {
         setRechargeModel(true);
     }
 
-    const handleViewClick = async (id) => {
-        navigate(`/order-detail/${id}`);
-    };
+    const handleViewClick = async (id, type) => {
+        if (type === 'THIRDPARTY') {
+          navigate(`/order-detail/ShipRocket/${id}`);
+        } else {
+            navigate(`/order-detail/${id}`);
+        }
+      };
+      
 
     const rechargeRiderWallet = async (amt, id) => {
         const token = localStorage.getItem("jwtToken");
@@ -873,7 +878,7 @@ const RiderDetail = () => {
                                         <tbody>
                                             {documentDetail?.length === 0 ? (
                                                 <tr>
-                                                    <td colSpan="5" className="text-center p-4">No orders found.</td>
+                                                    <td colSpan="5" className="text-center p-4">No Document found.</td>
                                                 </tr>
                                             ) : (
                                                 documentDetail?.map((order, index) => (
@@ -1012,7 +1017,7 @@ const RiderDetail = () => {
                                                             </tr>
                                                         ) : (
                                                             riderOrderDetail?.map((order, index) => (
-                                                                <tr key={index} onClick={() => handleViewClick(order.order_Id)}>
+                                                                <tr key={index} onClick={() => handleViewClick(order.order_Id,order.orderType)}>
                                                                     <td className="table-td">{(orderHistoryCurrentPage * orderHistorypagesize) + index + 1}</td>
                                                                     <td className="table-td">{order.order_Id}</td>
                                                                     <td className="table-td">{order.orderStatus}</td>
@@ -1208,6 +1213,12 @@ const RiderDetail = () => {
                                                                             return (
                                                                                 <p className="inline-block text-[0.875rem] px-2 text-center mx-auto py-1 rounded-[999px] bg-opacity-25 text-red-500 bg-red-200">
                                                                                     {status}
+                                                                                </p>
+                                                                            );
+                                                                        }else if (status === 'NO_PAY' || status === 'NO_PAY') {
+                                                                            return (
+                                                                                <p className="inline-block text-[0.875rem] px-2 text-center mx-auto py-1 rounded-[999px] bg-opacity-25 text-red-500 bg-red-200">
+                                                                                    CANCELLED
                                                                                 </p>
                                                                             );
                                                                         } else {

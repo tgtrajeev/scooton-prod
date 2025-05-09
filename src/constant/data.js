@@ -132,6 +132,11 @@ export const menuItems = [
         childtitle: "Settings",
         childlink: "setting",
         childicon: "heroicons:presentation-chart-line",
+      },
+      {
+        childtitle: "Configuration Keys",
+        childlink: "configuration-keys",
+        childicon: "heroicons:presentation-chart-line",
       }
     ]
   },

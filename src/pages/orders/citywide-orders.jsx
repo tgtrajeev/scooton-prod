@@ -1,13 +1,13 @@
 import React, { useState, useMemo, useEffect } from "react";
 import Icon from "@/components/ui/Icon";
 import axios from "axios";
-import {useTable, useRowSelect, useSortBy, usePagination,} from "react-table";
+import { useTable, useRowSelect, useSortBy, usePagination, } from "react-table";
 import Card from "../../components/ui/Card";
 import Textinput from "@/components/ui/Textinput";
 import { BASE_URL } from "../../api";
 import Loading from "../../components/Loading";
 import Tooltip from "@/components/ui/Tooltip";
-import { useNavigate, useParams,useSearchParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import RadioGroup from '@mui/material/RadioGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import TextField from "@mui/material/TextField";
@@ -25,13 +25,13 @@ import tataace from '../../assets/images/icon/Tata_Ace.png'
 import pickup_8ft from "../../assets/images/icon/Pickup_8ft.png";
 import axiosInstance from "../../api";
 
-const notificationtype =['All','INDIVIDUAL']
+const notificationtype = ['All', 'INDIVIDUAL']
 
-const COLUMNS = (openIsNotificationModel,openIsDeleteOrder,ordersType,currentPage,filterby,search,pagesizedata) => [
+const COLUMNS = (openIsNotificationModel, openIsDeleteOrder, ordersType, currentPage, filterby, search, pagesizedata) => [
   {
     Header: "S. No.",
     accessor: (row, i) => i + 1,
-  },            
+  },
   {
     Header: "Order ID",
     accessor: "order_Id",
@@ -64,7 +64,7 @@ const COLUMNS = (openIsNotificationModel,openIsDeleteOrder,ordersType,currentPag
     Header: "Amount",
     accessor: "orderHistory.totalAmount",
   },
-  
+
   {
     Header: "Order Date",
     accessor: "orderHistory.orderDate",
@@ -81,57 +81,53 @@ const COLUMNS = (openIsNotificationModel,openIsDeleteOrder,ordersType,currentPag
         second: "2-digit",
         hour12: true
       });
-      return <div className="rider-datetime"><span className="riderDate">{`${formattedDate}`}</span><br/><span className="riderTime">{`${formattedTime}`}</span></div>;
+      return <div className="rider-datetime"><span className="riderDate">{`${formattedDate}`}</span><br /><span className="riderTime">{`${formattedTime}`}</span></div>;
     },
-  }, 
-  ...(ordersType === "ALL ORDERS" ? [ 
-  {
-    Header: "Status",
-    accessor: "orderHistory.orderStatus",
-    Cell: (row) => {       
+  },
+  ...(ordersType === "ALL ORDERS" ? [
+    {
+      Header: "Status",
+      accessor: "orderHistory.orderStatus",
+      Cell: (row) => {
         return (
-            <span className="block w-full">
+          <span className="block w-full">
             <span
-              className={` inline-block text-[10px] px-2 text-center mx-auto py-1 rounded-[999px] bg-opacity-25 ${
-                row?.cell?.value === "COMPLETED"
+              className={` inline-block text-[10px] px-2 text-center mx-auto py-1 rounded-[999px] bg-opacity-25 ${row?.cell?.value === "COMPLETED"
                   ? "text-success-500 bg-success-500"
                   : ""
-              } 
-            ${
-              row?.cell?.value === "PLACED"
-                ? "text-warning bg-warning-700"
-                : ""
-            }
-            ${
-              row?.cell?.value === "CANCEL"
-                ? "text-danger-500 bg-danger-500"
-                : ""
-            }
-            ${
-                row?.cell?.value === "DISPATCHED"
+                } 
+            ${row?.cell?.value === "PLACED"
+                  ? "text-warning bg-warning-700"
+                  : ""
+                }
+            ${row?.cell?.value === "CANCEL"
+                  ? "text-danger-500 bg-danger-500"
+                  : ""
+                }
+            ${row?.cell?.value === "DISPATCHED"
                   ? "text-warning-500 bg-warning-400"
                   : ""
-              }
+                }
               ${row?.cell?.value === "ACCEPTED"
-                ? "text-info-500 bg-info-400"
-                : ""
-              }
+                  ? "text-info-500 bg-info-400"
+                  : ""
+                }
             
              `}
             >
               {row?.cell?.value === 'CANCEL' ? 'CANCELLED' :
-              row?.cell?.value === 'PLACED' ? 'PLACED' :
-              row?.cell?.value === 'COMPLETED' ? 'DELIVERED' :
-              row?.cell?.value === 'ACCEPTED' ? 'ACCEPTED' :
-               'PICKED' 
-              } 
+                row?.cell?.value === 'PLACED' ? 'PLACED' :
+                  row?.cell?.value === 'COMPLETED' ? 'DELIVERED' :
+                    row?.cell?.value === 'ACCEPTED' ? 'ACCEPTED' :
+                      'PICKED'
+              }
             </span>
           </span>
         );
+      },
     },
-  },
-]: [] ),
-  ...(ordersType === "PLACED" 
+  ] : []),
+  ...(ordersType === "PLACED"
     ? [
       {
         Header: "Alert",
@@ -147,7 +143,7 @@ const COLUMNS = (openIsNotificationModel,openIsDeleteOrder,ordersType,currentPag
     ]
     : []),
 
-  ...(ordersType === "PLACED"  || ordersType === "ACCEPTED"
+  ...(ordersType === "PLACED" || ordersType === "ACCEPTED"
     ? [
       {
         Header: "Cancel",
@@ -158,7 +154,7 @@ const COLUMNS = (openIsNotificationModel,openIsDeleteOrder,ordersType,currentPag
               <Icon icon="heroicons:x-mark" className="text-[24px] bg-opacity-25  rounded text-danger-500 bg-danger-500"></Icon>
             </div>
           )
-    
+
         }
       },
     ]
@@ -225,7 +221,7 @@ const COLUMNS = (openIsNotificationModel,openIsDeleteOrder,ordersType,currentPag
             <button className="action-btn bg-scooton" type="button" onClick={handleViewClick}>
               <Icon icon="heroicons:eye" />
             </button>
-          </Tooltip>          
+          </Tooltip>
         </div>
       );
     },
@@ -243,12 +239,12 @@ const CityWideOrders = () => {
   const [deleteordermodel, setDeleteOrderModel] = useState(false);
   const [orderdeleteid, setOrderDeleteId] = useState();
   const [notification, setNotification] = useState("ALL");
-  const [mobile, setMobile]= useState();
-  const [notificationid,setNotifictionId]= useState();
+  const [mobile, setMobile] = useState();
+  const [notificationid, setNotifictionId] = useState();
   const [notificationModel, setNotificationModel] = useState(false);
   const [serviceArea, setServiceArea] = useState([]);
   const [serviceAreaStatus, setServiceAreaStatus] = useState('All');
-  const [pagesizedata, setpagesizedata]=useState(10);
+  const [pagesizedata, setpagesizedata] = useState(10);
   const [totalCount, setTotalCount] = useState(0);
   const maxPagesToShow = 5;
   const [messages, setMessages] = useState([]);
@@ -272,29 +268,29 @@ const CityWideOrders = () => {
     setFilterBy(searchId);
     setSearch(searchText);
     setParamCurrentPage(pageFromUrl);
-    setpagesizedata(Number(pagesizedata1) || 10); 
+    setpagesizedata(Number(pagesizedata1) || 10);
     setRapf(true);
   }, [searchParams]);
-  
-    
+
+
   useEffect(() => {
     if (!searchParams) {
       setRapf(true);
     }
   }, [])
-  
+
   useEffect(() => {
-    setCurrentPage(Number(paramCurrentPage) || 0); 
+    setCurrentPage(Number(paramCurrentPage) || 0);
   }, [paramCurrentPage]);
 
-  
+
   useEffect(() => {
-    if(rapf == true){
-      if(filterby == 'NONE' ){
+    if (rapf == true) {
+      if (filterby == 'NONE') {
         fetchOrders(ordersType);
       }
     }
-  }, [currentPage,pagesizedata,rapf,search]);
+  }, [currentPage, pagesizedata, rapf, search]);
 
 
   const openIsNotificationModel = async (id) => {
@@ -311,28 +307,36 @@ const CityWideOrders = () => {
 
   const sendNotification = () => {
     const token = localStorage.getItem('jwtToken');
+    if (notification === 'INDIVIDUAL' && (!mobile || mobile.trim() === '')) {
+      setNotificationModel(true);
+      toast.error("Mobile Number Required");
+
+      return
+    }
     try {
       if (mobile) {
-        axiosInstance.get(`${BASE_URL}/order/v2/send-order-notification-particular-rider/${notificationid}/${mobile}`,{
+        axiosInstance.get(`${BASE_URL}/order/v2/send-order-notification-particular-rider/${notificationid}/${mobile}`, {
           headers: {
             Authorization: `Bearer ${token}`,
-        },
+          },
         })
-        .then((response) => {
-          setNotification(false);
-          toast.success("Notification Sended Successfully")
-         
-        })
+          .then((response) => {
+            setNotification(false);
+            toast.success("Notification Sended Successfully")
+            setNotificationModel(false);
+
+          })
       } else {
-        axiosInstance.get(`${BASE_URL}/order/v2/send-order-notification/${notificationid}`,{
+        axiosInstance.get(`${BASE_URL}/order/v2/send-order-notification/${notificationid}`, {
           headers: {
             Authorization: `Bearer ${token}`,
-        },
+          },
         })
-        .then((response) => {
-          toast.success("Notification Sended Successfully")
-          setNotification(false);
-        })
+          .then((response) => {
+            toast.success("Notification Sended Successfully");
+            setNotificationModel(false);
+            setNotification(false);
+          })
       }
 
     } catch (error) {
@@ -360,24 +364,24 @@ const CityWideOrders = () => {
     setOrderDeleteId(id)
   }
 
-  useEffect(() =>{
-    if(rapf == true && search =='')
+  useEffect(() => {
+    if (rapf == true && search == '')
       fetchOrders(ordersType)
-  },[search])
+  }, [search])
 
   const fetchOrders = (orderType) => {
     let searchtype;
-    if(search == ''){
+    if (search == '') {
       searchtype = 'NONE'
-    }else{
+    } else {
       searchtype = filterby
     }
     SetOrderType(orderType)
-    const dataToSend ={
+    const dataToSend = {
       "orderType": orderType, "searchType": searchtype
     }
     if (filterby && search) {
-      dataToSend.number = search; 
+      dataToSend.number = search;
     }
     setLoading(true);
     axiosInstance
@@ -388,7 +392,8 @@ const CityWideOrders = () => {
       )
       .then((response) => {
         setOrderData(response.data);
-        setTotalCount(Number(response.headers["x-total-count"])); 
+        console.log("response 2", response)
+        setTotalCount(Number(response.headers["x-total-count"]));
         setPageCount(Number(response.headers["x-total-pages"]));
       })
       .catch((error) => {
@@ -402,10 +407,10 @@ const CityWideOrders = () => {
 
 
   useEffect(() => {
-    if(filterby && search){
+    if (filterby && search) {
       FilterOrder();
-    }      
-  }, [filterby, search,currentPage,pagesizedata]);
+    }
+  }, [filterby, search, currentPage, pagesizedata]);
 
 
   const FilterOrder = () => {
@@ -418,8 +423,9 @@ const CityWideOrders = () => {
       )
       .then((response) => {
         setLoading(true);
+        console.log("response 1", response)
         setOrderData(response.data);
-        setTotalCount(Number(response.headers["x-total-count"])); 
+        setTotalCount(Number(response.headers["x-total-count"]));
         setPageCount(Number(response.headers["x-total-pages"]));
       })
       .catch((error) => {
@@ -432,30 +438,30 @@ const CityWideOrders = () => {
 
   const deletePlaceOrder = () => {
     const token = localStorage.getItem('jwtToken');
-    axiosInstance.post(`${BASE_URL}/order/v2/cancel-order/${orderdeleteid}`,{
-        type: "CITYWIDE"
-      },
+    axiosInstance.post(`${BASE_URL}/order/v2/cancel-order/${orderdeleteid}`, {
+      type: "CITYWIDE"
+    },
       {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       }
-      ).then((response) => {
-        toast.success("Order cancel successfully");
-        setOrderData((prevList) => prevList.filter((item) => item.order_Id !== orderdeleteid));
-      })
-    .catch (
-      (error) => {
-        toast.error("Failed");
-      }
-    )
+    ).then((response) => {
+      toast.success("Order cancelled successfully");
+      setOrderData((prevList) => prevList.filter((item) => item.order_Id !== orderdeleteid));
+    })
+      .catch(
+        (error) => {
+          toast.error("Failed");
+        }
+      )
   }
 
   const reorderPlaceOrder = () => {
-    const dataToSend ={
-      "orderType" : 'CITYWIDE'
+    const dataToSend = {
+      "orderType": 'CITYWIDE'
     }
-    axiosInstance.post(`${BASE_URL}/order/accepted-order-reorder/${orderdeleteid}`,dataToSend).then((response)=>{
+    axiosInstance.post(`${BASE_URL}/order/accepted-order-reorder/${orderdeleteid}`, dataToSend).then((response) => {
       toast.success(response)
       setOrderData((prevList) => prevList.filter((item) => item.order_Id !== orderdeleteid));
     }).catch((error) => {
@@ -464,20 +470,20 @@ const CityWideOrders = () => {
   }
 
   const timeDiffClass = (acceptedDate, orderDate, orderStatus) => {
-   
-    if(orderStatus == 'PLACED' || orderStatus == 'ACCEPTED'){
-      
+
+    if (orderStatus == 'PLACED' || orderStatus == 'ACCEPTED') {
+
       const currentTime = new Date().getTime();
-      
+
       let baseDateTime = acceptedDate ? new Date(acceptedDate).getTime() : new Date(orderDate).getTime();
-      
+
       if (isNaN(baseDateTime)) {
         console.warn("Invalid date provided. Falling back to current time.");
-        return "recentActivity"; 
+        return "recentActivity";
       }
-    
+
       const differenceInMin = (currentTime - baseDateTime) / (1000 * 60);
-    
+
       if (differenceInMin >= 20) {
         return "tenMinAgo";
       } else if (differenceInMin >= 10) {
@@ -485,11 +491,11 @@ const CityWideOrders = () => {
       } else {
         return "recentActivity";
       }
-  
+
     }
   };
 
-  const columns = useMemo(() => COLUMNS(openIsNotificationModel,openIsDeleteOrder,ordersType,currentPage,filterby,search,pagesizedata), [ordersType,currentPage,filterby,search,pagesizedata]);
+  const columns = useMemo(() => COLUMNS(openIsNotificationModel, openIsDeleteOrder, ordersType, currentPage, filterby, search, pagesizedata), [ordersType, currentPage, filterby, search, pagesizedata]);
   const tableInstance = useTable(
     {
       columns,
@@ -528,9 +534,9 @@ const CityWideOrders = () => {
   }, [pageIndex]);
 
   const handlePageSizeChange = (newSize) => {
-    setpagesizedata(newSize); 
-    setCurrentPage(0); 
-    
+    setpagesizedata(newSize);
+    setCurrentPage(0);
+
   };
   // get Service area 
   useEffect(() => {
@@ -554,14 +560,14 @@ const CityWideOrders = () => {
           `${BASE_URL}/order-history/search-city-wide-orders/${serviceAreaStatus}?page=${currentPage}&size=100`,
           {
             orderType: "PLACED",
-            searchType: "NONE", 
-            number: 0,           
+            searchType: "NONE",
+            number: 0,
           },
           { headers: { Authorization: `Bearer ${token}` } },
         )
         .then((response) => {
           setOrderData(response.data);
-          setTotalCount(Number(response.headers["x-total-count"])); 
+          setTotalCount(Number(response.headers["x-total-count"]));
           setPageCount(Number(response.headers["x-total-pages"]));
         })
         .catch((error) => {
@@ -573,7 +579,7 @@ const CityWideOrders = () => {
       console.error("Error fetching user data:", error);
     }
   };
-  
+
   // useEffect(() => {
   //   filterOrders();
   // }, [serviceAreaStatus, currentPage]);
@@ -585,13 +591,13 @@ const CityWideOrders = () => {
   // show hide
   const [isVisible, setIsVisible] = useState(false);
   const handleShow = () => {
-    setIsVisible(!isVisible); 
+    setIsVisible(!isVisible);
   };
-  
+
   return (
     <>
-      <ToastContainer/>
-      <Card>      
+      <ToastContainer />
+      <Card>
         <div className="order-header">
           <div className="mb-6">
             <div className="md:flex justify-between items-center mb-2">
@@ -603,8 +609,8 @@ const CityWideOrders = () => {
                   </Button>
                 </div>
               </div> */}
-                <div className="">
-                    {/* <FormControl >
+              <div className="">
+                {/* <FormControl >
                         <div className="filterbyRider"> 
                           <Select
                             id="demo-simple-select"
@@ -680,7 +686,7 @@ const CityWideOrders = () => {
              */}
           </div>
           <div className="filter-orderlist">
-            <div className={loading ? "tabs":""}>
+            <div className={loading ? "tabs" : ""}>
               <FormControl>
                 <RadioGroup
                   row
@@ -699,86 +705,86 @@ const CityWideOrders = () => {
               </FormControl>
             </div>
             <div>
-               <FormControl >
-                    <label className="text-sm mb-1">Filter By</label>
-                      <div className="filterbyRider"> 
-                        <Select
-                          id="demo-simple-select"
-                          value={filterby}
-                          //label="Filter By"
-                          onChange={handleChange}
-                          displayEmpty
-                          inputProps={{ 'aria-label': 'Without label' }}
-                        >
-                          <MenuItem value="NONE">Select</MenuItem>
-                          <MenuItem value="ORDERID">Order ID</MenuItem>
-                          <MenuItem value="MOBILE">Mobile Number</MenuItem>
-                        </Select>           
-                        <TextField
-                          id="search"
-                          type="text"
-                          name="search"
-                          value={search}
-                          disabled={filterby == 'NONE'}
-                          onChange={handleSearchChange}
-                        />
-                      </div>
-                </FormControl>
+              <FormControl >
+                <label className="text-sm mb-1">Filter By</label>
+                <div className="filterbyRider">
+                  <Select
+                    id="demo-simple-select"
+                    value={filterby}
+                    //label="Filter By"
+                    onChange={handleChange}
+                    displayEmpty
+                    inputProps={{ 'aria-label': 'Without label' }}
+                  >
+                    <MenuItem value="NONE">Select</MenuItem>
+                    <MenuItem value="ORDERID">Order ID</MenuItem>
+                    <MenuItem value="MOBILE">Mobile Number</MenuItem>
+                  </Select>
+                  <TextField
+                    id="search"
+                    type="text"
+                    name="search"
+                    value={search}
+                    disabled={filterby == 'NONE'}
+                    onChange={handleSearchChange}
+                  />
+                </div>
+              </FormControl>
             </div>
           </div>
         </div>
         <div className="overflow-x-auto -mx-6 my-4">
           <div className="inline-block min-w-full align-middle">
-            <div className="overflow-hidden ">  
+            <div className="overflow-hidden ">
               {loading ? (
-                  <div className="flex justify-center items-center w-100">
-                    <Loading /> 
-                  </div>
-                ) : (           
-              <table
-                className="min-w-full divide-y divide-slate-100 table-fixed dark:divide-slate-700"
-                {...getTableProps()}
-              >
-                <thead className=" bg-slate-200 dark:bg-slate-700">
-                  {headerGroups.map((headerGroup) => (
-                    <tr {...headerGroup.getHeaderGroupProps()}>
-                      {headerGroup.headers.map((column) => (
-                        <th
-                          {...column.getHeaderProps(
-                            // column.getSortByToggleProps()
-                          )}
-                          scope="col"
-                          className=" table-th "
-                        >
-                          {column.render("Header")}
-                          {/* <span>
+                <div className="flex justify-center items-center w-100">
+                  <Loading />
+                </div>
+              ) : (
+                <table
+                  className="min-w-full divide-y divide-slate-100 table-fixed dark:divide-slate-700"
+                  {...getTableProps()}
+                >
+                  <thead className=" bg-slate-200 dark:bg-slate-700">
+                    {headerGroups.map((headerGroup) => (
+                      <tr {...headerGroup.getHeaderGroupProps()}>
+                        {headerGroup.headers.map((column) => (
+                          <th
+                            {...column.getHeaderProps(
+                              // column.getSortByToggleProps()
+                            )}
+                            scope="col"
+                            className=" table-th "
+                          >
+                            {column.render("Header")}
+                            {/* <span>
                             {column.isSorted
                               ? column.isSortedDesc
                                 ? " 🔽"
                                 : " 🔼"
                               : ""}
                           </span> */}
-                        </th>
-                      ))}
-                    </tr>
-                  ))}
-                </thead>                       
-                <tbody
+                          </th>
+                        ))}
+                      </tr>
+                    ))}
+                  </thead>
+                  <tbody
                     className="bg-white divide-y divide-slate-100 dark:bg-slate-800 dark:divide-slate-700"
                     {...getTableBodyProps()}
                   >
-                        {page.length > 0 ? (
-                          page.map((row) => {
+                    {page.length > 0 ? (
+                      page.map((row) => {
                         prepareRow(row);
                         return (
-                          <tr className={timeDiffClass(row.original.acceptedDate, row.original.orderHistory.orderDate,  row.original.orderHistory.orderStatus)} {...row.getRowProps()} key={row.id}>
+                          <tr className={timeDiffClass(row.original.acceptedDate, row.original.orderHistory.orderDate, row.original.orderHistory.orderStatus)} {...row.getRowProps()} key={row.id}>
                             {row.cells.map((cell) => (
                               <td {...cell.getCellProps()} className="table-td" key={cell.column.id}>
                                 {cell.render("Cell")}
                               </td>
                             ))}
-                           
-                          
+
+
                           </tr>
                         );
                       })
@@ -792,20 +798,20 @@ const CityWideOrders = () => {
                         </td>
                       </tr>
                     )}
-                  </tbody>              
-              </table>
-              
-               )}
+                  </tbody>
+                </table>
+
+              )}
             </div>
           </div>
         </div>
         <div>
           <strong>Note*</strong>
-            <i>After 10 minutes, if an order is not accepted/Picked, it turns yellow.</i>
+          <i>After 10 minutes, if an order is not accepted/Picked, it turns yellow.</i>
         </div>
         <div>
-            <strong>Note*</strong>
-            <i>After 20 minutes, if an order is still not accepted/Picked up, it turns red.</i>
+          <strong>Note*</strong>
+          <i>After 20 minutes, if an order is still not accepted/Picked up, it turns red.</i>
         </div>
         <div className="md:flex md:space-y-0 space-y-5 justify-between mt-6 items-center">
           <div className=" flex items-center space-x-3 rtl:space-x-reverse">
@@ -814,7 +820,7 @@ const CityWideOrders = () => {
               value={pagesizedata}
               onChange={(e) => handlePageSizeChange(Number(e.target.value))}
             >
-              {[10,20,30,40,50].map((pageSize) => (
+              {[10, 20, 30, 40, 50].map((pageSize) => (
                 <option key={pageSize} value={pageSize}>
                   Show {pageSize}
                 </option>
@@ -849,10 +855,11 @@ const CityWideOrders = () => {
                   </button>
                 </li>
                 {(() => {
-                  const totalPages = pageCount; 
+                  const totalPages = pageCount;
                   const currentGroup = Math.floor(currentPage / maxPagesToShow);
-                  const startPage = currentGroup * maxPagesToShow; 
-                  const endPage = Math.min(startPage + maxPagesToShow, totalPages); 
+                  const startPage = currentGroup * maxPagesToShow;
+                  const endPage = Math.min(startPage + maxPagesToShow, totalPages);
+
                   return (
                     <>
                       {startPage > 0 && (
@@ -870,7 +877,7 @@ const CityWideOrders = () => {
                               className={` ${pageNumber === currentPage
                                 ? "bg-scooton-900 dark:bg-slate-600  dark:text-slate-200 text-white font-medium"
                                 : "bg-slate-100 dark:bg-slate-700 dark:text-slate-400 text-slate-900  font-normal"
-                              } text-sm rounded leading-[16px] flex h-6 w-6 items-center justify-center transition-all duration-150 `}
+                                } text-sm rounded leading-[16px] flex h-6 w-6 items-center justify-center transition-all duration-150 `}
                               onClick={() => setCurrentPage(pageNumber)}
                             >
                               {pageNumber + 1}
@@ -899,6 +906,8 @@ const CityWideOrders = () => {
                     Next
                   </button>
                 </li>
+
+                {/* Last Page Button */}
                 <li>
                   <button
                     onClick={() => gotoPage(pageCount - 1)}
@@ -936,7 +945,7 @@ const CityWideOrders = () => {
             {notification === 'INDIVIDUAL' && (
               <div className="mb-3">
                 <label className="form-label mb-1">Mobile Number</label>
-                <input                
+                <input
                   id="mobile"
                   type="number"
                   name="mobile"
@@ -945,8 +954,8 @@ const CityWideOrders = () => {
                   className="form-control"
                 />
               </div>
-            )} 
-             
+            )}
+
             {/* <div>
               <TextField
                 label="Mobile Number"
@@ -958,7 +967,7 @@ const CityWideOrders = () => {
               />
             </div> */}
             <div className="d-flex gap-2 justify-content-center mt-4">
-              <Button className="btn btn-dark" type="button" onClick={() => { sendNotification(); setNotificationModel(false) }} >
+              <Button className="btn btn-dark" type="button" onClick={() => { sendNotification() }} >
                 Send Notification
               </Button>
               <Button className="btn btn-outline-light" type="button" onClick={() => { setNotificationModel(false) }}>
@@ -991,20 +1000,20 @@ const CityWideOrders = () => {
           </div> */}
           <div className="">
             <div className="d-flex gap-2 justify-content-between align-items-center mt-4">
-                <h6 className="text-center">Are you sure to cancel?</h6>
-                <Button className="btn btn-outline-light" type="button" onClick={() => { deletePlaceOrder(); setDeleteOrderModel(false) }}>
-                  Yes
-                </Button>
+              <h6 className="text-center">Are you sure to cancel?</h6>
+              <Button className="btn btn-outline-light" type="button" onClick={() => { deletePlaceOrder(); setDeleteOrderModel(false) }}>
+                Yes
+              </Button>
             </div>
             {ordersType === 'ACCEPTED' && (
-                  <div className="d-flex gap-2 justify-content-between align-items-center mt-4">
-                    <h6 className="text-center">Are you want to Replace Order?</h6>
-                    <Button className="btn btn-outline-light" type="button" onClick={() => { reorderPlaceOrder(); setDeleteOrderModel(false) }}>
-                      Yes
-                    </Button>
-                </div>
+              <div className="d-flex gap-2 justify-content-between align-items-center mt-4">
+                <h6 className="text-center">Are you want to Replace Order?</h6>
+                <Button className="btn btn-outline-light" type="button" onClick={() => { reorderPlaceOrder(); setDeleteOrderModel(false) }}>
+                  Yes
+                </Button>
+              </div>
             )}
-            
+
             <div className="d-flex gap-2 justify-content-center mt-4">
             </div>
           </div>

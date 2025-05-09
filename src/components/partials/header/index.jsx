@@ -22,7 +22,7 @@ const Header = ({ className = "custom-class" }) => {
       case "floating":
         return "floating  has-sticky-header";
       case "sticky":
-        return "sticky top-0 z-[999]";
+        return "sticky top-0 z-[99999]";
       case "static":
         return "static";
       case "hidden":

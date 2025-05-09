@@ -63,14 +63,14 @@ const OrderDetail = () => {
             try {
                 const token = localStorage.getItem('jwtToken');
                 if (thirdPartyUsername) {
-                    const response = await axiosInstance.post(`${BASE_URL}/thirdParty/get-third-party-orders/${orderId}`, {
+                    const response = await axiosInstance.post(`${BASE_URL}/thirdParty/get-third-party-orders/${orderId}?orderType=THIRDPARTY`, {
                         headers: {
                             Authorization: `Bearer ${token}`,
                         },
                     });
                     setOrderDetail(response.data.jsonData);
                 } else {
-                    const response = await axiosInstance.get(`${BASE_URL}/order/v2/orders/get-city-wide-order/${orderId}`, {
+                    const response = await axiosInstance.get(`${BASE_URL}/order/v2/orders/get-city-wide-order/${orderId}?orderType=CITYWIDE`, {
                         headers: {
                             Authorization: `Bearer ${token}`,
                         },
@@ -101,7 +101,7 @@ const OrderDetail = () => {
         packageDetails,
         cancelDetails,
         riderDetails,
-        vehiceDetails,
+        vehicleDetails,
         tripDetails
     } = orderDetail;
 
@@ -193,7 +193,7 @@ const OrderDetail = () => {
             radius: 5,
             userLatitude: customerDetails?.pickupLocation?.lat,
             userLongitude: customerDetails?.pickupLocation?.lon,
-            vehicleId: orderDetail?.vehiceDetails?.id
+            vehicleId: orderDetail?.vehicleDetails?.id
         }
         try {
             await axiosInstance.get(`${BASE_URL}/rider/nearby-riders`, { params }).then((response) => {
@@ -269,7 +269,7 @@ const OrderDetail = () => {
                         <h4 className="card-title ms-2 mb-0">Order Details</h4>
                     </div>
                     <div className="mb-2 d-flex gap-4">
-                        <img src={vehiceDetails?.imageUrl} alt={vehiceDetails?.vehicleType} width={40} />
+                        <img src={vehicleDetails?.imageUrl} alt={vehicleDetails?.vehicleType} width={40} />
                         {orderDetails.orderStatus === 'Delivered' && (
                             <button type="button" className="btn btn-sm btn-dark py-1 px-2" onClick={downloadInvoice}>Get Invoice</button>
                         )}
@@ -713,7 +713,7 @@ const OrderDetail = () => {
                                 <tr className="border-b border-slate-100 dark:border-slate-700">
                                     <td className="px-6 py-2">Vehicle Type</td>
                                     <td className="text-end px-6 py-2">
-                                        {thirdPartyUsername ? vehiceDetails?.vehicleType : vehiceDetails?.vehicleType}
+                                        {thirdPartyUsername ? vehicleDetails?.vehicleType : vehicleDetails?.vehicleType}
                                     </td>
                                 </tr>
                             </tbody>
@@ -809,7 +809,7 @@ const OrderDetail = () => {
                     <div className="mt-3 d-flex justify-content-end gap-3">
                         {orderDetails.orderStatus === 'In Progress' && (
                             <>
-                                <img src={vehiceDetails?.imageUrl} alt={vehiceDetails?.vehicleType} width={40} />
+                                <img src={vehicleDetails?.imageUrl} alt={vehicleDetails?.vehicleType} width={40} />
                                 <button type="button" className="btn btn-dark p-2" onClick={() => { nearByRiderDetails() }}> Get Near By Rider</button>
                             </>
 
@@ -832,14 +832,14 @@ const OrderDetail = () => {
                                         <GoogleMap
                                             mapContainerStyle={mapContainerStyle}
                                             center={pickupLocation}
-                                            zoom={20}
+                                            zoom={10}
                                             onLoad={(map) => (mapRef.current = map)}
                                         >
                                             {riderNearLocation?.map((marker, index) => (
                                                 <Marker
                                                     key={index}
                                                     position={{ lat: marker.latitude, lng: marker.longitude }}
-                                                    icon={marker.riderActiveForOrders ? 'https://securestaging.net/scooton/rider-icon-green.png' : 'https://securestaging.net/scooton/rider-icon-red.png'}
+                                                    icon={marker.riderActiveForOrders ? 'https://image-res.s3.ap-south-1.amazonaws.com/Admin-assets/rider-icon-green.png' : 'https://image-res.s3.ap-south-1.amazonaws.com/Admin-assets/rider-icon-red.png'}
                                                     onClick={() => setSelectedMarker(marker)}
                                                 />
                                             ))}
@@ -858,7 +858,7 @@ const OrderDetail = () => {
                                             <Marker
                                                 position={pickupLocation}
                                                 icon={{
-                                                    url: "https://securestaging.net/scooton/pickuppoint.png",
+                                                    url: "https://image-res.s3.ap-south-1.amazonaws.com/Admin-assets/pickuppoint.png",
                                                 }}
                                                 onClick={() => setSelectedPickupMarker(pickupLocation)}
                                             />
@@ -878,7 +878,7 @@ const OrderDetail = () => {
                                             <Marker
                                                 position={dropLocation}
                                                 icon={{
-                                                    url: "https://securestaging.net/scooton/Droppoint.png",
+                                                    url: "https://image-res.s3.ap-south-1.amazonaws.com/Admin-assets/Droppoint.png",
                                                 }}
                                                 onClick={() => setSelectedDropMarker(dropLocation)}
                                             />

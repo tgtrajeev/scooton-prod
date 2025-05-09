@@ -73,7 +73,7 @@ const MobileMenu = ({ className = "custom-class" }) => {
         scrollableNodeProps={{ ref: scrollableNodeRef }}
       >
         <Navmenu menus={menuItems} />
-        <div className="bg-scooton-900 mb-24 lg:mb-10 mt-24 p-4 relative text-center rounded-2xl text-white">
+        {/* <div className="bg-scooton-900 mb-24 lg:mb-10 mt-24 p-4 relative text-center rounded-2xl text-white">
           <img
             src={svgRabitImage}
             alt=""
@@ -90,7 +90,7 @@ const MobileMenu = ({ className = "custom-class" }) => {
               Upgrade
             </button>
           </div>
-        </div>
+        </div> */}
       </SimpleBar>
     </div>
   );

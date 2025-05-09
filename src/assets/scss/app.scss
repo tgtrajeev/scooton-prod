@@ -325,13 +325,13 @@ width: 100%;padding: 1rem;margin-bottom: 1rem;}
   .react-tabs__tab-list{overflow-x: auto;}
   .react-tabs__tab{padding: 8px 12px;white-space: nowrap;}
   .filter-show .MuiFormControl-fullWidth{margin-bottom: .5rem;}
-  .filter-show{transform: translate(-50%, -50%);
-    position: fixed;
-    width: 95%;
-    top: 50%;
-    left: 50%;
-    z-index: 9999;
-  }
+  // .filter-show{transform: translate(-50%, -50%);
+  //   position: fixed;
+  //   width: 95%;
+  //   top: 50%;
+  //   left: 50%;
+  //   z-index: 9999;
+  // }
   .backdrop-filter{background-color: #00000094;position: fixed;width: 100%;height: 100%;top:0;left: 0;z-index: 999;}
 }
 @media (max-width:1366px) {
@@ -381,7 +381,20 @@ width: 100%;padding: 1rem;margin-bottom: 1rem;}
 
 div[data-tippy-root] div{ width: auto; word-wrap: break-word;}
 
-.Toastify__toast-container--top-right {
-  position: absolute;
-  z-index: 99999999;
+.Toastify {
+  position: relative;
+  z-index: 999999;
+}
+
+
+@media (max-width: 991px) {
+  .filter-orderlist{ flex-wrap: wrap;}
+  .filter-orderlist .MuiFormControl-root.css-1iw3t7y-MuiFormControl-root .css-cis11t-MuiFormGroup-root{ flex-wrap: wrap !important;}
+  .multistep-prgressbar ul{flex-wrap: wrap;}
+  .multistep-prgressbar ul .multistep-list{     flex: auto;}
+  .multistep-prgressbar ul .multistep-list span.orderTimetaken{ position: relative; left: inherit;}
+}
+
+@media (max-width: 768px) {
+  .multistep-prgressbar ul .multistep-list{     flex: 100%;}
 }
