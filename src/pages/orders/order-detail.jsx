@@ -14,7 +14,7 @@ import { GoogleMap, LoadScript, useLoadScript, Marker, InfoWindow } from '@react
 
 const mapContainerStyle = {
     width: '100%',
-    height: '50vh',
+    height: '70vh',
 };
 
 const markers = [
@@ -820,7 +820,7 @@ const OrderDetail = () => {
                         <Modal
                             activeModal={nearRiderMap}
                             uncontrol
-                            className="max-w-5xl"
+                            className="h-full"
                             title="Near By Rider"
                             centered
                             onClose={() => setNearRiderMap(false)}
@@ -832,7 +832,7 @@ const OrderDetail = () => {
                                         <GoogleMap
                                             mapContainerStyle={mapContainerStyle}
                                             center={pickupLocation}
-                                            zoom={10}
+                                            zoom={13}
                                             onLoad={(map) => (mapRef.current = map)}
                                         >
                                             {riderNearLocation?.map((marker, index) => (
