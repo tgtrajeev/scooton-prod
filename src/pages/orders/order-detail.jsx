@@ -87,6 +87,34 @@ const OrderDetail = () => {
         fetchOrderDetail();
     }, [orderId, pickup, delivered]);
 
+    // Rider Assign
+    const [riderId, setRiderId] = useState('');
+    const handleAssign = async (e) => {
+        e.preventDefault();
+        try {
+            const payload = {
+                orderType: thirdPartyUsername ? "THIRDPARTY" : "CITYWIDE"
+            };
+
+            const response = await axiosInstance.post(
+                `${BASE_URL}/order/v2/orders/accept-city-wide-order-by-rider/${riderId}/${orderId}/ACCEPTED`,
+                payload
+            );
+
+            if (response.data.statusCode === 200) {
+                toast.success("Rider assigned successfully!");
+                setRiderId('');
+            } else {
+                toast.error(response.data.message || "Failed to assign rider.");
+            }
+        } catch (error) {
+            const message = error?.response?.data?.message || "An unexpected error occurred while assigning rider.";
+            toast.error(message);
+            console.error("Assign rider error:", error);
+        }
+    };
+    // Rider Assign
+
     if (loading) {
         return <Loading />;
     }
@@ -237,7 +265,7 @@ const OrderDetail = () => {
 
     return (
         <Card>
-            <ToastContainer />
+            {/* <ToastContainer /> */}
             <div className="order-header">
                 <div className="md:flex justify-between items-center mb-4 border-bottom">
                     <div className="flex items-center mb-2">
@@ -280,6 +308,20 @@ const OrderDetail = () => {
                                 </span>
                             </div>
                         )}
+
+                        <form className="d-flex gap-2" onSubmit={handleAssign}>
+                            <input
+                            type="text"
+                            className="form-control"
+                            placeholder="Rider ID"
+                            value={riderId}
+                            onChange={(e) => setRiderId(e.target.value)}
+                            required
+                            />
+                            <button type="submit" className="btn btn-sm btn-dark py-1 px-2">
+                            Assign
+                            </button>
+                        </form>
                     </div>
                 </div>
                 <div className="multistep-prgressbar">
