@@ -128,14 +128,39 @@ export const menuItems = [
     icon: "heroicons-outline:cog-8-tooth",
     link: "configuration",
     child: [
+      // {
+      //   childtitle: "Settings",
+      //   childlink: "setting",
+      //   childicon: "heroicons:presentation-chart-line",
+      // },
       {
-        childtitle: "Settings",
-        childlink: "setting",
+        childtitle: "Logout from all devices",
+        childlink: "logout-from-all-devices",
+        childicon: "heroicons:presentation-chart-line",
+      },
+      {
+        childtitle: "Export Reports",
+        childlink: "export-reports",
         childicon: "heroicons:presentation-chart-line",
       },
       {
         childtitle: "Configuration Keys",
         childlink: "configuration-keys",
+        childicon: "heroicons:presentation-chart-line",
+      },
+      {
+        childtitle: "Third Party Vendors",
+        childlink: "third-party-vendors",
+        childicon: "heroicons:presentation-chart-line",
+      },
+      {
+        childtitle: "Rider Settings & Calc",
+        childlink: "rider-settings-&-calc",
+        childicon: "heroicons:presentation-chart-line",
+      },
+      {
+        childtitle: "Vehicle Settings",
+        childlink: "vehicle-settings",
         childicon: "heroicons:presentation-chart-line",
       }
     ]

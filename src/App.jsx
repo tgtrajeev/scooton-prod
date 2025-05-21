@@ -39,7 +39,15 @@ import OrderDetail from "./pages/orders/order-detail";
 import RiderDetail from "./pages/riders/rider-detail";
 import HomepageList from "./pages/home-page/home-page-list";
 import Settings from "./pages/configuration/setting";
+
+import Logout_from_all_devices from "./pages/configuration/logout-from-all-devices";
+import Export_Reports from "./pages/configuration/export-reports";
 import Configuration_Keys from "./pages/configuration/configuration-keys";
+import Third_Party_Vendors from "./pages/configuration/third-party-vendors";
+import Rider_Calculations from "./pages/configuration/rider-calculations";
+import Vehicle_Settings from "./pages/configuration/vehicle-settings";
+
+
 import AddHomePage from "./pages/home-page/add-homepage";
 import Vendor from "./pages/orders/vendor-order";
 import ProtectedRoute from "./layout/ProtectedRoute";
@@ -152,7 +160,16 @@ function App() {
           <Route path = ":vendor" element={<Vendor notificationCount={notificationCount} />} />
           <Route element={<ProtectedRoute isAuthRoute={"ROLE_SUPER_ADMIN"} />}>
           <Route path="setting" element={<Settings />} />
+
+          <Route path="logout-from-all-devices" element={<Logout_from_all_devices />} />
+          <Route path="export-reports" element={<Export_Reports />} />
           <Route path="configuration-keys" element={<Configuration_Keys />} />
+          <Route path="third-party-vendors" element={<Third_Party_Vendors />} />
+          <Route path="rider-settings-&-calc" element={<Rider_Calculations />} />
+          <Route path="vehicle-settings" element={<Vehicle_Settings />} />
+
+
+
           <Route path="role-list" element={<RoleList />} />
           <Route path="add-role" element={<AddRole />} />
         </Route>
