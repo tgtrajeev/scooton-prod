@@ -7,7 +7,7 @@ import { BASE_URL } from "../../api";
 import Loading from "../../components/Loading";
 import Button from "../../components/ui/Button";
 import Textinput from "@/components/ui/Textinput";
-import { toast,ToastContainer } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Modal from "../../components/ui/Modal";
 import { useNavigate } from "react-router-dom";
@@ -22,33 +22,45 @@ import axiosInstance from "../../api";
 
 const Export_Reports = () => {
     const navigate = useNavigate();
-    const[logoutAll, setLogoutAllList] = useState([]);
+    const [logoutAll, setLogoutAllList] = useState([]);
     const [loading, setLoading] = useState(true);
     const [logoutDevice, setLogoutDevice] = useState();
-    const [isLogoutModal, setIsLogoutModal] = useState(false);   
+    const [isLogoutModal, setIsLogoutModal] = useState(false);
+    const [selectedFields, setSelectedFields] = useState([]);
+
+    // Define the state for orderType
+    const [orderType, setOrderType] = useState("CITYWIDE"); // Default to "CITYWIDE"
 
     useEffect(() => {
-      const fetchLogoutAllList = async () => {
-        try {
-          const token = localStorage.getItem('jwtToken');
-          if (token) {
-            const response = await axiosInstance.get(`${BASE_URL}/auth/get-logout-details`, {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            });
-            const validLogoutList = response.data.filter(item => !item.isExpired);
+        const fetchLogoutAllList = async () => {
+            try {
+                const token = localStorage.getItem('jwtToken');
+                if (token) {
+                    const response = await axiosInstance.get(`${BASE_URL}/auth/get-logout-details`, {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                        },
+                    });
+                    const validLogoutList = response.data.filter(item => !item.isExpired);
 
-            setLogoutAllList(validLogoutList);
-          }
-        } catch (error) {
-          console.error('Error fetching order detail:', error);
-        } finally {
-            setLoading(false);
-        }
-      };  
-      fetchLogoutAllList();
+                    setLogoutAllList(validLogoutList);
+                }
+            } catch (error) {
+                console.error('Error fetching order detail:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchLogoutAllList();
     }, []);
+
+    const handleCheckboxChange = (e) => {
+        const { id, checked } = e.target;
+
+        setSelectedFields((prev) =>
+            checked ? [...prev, id] : prev.filter((item) => item !== id)
+        );
+    };
 
     const [startDate, setStartDate] = useState(null);
     const [endDate, setEndDate] = useState(null);
@@ -67,22 +79,21 @@ const Export_Reports = () => {
 
     const validateDateRange = (start, end) => {
         if (start && end) {
-        const differenceInDays = dayjs(end).diff(dayjs(start), "day") + 1;
-        setIsButtonDisabled(differenceInDays > 30 || differenceInDays <= 0);
+            const differenceInDays = dayjs(end).diff(dayjs(start), "day") + 1;
+            setIsButtonDisabled(differenceInDays > 30 || differenceInDays <= 0);
         } else {
-        setIsButtonDisabled(true);
+            setIsButtonDisabled(true);
         }
     };
 
     const exportRiderCsv = async () => {
-        try{
+        try {
             setLoadingCSV(true);
-            await axiosInstance.get(`${BASE_URL}/order/admin/registered-rider-details`).then((response)=> {
-             
+            await axiosInstance.get(`${BASE_URL}/order/admin/registered-rider-details`).then((response) => {
 
-                if(response.data.length == 0){
+                if (response.data.length == 0) {
                     toast.error("No data found");
-                    setLoadingCSV(false); 
+                    setLoadingCSV(false);
                     return;
                 }
 
@@ -99,159 +110,325 @@ const Export_Reports = () => {
                         "Wallet Balance": item?.walletBalance || "N/A",
                         "Registration Fee Status": item?.registrationFeesPaid || "N/A",
                         "No of Orders Delivered": item?.noOfDeliveredOrders || "N/A",
+                        "On role riders": item?.onRoleRider || "N/A",
+                        "Last activity": item?.lastActivity || "N/A",
                     };
-                    
-                });   
-               
-                
+                });
+
                 const workbook = XLSX.utils.book_new();
                 const worksheet = XLSX.utils.json_to_sheet(csvData);
-        
+
                 XLSX.utils.book_append_sheet(workbook, worksheet, "Rider_Detail");
-        
+
                 XLSX.writeFile(
                     workbook,
                     `Rider_Detail.xlsx`
                 );
-                
+
             })
         } catch (error) {
             console.error("Error exporting CSV:", error);
             toast.error("Failed to export data. Please try again.");
         } finally {
-            setLoadingCSV(false); 
+            setLoadingCSV(false);
+        }
+    }
+
+    const exportRegRiderFilter = async () => {
+        const baseFields = [
+            "riderId",
+            "riderName",
+            "riderMobileNumber",
+            "walletBalance",
+        ];
+
+        const allFields = [...new Set([...baseFields, ...selectedFields])];
+
+        const fieldMap = {
+            riderId: "Rider ID",
+            riderName: "Rider Name",
+            riderMobileNumber: "Mobile Number",
+            riderCity: "City",
+            status: "Status",
+            vehicleType: "Vehicle Type",
+            walletBalance: "Wallet Balance",
+            onRoleRider: "On role riders",
+            lastActivity: "Last activity",
+        };
+
+        const params = new URLSearchParams();
+        allFields.forEach(field => params.append('fields', field));
+
+        try {
+            setLoadingCSV(true);
+
+            const response = await axiosInstance.get(
+                `${BASE_URL}/api/v1/admin/report/registered-rider-details-filtered?${params.toString()}`
+            )
+                .then((response) => {
+
+                    if (response.data.length == 0) {
+                        toast.error("No data found");
+                        setLoadingCSV(false);
+                        return;
+                    }
+
+                    const riderDetails = response.data.jsonData;
+                    const csvData = riderDetails.map(item => {
+                        const row = {};
+                        allFields.forEach(field => {
+                            const header = fieldMap[field];
+                            row[header] = item?.[field] ?? "N/A";
+                        });
+                        return row;
+                    });
+
+                    const workbook = XLSX.utils.book_new();
+                    const worksheet = XLSX.utils.json_to_sheet(csvData);
+
+                    XLSX.utils.book_append_sheet(workbook, worksheet, "Rider_Detail");
+
+                    XLSX.writeFile(
+                        workbook,
+                        `Rider_Detail.xlsx`
+                    );
+
+                })
+        } catch (error) {
+            console.error("Error exporting CSV:", error);
+            toast.error("Failed to export data. Please try again.");
+        } finally {
+            setLoadingCSV(false);
         }
     }
 
     const exportCsv = async () => {
-        
-        if (!startDate || !endDate) return;    
+        if (!startDate || !endDate) return;
         const formattedFromDate = dayjs(startDate).format("MM-DD-YYYY");
-        const formattedToDate = dayjs(endDate).format("MM-DD-YYYY");   
-         
+        const formattedToDate = dayjs(endDate).format("MM-DD-YYYY");
+
         try {
             const token = localStorage.getItem("jwtToken");
             setLoadingCSV(true);
             const response = await axiosInstance.get(
-                `${BASE_URL}/order/v2/orders/get-city-wide-orders-by-date?from_date=${formattedFromDate}&to_date=${formattedToDate}`,
+                `${BASE_URL}/order/v2/orders/get-city-wide-orders-by-date?from_date=${formattedFromDate}&to_date=${formattedToDate}&orderType=${orderType}`,
                 {
                     responseType: "json",
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
-                },
-                
+                }
             );
-    
-            if (response.data?.length === 0) {
+
+            if (!response.data || response.data.length === 0) {
                 alert("No data found for the specified date range.");
-                setLoadingCSV(false); 
+                setLoadingCSV(false);
                 return;
             }
-            const csvData = response.data.map((item) => {
-                const { orderDetails = {}, customerDetails = {}, riderDetails = {} } = item.jsonData || {};
-                return {
-                    "Order ID": orderDetails?.orderId || "N/A",
-                    "Order Date": orderDetails?.orderDateTime || "N/A",
-                    "User Mobile": orderDetails?.userMobileNumber || "N/A",
-                    "User Name": orderDetails?.userName?.trim() || "N/A",
-                    "Order Amount (MRP)": orderDetails?.orderAmount?.mrp || 0,
-                    "Order Amount (Discount)": orderDetails?.orderAmount?.discount || 0,
-                    "Order Amount (Final Price)": orderDetails?.orderAmount?.finalPrice || 0,
-                    "Order Status": orderDetails?.orderStatus || "N/A",
-                    "Delivery DateTime": orderDetails?.deliveryDateTime || "N/A",
-                    "Pickup Address": customerDetails?.pickupAddress || "N/A",
-                    "Delivery Address": customerDetails?.deliveryAddress || "N/A",
-                    "Delivery Contact": customerDetails?.deliveryContact || "N/A",
-                    "Rider ID": riderDetails?.riderId || "N/A",
-                    "Rider Name": riderDetails?.riderName || "N/A",
-                    "Rider Contact": riderDetails?.riderContact || "N/A",
-                    "Vehicle Type": riderDetails?.vehicleType || "N/A",
-                    "Rider Payout": riderDetails?.riderPayout || "N/A",
-                };
-                
-            });   
-            
+
+            let csvData;
+            if (orderType === "CITYWIDE") {
+                // Existing mapping
+                csvData = response.data.map((item) => {
+                    const { orderDetails = {}, customerDetails = {}, riderDetails = {} } = item.jsonData || {};
+                    return {
+                        "Order ID": orderDetails?.orderId || "N/A",
+                        "Order Date": orderDetails?.orderDateTime || "N/A",
+                        "User Mobile": orderDetails?.userMobileNumber || "N/A",
+                        "User Name": orderDetails?.userName?.trim() || "N/A",
+                        "Fare Amount": orderDetails?.orderAmount?.mrp || 0,
+                        "Discount": orderDetails?.orderAmount?.discount || 0,
+                        "Toll tax": orderDetails?.orderAmount?.tollTax || 0,
+                        "MCD tax": orderDetails?.orderAmount?.mcdTax || 0,
+                        "State tax": orderDetails?.orderAmount?.stateTax || 0,
+                        "Order Status": orderDetails?.orderStatus || "N/A",
+                        "Delivery DateTime": orderDetails?.deliveryDateTime || "N/A",
+                        "Pickup Address": customerDetails?.pickupAddress || "N/A",
+                        "Delivery Address": customerDetails?.deliveryAddress || "N/A",
+                        "Delivery Contact": customerDetails?.deliveryContact || "N/A",
+                        "Rider ID": riderDetails?.riderId || "N/A",
+                        "Rider Name": riderDetails?.riderName || "N/A",
+                        "Rider Contact": riderDetails?.riderContact || "N/A",
+                        "Vehicle Type": riderDetails?.vehicleType || "N/A",
+                        "Rider Payout": riderDetails?.riderPayout || "N/A",
+                    };
+                });
+            } else if (orderType === "SHIPROCKET") {
+                // NEW SHIPROCKET MAPPING
+                csvData = response.data.map((item) => {
+                    return {
+                        "Order ID": item?.orderId || "N/A",
+                        "Order Date": item?.orderDate || "N/A",
+                        "User Mobile": item?.userInfo?.mobileNumber || "N/A",
+                        "User Name": item?.userInfo?.userName?.trim() || "N/A",
+
+                        "Fare Amount": item?.mrp || 0,
+                        "Discount": item?.discount || 0,
+                        "Toll tax": item?.tollTax || 0,
+                        "MCD tax": item?.mcdTax || 0,
+                        "State tax": item?.stateTax || 0,
+                        "Collective Amount": item?.freightAmount || 0,
+
+                        "Order Status": item?.orderStatus || "N/A",
+                        "Delivery DateTime": item?.deliveredDateTime || "N/A",
+                        "Pickup Address": item?.pickupAddressDetails?.addressLine1 || "N/A",
+                        "Delivery Address": item?.deliveryAddressDetails?.addressLine1 || "N/A",
+                        "Delivery Contact": item?.deliveryAddressDetails?.userInfo?.mobileNumber || "N/A",
+                        "Rider ID": item?.riderId || "N/A",
+                        "Rider Name": item?.riderName || "N/A",
+                        "Rider Contact": item?.riderContact || "N/A",
+                        "Vehicle Type": item?.vehicleType || "N/A",
+                        "Rider Payout": item?.riderPayout || "N/A",
+                    };
+
+
+                });
+            } else {
+                csvData = []; // Fallback: empty if unknown orderType
+            }
+
             const workbook = XLSX.utils.book_new();
             const worksheet = XLSX.utils.json_to_sheet(csvData);
-    
+
             XLSX.utils.book_append_sheet(workbook, worksheet, "Orders");
-    
+
             XLSX.writeFile(
                 workbook,
-                `orders_${formattedFromDate}_to_${formattedToDate}.xlsx`
+                `orders_${orderType}_${formattedFromDate}_to_${formattedToDate}.xlsx`
             );
             setStartDate(null);
-            setEndDate(null)
+            setEndDate(null);
         } catch (error) {
             console.error("Error exporting data:", error);
-        }finally {
+        } finally {
             setLoadingCSV(false);
         }
     };
-    
+
+
     if (loading) {
         return <Loading />;
     }
-  return (
-    <>
-        <Card className="h-100">
-            <div className="card-header md:flex justify-between items-center mb-4 px-0 py-2">
-                <div className="flex items-center">
-                    <h4 className="card-title">Export Data</h4>
-                </div>
-            </div>
-            <div className="export-data">                        
-                <LocalizationProvider dateAdapter={AdapterDayjs}>
-                    <div className="flex w-100 gap-3">
-                        <div className="">
-                            <DatePicker
-                                label="Start Date"
-                                value={startDate}
-                                onChange={handleStartDateChange}
-                                maxDate={dayjs()}
-                            />
-                        </div>
-                        <div className="">
-                            <DatePicker
-                                label="End Date"
-                                value={endDate}
-                                onChange={handleEndDateChange}
-                                maxDate={dayjs()}
-                            />
-                        </div>
-                        <button
-                            className={`btn btn-dark`}
-                            disabled={isButtonDisabled}
-                            onClick={exportCsv}
-                        >   Export</button>
+    return (
+        <>
+            <Card className="h-100">
+                <div className="card-header md:flex justify-between items-center mb-4 px-0 py-2">
+                    <div className="flex items-center">
+                        <h4 className="card-title">Export Order Data</h4>
                     </div>
-                    {loadingCSV && (
-                        <div className="loader-fixed">
-                        <span className="flex items-center gap-2">
-                            <Loading />                              
-                        </span>
+                </div>
+                <div className="export-data mb-4">
+                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                        <div className="flex w-100 gap-3">
+                            <div className="">
+                                <DatePicker
+                                    label="Start Date"
+                                    value={startDate}
+                                    onChange={handleStartDateChange}
+                                    maxDate={dayjs()}
+                                />
+                            </div>
+                            <div className="">
+                                <DatePicker
+                                    label="End Date"
+                                    value={endDate}
+                                    onChange={handleEndDateChange}
+                                    maxDate={dayjs()}
+                                />
+                            </div>
+                            
+                            <div class="flex items-center">
+                                <input id="CITYWIDE" type="radio" name="orderType" value="CITYWIDE" checked={orderType === "CITYWIDE"} onChange={() => setOrderType("CITYWIDE")} className="form-check-input"/>
+                                <label for="CITYWIDE" className="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">Citywide</label>
+                            </div>
+                            <div class="flex items-center">
+                                <input id="SHIPROCKET" type="radio" name="orderType" value="SHIPROCKET" checked={orderType === "SHIPROCKET"} onChange={() => setOrderType("SHIPROCKET")} className="form-check-input"/>
+                                <label for="SHIPROCKET" className="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">Shiprocket</label>
+                            </div>
+                            <button
+                                className={`btn btn-dark`}
+                                disabled={isButtonDisabled}
+                                onClick={exportCsv}
+                            >   Export</button>
                         </div>
-                    )}
-                </LocalizationProvider>                   
-            </div>
-            <div className="mt-4">
-                <p><strong>Note*</strong> <i>For every export,you can set the date limit to a maximum of 30 days.</i></p>
-            </div>
-            <div className="riderexport mt-3 pt-3 mb-3">
-                <div className="">
+                        {loadingCSV && (
+                            <div className="loader-fixed">
+                                <span className="flex items-center gap-2">
+                                    <Loading />
+                                </span>
+                            </div>
+                        )}
+                    </LocalizationProvider>
+                </div>
+                <hr></hr>
+                <div className="mt-3">
+                    <p className="mb-2"><strong>Note*</strong></p>
+                    <ol className="list-decimal ms-3">
+                        <li>For every export, you can set the date limit to a maximum of 30 days.</li>
+                        <li>On Citywide selection, you will get all orders.</li>
+                        <li>On Shiprocket selection, you will get all orders, except cancelled & which are not rider assinged.</li>
+                    </ol>
+                </div>
+            </Card>
+
+            <Card className="h-100 mt-3">
+                <div className="card-header md:flex justify-between items-center mb-4 px-0 py-2">
                     <div className="flex items-center">
                         <h4 className="card-title">Export Rider Detail</h4>
                     </div>
                 </div>
-                <button
-                    className="btn btn-dark"
-                    onClick={exportRiderCsv}
-                >   Export</button>
-            </div>
-        </Card>
-    </>
-  );
+                <div className="export-data flex space-x-4">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" value="" id="riderCity" onChange={handleCheckboxChange} />
+                        <label class="form-check-label" for="riderCity">
+                            Rider City
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" value="" id="vehicleType" onChange={handleCheckboxChange} />
+                        <label class="form-check-label" for="vehicleType">
+                            Vehicle Type
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" value="" id="status" onChange={handleCheckboxChange} />
+                        <label class="form-check-label" for="status">
+                            Status
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" value="" id="onRoleRider" onChange={handleCheckboxChange} />
+                        <label class="form-check-label" for="onRoleRider">
+                            On role riders
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" value="" id="lastActivity" onChange={handleCheckboxChange} />
+                        <label class="form-check-label" for="lastActivity">
+                            Last activity
+                        </label>
+                    </div>
+
+                </div>
+
+                <div className="mt-3 pt-3 mb-3">
+                    <button
+                        className="btn btn-dark"
+                        onClick={exportRegRiderFilter}
+                    >   Export</button>
+                </div>
+                <hr></hr>
+                <div className="mt-3">
+                    <p className="mb-2"><strong>Note*</strong></p>
+                    <ol className="list-decimal ms-3">
+                        <li>By default you will get Rider Id, Rider Name, Rider Mobile No., WalletBalance.</li>
+                        <li>Select checkbox for adding column in the export report. </li>
+                        <li>In this export you will get only register riders which has done at least one order wheather it's cancelled.</li>
+                    </ol>
+                </div>
+            </Card>
+        </>
+    );
 };
 
 export default Export_Reports;

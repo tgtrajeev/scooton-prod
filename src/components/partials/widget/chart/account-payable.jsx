@@ -94,6 +94,6 @@ const AccountPayable = ({ height = 300 }) => {
       <Chart options={options} series={series} type="line" height={height} />
     </>
   );
-};
+}; 
 
 export default AccountPayable;

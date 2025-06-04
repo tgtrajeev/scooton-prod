@@ -7,6 +7,7 @@ import Tooltip from "@/components/ui/Tooltip";
 import Loading from "../../components/Loading";
 import { toast, ToastContainer } from "react-toastify";
 import axiosInstance from "../../api";
+import Modal from "@/components/ui/Modal"; // Assuming you have Modal component
 
 const ConfigurationKeys = () => {
   const [loading, setLoading] = useState(true);
@@ -16,6 +17,9 @@ const ConfigurationKeys = () => {
   const [totalCount, setTotalCount] = useState(0);
   const [pagesizedata, setpagesizedata] = useState(10);
   const [editedValues, setEditedValues] = useState({});
+  const [isEditModal, setIsEditModal] = useState(false); // State for modal visibility
+  const [modalKeyName, setModalKeyName] = useState(""); // State for modal Key Name
+  const [modalKeyValue, setModalKeyValue] = useState(""); // State for modal Key Value
 
   // Fetch config keys
   useEffect(() => {
@@ -43,20 +47,16 @@ const ConfigurationKeys = () => {
     }
   }, [currentPage, pagesizedata]);
 
-  // Handle input change
-  const handleKeyValueChange = (id, newValue) => {
-    setEditedValues((prev) => ({
-      ...prev,
-      [id]: newValue,
-    }));
+  // Handle input change for Key Value
+  const handleKeyValueChange = (newValue) => {
+    setModalKeyValue(newValue);
   };
 
-  // Handle save button click
-  const handleSaveKeyValue = async (row) => {
+  // Handle save button click to update only Key Value
+  const handleSaveKeyValue = async () => {
     const token = localStorage.getItem("jwtToken");
-    const id = row.original.id;
-    const keyName = row.original.keyName;
-    const updatedValue = editedValues[id];
+    const updatedValue = modalKeyValue; // This is the value from the modal input
+    const keyName = modalKeyName; // This is the key name you're updating
 
     if (!updatedValue || !keyName) {
       toast.error("Missing key name or value");
@@ -67,8 +67,8 @@ const ConfigurationKeys = () => {
       const response = await axiosInstance.put(
         `${BASE_URL}/api/v1/config`,
         {
-          keyName,
-          keyValue: updatedValue,
+          keyName: keyName, // keyName remains the same, you're only updating keyValue
+          keyValue: updatedValue, // The value being updated for the keyName
         },
         {
           headers: {
@@ -81,14 +81,10 @@ const ConfigurationKeys = () => {
       // Optionally refresh data
       setRoleList((prev) =>
         prev.map((item) =>
-          item.id === id ? { ...item, keyValue: updatedValue } : item
+          item.keyName === keyName ? { ...item, keyValue: updatedValue } : item
         )
       );
-      setEditedValues((prev) => {
-        const newState = { ...prev };
-        delete newState[id];
-        return newState;
-      });
+      setIsEditModal(false); // Close the modal
     } catch (error) {
       console.error("Update failed:", error);
       toast.error("Failed to update key value");
@@ -113,15 +109,8 @@ const ConfigurationKeys = () => {
       Header: "Key Value",
       accessor: "keyValue",
       Cell: ({ row }) => {
-        const id = row.original.id;
-        return (
-          <input
-            type="text"
-            className="form-control"
-            value={editedValues[id] ?? row.original.keyValue}
-            onChange={(e) => handleKeyValueChange(id, e.target.value)}
-          />
-        );
+        const { keyValue } = row.original;
+        return <span>{keyValue}</span>; // Displaying the Key Value normally, no input
       },
     },
     {
@@ -129,11 +118,15 @@ const ConfigurationKeys = () => {
       accessor: "action",
       Cell: ({ row }) => (
         <div className="flex space-x-3 rtl:space-x-reverse">
-          <Tooltip content="Save" placement="top" arrow animation="shift-away">
+          <Tooltip content="Edit" placement="top" arrow animation="shift-away">
             <button
               className="action-btn"
               type="button"
-              onClick={() => handleSaveKeyValue(row)}
+              onClick={() => {
+                setModalKeyName(row.original.keyName); // Set key name to modal (readonly)
+                setModalKeyValue(row.original.keyValue); // Set key value to modal (editable)
+                setIsEditModal(true); // Open modal
+              }}
             >
               <Icon icon="heroicons:paper-airplane" />
             </button>
@@ -141,14 +134,14 @@ const ConfigurationKeys = () => {
         </div>
       ),
     },
-  ], [editedValues]);
+  ], []);
 
   const tableInstance = useTable(
     {
       columns,
       data: roleList,
       initialState: {
-        pageIndex: currentPage,
+        pageIndex: currentPage, // initial page index
         pageSize: pagesizedata,
       },
       manualPagination: true,
@@ -164,17 +157,12 @@ const ConfigurationKeys = () => {
     getTableBodyProps,
     headerGroups,
     page,
-    nextPage,
-    previousPage,
-    canNextPage,
-    canPreviousPage,
-    pageOptions,
-    state,
-    gotoPage,
     prepareRow,
+    state, // The state object contains pageIndex
+    gotoPage,
   } = tableInstance;
 
-  const { pageIndex } = state;
+  const { pageIndex } = state; // Correctly accessing pageIndex from state
 
   const handlePageSizeChange = (newSize) => {
     setpagesizedata(newSize);
@@ -182,7 +170,7 @@ const ConfigurationKeys = () => {
   };
 
   useEffect(() => {
-    setCurrentPage(pageIndex);
+    setCurrentPage(pageIndex); // Ensure currentPage is updated correctly with pageIndex
   }, [pageIndex]);
 
   return (
@@ -252,83 +240,46 @@ const ConfigurationKeys = () => {
             </div>
           </div>
         </div>
-
-        {/* <div className="md:flex justify-between mt-6 items-center">
-          <div className="flex items-center space-x-3 rtl:space-x-reverse">
-            <select
-              className="form-control py-2 w-max"
-              value={pagesizedata}
-              onChange={(e) => handlePageSizeChange(Number(e.target.value))}
-            >
-              {[10, 20, 30, 40, 50].map((size) => (
-                <option key={size} value={size}>
-                  Show {size}
-                </option>
-              ))}
-            </select>
-            <span className="text-sm font-medium text-slate-600 dark:text-slate-300">
-              Page {pageIndex + 1} of {pageCount}
-            </span>
-          </div>
-
-          <ul className="flex items-center space-x-3 rtl:space-x-reverse">
-            {totalCount > pagesizedata && (
-              <>
-                <li>
-                  <button
-                    onClick={() => gotoPage(0)}
-                    disabled={currentPage === 0}
-                    className={currentPage === 0 ? "opacity-50 cursor-not-allowed" : ""}
-                  >
-                    <Icon icon="heroicons:chevron-double-left-solid" />
-                  </button>
-                </li>
-                <li>
-                  <button
-                    onClick={() => setCurrentPage(currentPage - 1)}
-                    disabled={currentPage === 0}
-                    className={currentPage === 0 ? "opacity-50 cursor-not-allowed" : ""}
-                  >
-                    Prev
-                  </button>
-                </li>
-                {pageOptions.slice(0, 10).map((page, idx) => (
-                  <li key={idx}>
-                    <button
-                      className={`${
-                        idx === pageIndex
-                          ? "bg-scooton-900 text-white"
-                          : "bg-slate-100 text-slate-900"
-                      } text-sm rounded h-6 w-6 flex items-center justify-center`}
-                      onClick={() => gotoPage(idx)}
-                    >
-                      {page + 1}
-                    </button>
-                  </li>
-                ))}
-                <li>
-                  <button
-                    onClick={() => setCurrentPage(currentPage + 1)}
-                    disabled={currentPage >= pageCount - 1}
-                    className={currentPage >= pageCount - 1 ? "opacity-50 cursor-not-allowed" : ""}
-                  >
-                    Next
-                  </button>
-                </li>
-                <li>
-                  <button
-                    onClick={() => gotoPage(pageCount - 1)}
-                    disabled={currentPage >= pageCount - 1}
-                    className={currentPage >= pageCount - 1 ? "opacity-50 cursor-not-allowed" : ""}
-                  >
-                    <Icon icon="heroicons:chevron-double-right-solid" />
-                  </button>
-                </li>
-              </>
-            )}
-          </ul>
-        </div> */}
       </Card>
+
+      {/* Modal for editing key value */}
+      <Modal
+        activeModal={isEditModal}
+        uncontrol
+        className="max-w-2xl"
+        title="Edit Key Value"
+        onClose={() => setIsEditModal(false)}
+        centered
+      >
+        <div>
+          <div className="space-y-4 max-h-[60vh] overflow-y-auto px-2">
+            <div>
+              <label className="block font-medium mb-1">Key Name</label>
+              <input
+                className="w-full border px-3 py-2 rounded dark:bg-slate-700 dark:text-white"
+                type="text"
+                value={modalKeyName}
+                readOnly // Make keyName readonly (cannot edit)
+              />
+            </div>
+            <div>
+              <label className="block font-medium mb-1">Key Value</label>
+              <input
+                className="w-full border px-3 py-2 rounded dark:bg-slate-700 dark:text-white"
+                type="text"
+                value={modalKeyValue}
+                onChange={(e) => handleKeyValueChange(e.target.value)} // Allow value update
+              />
+            </div>
+          </div>
+          <hr className="mt-3" />
+          <div className="d-flex gap-2 justify-content-end mt-6">
+            <button className="btn btn-dark" type="button" onClick={handleSaveKeyValue}>
+              Save
+            </button>
+          </div>
+        </div>
+      </Modal>
     </>
   );
 };

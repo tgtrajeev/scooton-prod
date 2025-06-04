@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { format } from "date-fns";  // Import the 'format' function
 import Card from "@/components/ui/Card";
-import RevenueBarChart from "@/components/partials/widget/chart/revenue-bar-chart";
 import RadialsChart from "@/components/partials/widget/chart/radials";
 import SelectMonth from "@/components/partials/SelectMonth";
 import RecentCompletedOrders from "@/components/partials/Table/recent-completed-orders";
@@ -8,7 +8,8 @@ import HomeBredCurbs from "./HomeBredCurbs";
 import { BASE_URL } from "../../api";
 import OnRoleRiders from "../riders/on-role-riders";
 import axiosInstance from "../../api";
-import PolarAreaChart from "../../components/partials/widget/chart/polar-area-chart";
+import RiderAnalytics from "@/components/partials/widget/chart/rider-analytics";
+import OrderAnalytics from "@/components/partials/widget/chart/order-analytics";
 
 const Dashboard = () => {
   const [CompletedOrders, setCompletedOrders] = useState("");
@@ -21,6 +22,15 @@ const Dashboard = () => {
   const [onRoleRiders, setOnRoleRiders] = useState(0);
   const [totalRiders, setTotalRiders] = useState(0);
   const [unregisteredRiders, setUnregisteredRiders] = useState(0);
+
+  const [dateRange, setDateRange] = useState({
+    startDate: format(new Date(new Date().setDate(new Date().getDate() - 6)), "yyyy-MM-dd"),
+    endDate: format(new Date(), "yyyy-MM-dd"),
+  });
+
+  const handleDateRangeChange = (newRange) => {
+    setDateRange(newRange);
+  };
 
   useEffect(() => {
     const fetchOrderData = async () => {
@@ -61,10 +71,9 @@ const Dashboard = () => {
     fetchOrderData();
   }, [serviceAreaId]);
 
-
   return (
     <div>
-      <HomeBredCurbs title="Dashboard" />
+      <HomeBredCurbs title="Dashboard" onDateRangeChange={handleDateRangeChange} />
       <div className="grid grid-cols-12 gap-4 mb-4">
         <div className="2xl:col-span-12 lg:col-span-12 col-span-12">
           <Card bodyClass="p-4">
@@ -73,7 +82,7 @@ const Dashboard = () => {
                 <div className="flex items-center space-x-6 rtl:space-x-reverse">                  
                   <div className="flex-1">
                     <div className="text-slate-800 dark:text-slate-300 text-md mb-1 font-medium">
-                    Completed Orders
+                      Completed Orders
                     </div>
                     <div className="text-slate-900 dark:text-white tet-lg font-medium">
                       {CompletedOrders}
@@ -85,7 +94,7 @@ const Dashboard = () => {
                 <div className="flex items-center space-x-6 rtl:space-x-reverse">                  
                   <div className="flex-1">
                     <div className="text-slate-800 dark:text-slate-300 text-md mb-1 font-medium">
-                    Incoming Orders
+                      Incoming Orders
                     </div>
                     <div className="text-slate-900 dark:text-white tet-lg font-medium">
                       {IncomingOrders}
@@ -97,7 +106,7 @@ const Dashboard = () => {
                 <div className="flex items-center space-x-6 rtl:space-x-reverse">                  
                   <div className="flex-1">
                     <div className="text-slate-800 dark:text-slate-300 text-md mb-1 font-medium">
-                    Cash Payment Orders
+                      Cash Payment Orders
                     </div>
                     <div className="text-slate-900 dark:text-white tet-lg font-medium">
                       {cashPaymentOrders}
@@ -109,7 +118,7 @@ const Dashboard = () => {
                 <div className="flex items-center space-x-6 rtl:space-x-reverse">                  
                   <div className="flex-1">
                     <div className="text-slate-800 dark:text-slate-300 text-md mb-1 font-medium">
-                    Online Payment Orders
+                      Online Payment Orders
                     </div>
                     <div className="text-slate-900 dark:text-white tet-lg font-medium">
                       {onlinePaymentOrders}
@@ -122,33 +131,12 @@ const Dashboard = () => {
         </div>
       </div>
       <div className="grid grid-cols-12 gap-4">
-        <div className="lg:col-span-8 col-span-12">
-          <Card title="All Vehicle types">
-            <div className="legend-ring">
-              <RevenueBarChart />
-            </div>
-          </Card>
+        <div className="lg:col-span-6 col-span-12">
+          <RiderAnalytics dateRange={dateRange} onDateRangeChange={handleDateRangeChange} />
         </div>
-        <div className="lg:col-span-4 col-span-12">
-          <Card title="Riders Count">
-            {/* <ul className="grid md:grid-cols-2 col-span-1 gap-2">
-              <li>
-                <strong>Total Riders:</strong>{totalRiders}</li>
-              <li>
-                <strong>Active Riders:</strong>{activeRiders}</li>
-              <li>
-                <strong>OnRole Riders:</strong>{onRoleRiders}</li>
-              <li>
-                <strong>Unregistered Riders:</strong>{unregisteredRiders}</li>
-            </ul> */}
-            <RadialsChart />
-          </Card>
+        <div className="lg:col-span-6 col-span-12">
+          <OrderAnalytics dateRange={dateRange} onDateRangeChange={handleDateRangeChange} />
         </div>
-        {/* <div className="lg:col-span-4 col-span-12">
-          <Card title="Riders Count" >
-            <PolarAreaChart />
-          </Card>
-        </div> */}
         <div className="lg:col-span-12 col-span-12">
           <Card title="Recent Completed Orders">
             <RecentCompletedOrders />
@@ -157,8 +145,6 @@ const Dashboard = () => {
         <div className="lg:col-span-12 col-span-12">
           <OnRoleRiders />
         </div>
-        
-       
       </div>
     </div>
   );

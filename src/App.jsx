@@ -148,7 +148,7 @@ function App() {
           <Route path="on-role-riders" element={<OnRoleRiders />} />
           <Route path="rider-detail/:riderId" element={<RiderDetail />} />
           <Route path="all-orders" element={<AllOrders notificationCount={notificationCount} />} />
-          <Route path="all-orders/:id/:ordertype/:search" element={<AllOrders notificationCount={notificationCount}  />} />
+          <Route path="all-orders/:mobilesearch/:mobileordertype/:mobileid" element={<AllOrders notificationCount={notificationCount}  />} />
           <Route path="all-orders/:ordertype" element={<AllOrders notificationCount={notificationCount}  />} />
           <Route path="citywide-orders" element={<CityWideOrders />} />
           <Route path="offline-orders" element={<OfflineOrders />} />

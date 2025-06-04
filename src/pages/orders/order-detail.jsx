@@ -63,14 +63,14 @@ const OrderDetail = () => {
             try {
                 const token = localStorage.getItem('jwtToken');
                 if (thirdPartyUsername) {
-                    const response = await axiosInstance.post(`${BASE_URL}/thirdParty/get-third-party-orders/${orderId}?orderType=THIRDPARTY`, {
+                    const response = await axiosInstance.get(`${BASE_URL}/order/v2/get-order-details/${orderId}?orderType=THIRDPARTY`, {
                         headers: {
                             Authorization: `Bearer ${token}`,
                         },
                     });
                     setOrderDetail(response.data.jsonData);
                 } else {
-                    const response = await axiosInstance.get(`${BASE_URL}/order/v2/orders/get-city-wide-order/${orderId}?orderType=CITYWIDE`, {
+                    const response = await axiosInstance.get(`${BASE_URL}/order/v2/get-order-details/${orderId}?orderType=CITYWIDE`, {
                         headers: {
                             Authorization: `Bearer ${token}`,
                         },
@@ -262,6 +262,14 @@ const OrderDetail = () => {
         address: customerDetails?.deliveryAddress,
         name: "Drop Location"
     }
+    const mrp = orderDetails?.orderAmount?.mrp || 0;
+    const discount = orderDetails?.orderAmount?.discount || 0;
+    const mcdTax = orderDetails?.orderAmount?.mcdTax || 0;
+    const stateTax = orderDetails?.orderAmount?.stateTax || 0;
+    const tollTax = orderDetails?.orderAmount?.tollTax || 0;
+
+    const calculatedAmount = mrp - discount + mcdTax + stateTax + tollTax;
+
 
     return (
         <Card>
@@ -275,19 +283,19 @@ const OrderDetail = () => {
                             <Icon icon="heroicons:arrow-left-circle" className="text-xl font-bold text-scooton-500" />
                         </Link> */}
                         {customRadio && pagenumber ? (
-                            orders == 'ALL' ? (
+                            orders == 'ALLCITYWIDE' ? (
                                 <Link to={`/all-orders?customRadio=${customRadio}&page=${pagenumber || 0}&searchId=${searchId || ''}&searchText=${searchText || ''}&orders=ALL&pagesizedata=${pagesizedata}`}>
                                     <Icon icon="heroicons:arrow-left-circle" className="text-xl font-bold text-scooton-500" />
                                 </Link>
-                            ) : orders == 'citywide' ? (
-                                <Link to={`/citywide-orders?customRadio=${customRadio}&page=${pagenumber || 0}&searchId=${searchId || ''}&searchText=${searchText || ''}&orders=citywide&pagesizedata=${pagesizedata}`}>
+                            ) : orders == 'CITYWIDE' ? (
+                                <Link to={`/offline-orders?customRadio=${customRadio}&page=${pagenumber || 0}&searchId=${searchId || ''}&searchText=${searchText || ''}&orders=citywide&pagesizedata=${pagesizedata}`}>
                                     <Icon icon="heroicons:arrow-left-circle" className="text-xl font-bold text-scooton-500" />
                                 </Link>
-                            ) : orders == 'offline' ? (
-                                <Link to={`/offline-orders?customRadio=${customRadio}&page=${pagenumber || 0}&searchId=${searchId || ''}&searchText=${searchText || ''}&orders=offline&pagesizedata=${pagesizedata}`}>
+                            ) : orders.trim() == 'CITYWIDEON' ? (
+                                <Link to={`/citywide-orders?customRadio=${customRadio}&page=${pagenumber || 0}&searchId=${searchId || ''}&searchText=${searchText || ''}&orders=CITYWIDEON&pagesizedata=${pagesizedata}`}>
                                     <Icon icon="heroicons:arrow-left-circle" className="text-xl font-bold text-scooton-500" />
                                 </Link>
-                            ) : orders == 'SparksPlus' || orders == 'ShipRocket' ? (
+                            ) : orders == 'THIRDPARTY' || orders == 'SHIPROCKET' ? (
                                 <Link to={`/${orders}?customRadio=${customRadio}&page=${pagenumber || 0}&searchId=${searchId || ''}&searchText=${searchText || ''}&orders=${orders}`}>
                                     <Icon icon="heroicons:arrow-left-circle" className="text-xl font-bold text-scooton-500" />
                                 </Link>
@@ -311,15 +319,15 @@ const OrderDetail = () => {
 
                         <form className="d-flex gap-2" onSubmit={handleAssign}>
                             <input
-                            type="text"
-                            className="form-control"
-                            placeholder="Rider ID"
-                            value={riderId}
-                            onChange={(e) => setRiderId(e.target.value)}
-                            required
+                                type="text"
+                                className="form-control"
+                                placeholder="Rider ID"
+                                value={riderId}
+                                onChange={(e) => setRiderId(e.target.value)}
+                                required
                             />
                             <button type="submit" className="btn btn-sm btn-dark py-1 px-2">
-                            Assign
+                                Assign
                             </button>
                         </form>
                     </div>
@@ -554,7 +562,7 @@ const OrderDetail = () => {
                     </ul>
                 </div>
             </div>
-            <div className="row">
+            <div className="row order-detail-list">
                 <div className="col-lg-6">
                     <div className="mx-auto shadow-base dark:shadow-none my-8 rounded-md overflow-x-auto">
                         <h6 className="text-scooton-500 p-3 border-bottom">Order Info</h6>
@@ -622,16 +630,18 @@ const OrderDetail = () => {
                                 </tr>
                                 <tr className="border-b border-slate-100 dark:border-slate-700">
                                     <td className=" px-6 py-2"> Distance (KM) </td>
-                                    {thirdPartyUsername ? (
+                                    <td className=" px-6 py-2 text-end">{orderDetails?.distance}</td>
+
+                                    {/* {thirdPartyUsername ? (
                                         <td className=" px-6 py-2 text-end">{orderDetails?.distance?.text} , {orderDetails?.distance?.value} </td>
                                     ) : (
                                         <td className=" px-6 py-2 text-end">{orderDetails?.distance}</td>
-                                    )}
+                                    )} */}
 
                                 </tr>
 
 
-                                {thirdPartyUsername ? (
+                                {/* {thirdPartyUsername ? (
                                     <>
                                         <tr className="border-b border-slate-100 dark:border-slate-700">
                                             <td className=" px-6 py-2"> Pickup OTP </td>
@@ -643,18 +653,18 @@ const OrderDetail = () => {
                                         </tr>
                                     </>
 
-                                ) : (
-                                    <>
-                                        <tr className="border-b border-slate-100 dark:border-slate-700">
-                                            <td className=" px-6 py-2"> Pickup OTP </td>
-                                            <td className=" px-6 py-2 text-end">{orderDetails?.pickupOtp}</td>
-                                        </tr>
-                                        <tr className="border-b border-slate-100 dark:border-slate-700">
-                                            <td className=" px-6 py-2"> Delivery OTP</td>
-                                            <td className=" px-6 py-2 text-end">{orderDetails?.deliveryOtp}</td>
-                                        </tr>
-                                    </>
-                                )}
+                                ) : ( */}
+                                <>
+                                    <tr className="border-b border-slate-100 dark:border-slate-700">
+                                        <td className=" px-6 py-2"> Pickup OTP </td>
+                                        <td className=" px-6 py-2 text-end">{orderDetails?.pickupOtp}</td>
+                                    </tr>
+                                    <tr className="border-b border-slate-100 dark:border-slate-700">
+                                        <td className=" px-6 py-2"> Delivery OTP</td>
+                                        <td className=" px-6 py-2 text-end">{orderDetails?.deliveryOtp}</td>
+                                    </tr>
+                                </>
+
 
                                 {!thirdPartyUsername && (
                                     <>
@@ -788,61 +798,46 @@ const OrderDetail = () => {
                                         <td className="text-end px-6 py-2">{orderDetails?.paymentStatus}</td>
                                     </tr>
                                 )}
-                                {(orderDetails.paymentMode === 'PREPAID') && (
-                                    <tr className="border-b border-slate-100 dark:border-slate-700">
-                                        <td className="px-6 py-2">Refund Message</td>
-                                        {/* <td className="text-end px-6 py-2">Cancelled</td> */}
-                                        <td className="text-end px-6 py-2">{orderDetails?.refundStatus || ""}</td>
-                                    </tr>
-                                )}
-                                {/* {orderDetails.paymentMode === 'PREPAID' && (
-                                    <tr className="border-b border-slate-100 dark:border-slate-700">
-                                        <td className="px-6 py-2">Refund Message</td>
-                                        <td className="text-end px-6 py-2">{orderDetails.refundStatus}</td>
-                                    </tr>
-                                )} */}
-
-                                {/* {(orderDetails.orderStatus === 'In Progress' && orderDetails.paymentMode === 'PREPAID') && (
-                                    <tr className="border-b border-slate-100 dark:border-slate-700">
-                                        <td className="px-6 py-2">Payment Status</td>
-                                        <td className="text-end px-6 py-2">{orderDetails?.paymentStatus}</td>
-                                    </tr>
-                                )} */}
                                 <tr className="border-b border-slate-100 dark:border-slate-700">
-                                    <td className="px-6 py-2">MRP</td>
+                                    <td className="px-6 py-2">Applied Promocode</td>
+                                    <td className="text-end px-6 py-2">{orderDetails.orderAmount.promoCode}</td>
+                                </tr>
+                                <tr className="border-b border-slate-100 dark:border-slate-700">
+                                    <td className="px-6 py-2">Fare Amount <small>(As per tariff)</small></td>
                                     <td className="text-end px-6 py-2">
-                                        {thirdPartyUsername ? orderDetails.orderAmount : orderDetails.orderAmount.mrp}
+                                        {orderDetails.orderAmount.mrp}
+                                        {/* {thirdPartyUsername ? orderDetails.orderAmount.mrp : orderDetails.orderAmount.mrp} */}
                                     </td>
                                 </tr>
-                                {!thirdPartyUsername && (
-                                    <>
-                                        <tr className="border-b border-slate-100 dark:border-slate-700">
-                                            <td className="px-6 py-2">Discount</td>
-                                            <td className="text-end px-6 py-2">{orderDetails.orderAmount.discount}</td>
-                                        </tr>
-                                        <tr className="border-b border-slate-100 dark:border-slate-700">
-                                            <td className="px-6 py-2">MCD Tax</td>
-                                            <td className="text-end px-6 py-2">{orderDetails?.orderAmount?.mcdTax?.toFixed(3)}</td>
-                                        </tr>
-                                        <tr className="border-b border-slate-100 dark:border-slate-700">
-                                            <td className="px-6 py-2">State Tax</td>
-                                            <td className="text-end px-6 py-2">{orderDetails.orderAmount.stateTax?.toFixed(3)}</td>
-                                        </tr>
-                                        <tr className="border-b border-slate-100 dark:border-slate-700">
-                                            <td className="px-6 py-2">Toll Tax</td>
-                                            <td className="text-end px-6 py-2">{orderDetails.orderAmount.tollTax?.toFixed(3)}</td>
-                                        </tr>
-                                        <tr className="border-b border-slate-100 dark:border-slate-700">
-                                            <td className="px-6 py-2">Applied Promocode</td>
-                                            <td className="text-end px-6 py-2">{orderDetails.orderAmount.promoCode}</td>
-                                        </tr>
-                                    </>
-                                )}
-
                                 <tr className="border-b border-slate-100 dark:border-slate-700">
-                                    <td className="px-6 py-2">Total Amount Payable</td>
+                                    <td className="px-6 py-2">Discount</td>
+                                    <td className="text-end px-6 py-2">{orderDetails.orderAmount.discount}</td>
+                                </tr>
+                                <tr className="border-b border-slate-100 dark:border-slate-700">
+                                    <td className="px-6 py-2">MCD Tax</td>
+                                    <td className="text-end px-6 py-2">{orderDetails?.orderAmount?.mcdTax?.toFixed(3)}</td>
+                                </tr>
+                                <tr className="border-b border-slate-100 dark:border-slate-700">
+                                    <td className="px-6 py-2">State Tax</td>
+                                    <td className="text-end px-6 py-2">{orderDetails.orderAmount.stateTax?.toFixed(3)}</td>
+                                </tr>
+                                <tr className="border-b border-slate-100 dark:border-slate-700">
+                                    <td className="px-6 py-2">Toll Tax</td>
+                                    <td className="text-end px-6 py-2">{orderDetails.orderAmount.tollTax?.toFixed(3)}</td>
+                                </tr>
+                                <tr className="border-b border-slate-100 dark:border-slate-700">
+                                    <td className="px-6 py-2">
+                                        Order Amount <small>(Fare - Discount + MCD + State + Toll Tax)</small>
+                                    </td>
                                     <td className="text-end px-6 py-2">
-                                        {thirdPartyUsername ? orderDetails.orderAmount : orderDetails.orderAmount.finalPrice}
+                                        {calculatedAmount}
+                                    </td>
+                                </tr>
+                                <tr className="border-b border-slate-100 dark:border-slate-700">
+                                    <td className="px-6 py-2">Total Amount Payable <small>(Collactive Amount)</small></td>
+                                    <td className="text-end px-6 py-2">
+                                        {orderDetails?.orderAmount?.collectiveAmount}
+                                        {/* {thirdPartyUsername ? orderDetails.orderAmount : orderDetails.orderAmount.finalPrice} */}
                                     </td>
                                 </tr>
                             </tbody>
