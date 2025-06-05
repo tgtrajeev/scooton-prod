@@ -221,7 +221,7 @@ const OrderDetail = () => {
             radius: 5,
             userLatitude: customerDetails?.pickupLocation?.lat,
             userLongitude: customerDetails?.pickupLocation?.lon,
-            vehicleId: orderDetail?.vehicleDetails?.id
+            vehicleId: orderDetail?.vehicleDetails?.categoryId
         }
         try {
             await axiosInstance.get(`${BASE_URL}/rider/nearby-riders`, { params }).then((response) => {
