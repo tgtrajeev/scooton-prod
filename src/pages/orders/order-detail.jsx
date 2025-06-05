@@ -582,6 +582,9 @@ const OrderDetail = () => {
                                         Order Date
                                     </td>
                                     <td className="px-6 py-2 text-end">
+                                        {orderDetails.orderDateTime}
+                                    </td>
+                                    {/* <td className="px-6 py-2 text-end">
                                         {thirdPartyUsername ? new Date(orderDetails.orderDateTime).toLocaleString("en-US", {
                                             year: "numeric",
                                             month: "short",
@@ -592,7 +595,7 @@ const OrderDetail = () => {
                                             hour12: true,
                                             timeZone: "UTC"
                                         }) : orderDetails.orderDateTime}
-                                    </td>
+                                    </td> */}
                                 </tr>
                                 <tr className="border-b border-slate-100 dark:border-slate-700">
                                     <td className=" px-6 py-2"> Order Status </td>
