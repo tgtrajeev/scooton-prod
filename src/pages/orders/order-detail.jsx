@@ -838,6 +838,14 @@ const OrderDetail = () => {
                                     </td>
                                 </tr>
                                 <tr className="border-b border-slate-100 dark:border-slate-700">
+                                    <td className="px-6 py-2">
+                                        ThirdParty Amount
+                                    </td>
+                                    <td className="text-end px-6 py-2">
+                                        {orderDetails?.orderAmount?.tpAmount ?? 0}
+                                    </td>
+                                </tr>
+                                <tr className="border-b border-slate-100 dark:border-slate-700">
                                     <td className="px-6 py-2">Total Amount Payable <small>(Collactive Amount)</small></td>
                                     <td className="text-end px-6 py-2">
                                         {orderDetails?.orderAmount?.collectiveAmount}

@@ -212,7 +212,7 @@ const Export_Reports = () => {
         setLoadingCSV(true);
 
         const response = await axiosInstance.get(
-        `${BASE_URL}/api/v1/admin/report/get-reports?from_date=${formattedFromDate}&to_date=${formattedToDate}&order_type=${orderType}`,
+        `${BASE_URL}/api/v1/admin/report/get-reports?from_date=${formattedFromDate}&to_date=${formattedToDate}&order_type=${orderType}&vendor_name=SHIPROCKET`,
         {
             responseType: "json",
             headers: {
@@ -310,8 +310,8 @@ const Export_Reports = () => {
                                 <label for="CITYWIDE" className="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">Citywide</label>
                             </div>
                             <div class="flex items-center">
-                                <input id="SHIPROCKET" type="radio" name="orderType" value="SHIPROCKET" checked={orderType === "SHIPROCKET"} onChange={() => setOrderType("SHIPROCKET")} className="form-check-input"/>
-                                <label for="SHIPROCKET" className="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">Shiprocket</label>
+                                <input id="THIRDPARTY" type="radio" name="orderType" value="THIRDPARTY" checked={orderType === "THIRDPARTY"} onChange={() => setOrderType("THIRDPARTY")} className="form-check-input"/>
+                                <label for="THIRDPARTY" className="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">Shiprocket</label>
                             </div>
                             <button
                                 className={`btn btn-dark`}
