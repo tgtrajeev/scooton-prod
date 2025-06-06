@@ -755,15 +755,16 @@ const Order = ({ thirdPartyVendorName, orderCategory, isOfflineOrder }) => {
                                     className="w-48"
                                     value={selectedVehicleType}
                                     onChange={(e) => {
-                                    setSelectedVehicleType(e.target.value);
-                                    // Reset other filters
-                                    setFilterBy('NONE');
-                                    setSearch('');
-                                    }}
+                                const selectedId = e.target.value;
+                                const selectedVehicle = vehicleList.find((v) => v.id === selectedId);
+                                setSelectedVehicleType(selectedVehicle ? selectedVehicle.categoryId : '');
+                                setFilterBy('NONE');
+                                setSearch('');
+                                }}
                                 >
                                     <MenuItem value="0">ALL</MenuItem>
                                     {vehicleList.map((vehicle) => (
-                                    <MenuItem key={vehicle.categoryId} value={vehicle.categoryId}>
+                                    <MenuItem key={vehicle.categoryId} value={vehicle.id}>
                                         {vehicle.type}
                                     </MenuItem>
                                     ))}

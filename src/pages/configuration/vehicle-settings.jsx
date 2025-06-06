@@ -65,6 +65,15 @@ const Vehicle_Settings = () => {
         accessor: (row, i) => i + 1,
       },
       {
+        Header: "Vehicle ID",
+        accessor: "id",
+        Cell: ({ value }) => (
+          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+            {value}
+          </span>
+        )
+      },
+      {
         Header: "Type",
         accessor: "type",
       },

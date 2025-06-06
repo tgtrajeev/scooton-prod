@@ -221,7 +221,7 @@ const OrderDetail = () => {
             radius: 5,
             userLatitude: customerDetails?.pickupLocation?.lat,
             userLongitude: customerDetails?.pickupLocation?.lon,
-            vehicleId: orderDetail?.vehicleDetails?.categoryId
+            vehicleCategoryId: orderDetail?.vehicleDetails?.categoryId
         }
         try {
             await axiosInstance.get(`${BASE_URL}/rider/nearby-riders`, { params }).then((response) => {
@@ -341,7 +341,7 @@ const OrderDetail = () => {
                             <div className="multistep-item">Order Placed hyg</div>
                         </li> */}
                         <li className="multistep-list active">
-                            <span>{thirdPartyUsername ? new Date(orderDetails.orderDateTime).toLocaleString("en-US", {
+                            {/* <span>{thirdPartyUsername ? new Date(orderDetails.orderDateTime).toLocaleString("en-US", {
                                 year: "numeric",
                                 month: "short",
                                 day: "2-digit",
@@ -350,7 +350,8 @@ const OrderDetail = () => {
                                 second: "2-digit",
                                 hour12: true,
                                 timeZone: "UTC"
-                            }) : orderDetails.orderDateTime}</span>
+                            }) : orderDetails.orderDateTime}</span> */}
+                            <span>{orderDetails.orderDateTime}</span>
                             <div className="multistep-item">Order Placed</div>
                         </li>
 
@@ -875,14 +876,62 @@ const OrderDetail = () => {
                                             zoom={13}
                                             onLoad={(map) => (mapRef.current = map)}
                                         >
-                                            {riderNearLocation?.map((marker, index) => (
+                                            {/* {riderNearLocation?.map((marker, index) => (
                                                 <Marker
                                                     key={index}
                                                     position={{ lat: marker.latitude, lng: marker.longitude }}
                                                     icon={marker.riderActiveForOrders ? 'https://image-res.s3.ap-south-1.amazonaws.com/Admin-assets/rider-icon-green.png' : 'https://image-res.s3.ap-south-1.amazonaws.com/Admin-assets/rider-icon-red.png'}
                                                     onClick={() => setSelectedMarker(marker)}
                                                 />
-                                            ))}
+                                            ))} */}
+                                            {riderNearLocation?.map((marker, index) => {
+                                                let iconUrl;
+
+                                                // Determine icon URL based on vehicleId and riderActiveForOrders
+                                                if (marker.vehicleId === 1) {
+                                                    iconUrl = marker.riderActiveForOrders
+                                                    ? 'https://image-res.s3.ap-south-1.amazonaws.com/Admin-assets/Two-Wheeler-green.png'
+                                                    : 'https://image-res.s3.ap-south-1.amazonaws.com/Admin-assets/Two-Wheeler.png';
+                                                } else if (marker.vehicleId === 2) {
+                                                    iconUrl = marker.riderActiveForOrders
+                                                    ? 'https://image-res.s3.ap-south-1.amazonaws.com/Admin-assets/Two-Wheeler-EV-green.png'
+                                                    : 'https://image-res.s3.ap-south-1.amazonaws.com/Admin-assets/Two-Wheeler-EV.png';
+                                                } else if (marker.vehicleId === 3) {
+                                                    iconUrl = marker.riderActiveForOrders
+                                                    ? 'https://image-res.s3.ap-south-1.amazonaws.com/Admin-assets/Tata-Ace-green.png'
+                                                    : 'https://image-res.s3.ap-south-1.amazonaws.com/Admin-assets/Tata-Ace.png';
+                                                } else if (marker.vehicleId === 4) {
+                                                    iconUrl = marker.riderActiveForOrders
+                                                    ? 'https://image-res.s3.ap-south-1.amazonaws.com/Admin-assets/Three-Wheeler-green.png'
+                                                    : 'https://image-res.s3.ap-south-1.amazonaws.com/Admin-assets/Three-Wheeler.png';
+                                                } else if (marker.vehicleId === 5) {
+                                                    iconUrl = marker.riderActiveForOrders
+                                                    ? 'https://image-res.s3.ap-south-1.amazonaws.com/Admin-assets/Eeco-green.png'
+                                                    : 'https://image-res.s3.ap-south-1.amazonaws.com/Admin-assets/Eeco.png';
+                                                } else if (marker.vehicleId === 6) {
+                                                    iconUrl = marker.riderActiveForOrders
+                                                    ? 'https://image-res.s3.ap-south-1.amazonaws.com/Admin-assets/Champion-green.png'
+                                                    : 'https://image-res.s3.ap-south-1.amazonaws.com/Admin-assets/Champion.png';
+                                                } else if (marker.vehicleId === 7) {
+                                                    iconUrl = marker.riderActiveForOrders
+                                                    ? 'https://image-res.s3.ap-south-1.amazonaws.com/Admin-assets/Pickup-8ft-green.png'
+                                                    : 'https://image-res.s3.ap-south-1.amazonaws.com/Admin-assets/Pickup-8ft.png';
+                                                }
+                                                 else {
+                                                    iconUrl = marker.riderActiveForOrders
+                                                    ? 'https://image-res.s3.ap-south-1.amazonaws.com/Admin-assets/rider-icon-green.png'
+                                                    : 'https://image-res.s3.ap-south-1.amazonaws.com/Admin-assets/rider-icon-red.png';
+                                                }
+
+                                                return (
+                                                    <Marker
+                                                    key={index}
+                                                    position={{ lat: marker.latitude, lng: marker.longitude }}
+                                                    icon={iconUrl}
+                                                    onClick={() => setSelectedMarker(marker)}
+                                                    />
+                                                );
+                                            })}
 
                                             {selectedMarker && selectedMarker.latitude && selectedMarker.longitude && (
                                                 <InfoWindow
