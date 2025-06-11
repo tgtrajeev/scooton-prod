@@ -435,60 +435,46 @@ const Order = ({ thirdPartyVendorName, orderCategory, isOfflineOrder }) => {
     };
 
     const fetchOrders = async (orderType) => {
-        setLoading(true);
+    setLoading(true);
 
-        // let searchtype
-        // if (search == '') {
-        //     searchtype = 'NONE'
-        // } else {
-        //     searchtype = filterby
-        // }
+    const params = new URLSearchParams();
+    params.append('page', currentPage);
+    params.append('size', pagesizedata);
+    params.append('sort', 'orderId');
+    params.append('orderStatus', orderType);
+    params.append('orderType', orderCategory);
+    params.append("isOfflineOrder", isOfflineOrder);
 
-        const params = new URLSearchParams();
-        params.append('page', currentPage);
-        params.append('size', pagesizedata);
-        params.append('sort', 'orderId');
-        params.append('orderStatus', orderType);
-        //params.append('searchType', filterby);
-        //params.append('searchTypeValue', search.trim());
-        params.append('orderType', orderCategory);
-        params.append("isOfflineOrder", isOfflineOrder)
+    if (thirdPartyVendorName) {
+        params.append('thirdPartyVendorName', thirdPartyVendorName);
+    }
 
-        if (thirdPartyVendorName) {
-            params.append('thirdPartyVendorName', thirdPartyVendorName);
-        }
+    if (filterby !== 'NONE' && search.trim() !== '') {
+        params.append('searchType', filterby);
+        params.append('searchTypeValue', search.trim());
+    } else if (selectedVehicleType !== "0") {
+        params.append('searchType', 'VEHICLE');
+        params.append('searchTypeValue', selectedVehicleType);
+    } else {
+        params.append('searchType', 'NONE');
+        params.append('searchTypeValue', '');
+    }
 
-        // NEW LOGIC
-        if (filterby !== 'NONE' && search.trim() !== '') {
-            params.append('searchType', filterby);
-            params.append('searchTypeValue', search.trim());
-        } else if (selectedVehicleType !== "0") {
-            params.append('searchType', 'VEHICLE');
-            params.append('searchTypeValue', selectedVehicleType);
-        } else {
-            params.append('searchType', 'NONE');
-            params.append('searchTypeValue', '');
-        }
+    const url = `${BASE_URL}/api/v1/admin/orders/get-list?${params.toString()}`;
+    console.log("API Request URL:", url);
 
+    SetOrderType(orderType);
 
-        SetOrderType(orderType)
-        axiosInstance
-            .get(
-                `${BASE_URL}/api/v1/admin/orders/get-list?${params.toString()}`
-            )
-            .then((response) => {
-                console.log("response", response.data.jsonData)
-                setOrderData(response.data.jsonData.list);
-                setTotalCount(Number(response.data.jsonData.headers["x-total-count"]));
-                setPageCount(Number(response.data.jsonData.headers["x-total-pages"]));
-            })
-            .catch((error) => {
-                console.error("Error fetching order data:", error);
-            })
-            .finally(() => {
-                setLoading(false);
-            });
-
+    try {
+        const response = await axiosInstance.get(url);
+        setOrderData(response.data.jsonData.list);
+        setTotalCount(Number(response.data.jsonData.headers["x-total-count"]));
+        setPageCount(Number(response.data.jsonData.headers["x-total-pages"]));
+    } catch (error) {
+        console.error("Error fetching order data:", error);
+    } finally {
+        setLoading(false);
+    }
     };
 
 
@@ -685,8 +671,11 @@ const Order = ({ thirdPartyVendorName, orderCategory, isOfflineOrder }) => {
             try {
                 const response = await axiosInstance.get(`${BASE_URL}/api/v1/admin/config/vehicles`);
                 const data = response.data?.jsonData || [];
-                // Removed the .filter() to show the complete list
-                setVehicleList(data);
+
+                // Filter to show only vehicles with isDisplay: true
+                const displayedVehicles = data.filter((vehicle) => vehicle.isDisplay);
+
+                setVehicleList(displayedVehicles);
             } catch (error) {
                 console.error("Error fetching vehicle data:", error);
             }
@@ -752,22 +741,21 @@ const Order = ({ thirdPartyVendorName, orderCategory, isOfflineOrder }) => {
                             <FormControl className="">
                                 <label className="text-sm mb-1">Vehicle Type</label>
                                 <Select
-                                    className="w-48"
-                                    value={selectedVehicleType}
-                                    onChange={(e) => {
-                                const selectedId = e.target.value;
-                                const selectedVehicle = vehicleList.find((v) => v.id === selectedId);
-                                setSelectedVehicleType(selectedVehicle ? selectedVehicle.categoryId : '');
-                                setFilterBy('NONE');
-                                setSearch('');
+                                className="w-48"
+                                value={selectedVehicleType}
+                                onChange={(e) => {
+                                    const selectedId = e.target.value;
+                                    setSelectedVehicleType(selectedId);
+                                    setFilterBy('NONE');
+                                    setSearch('');
                                 }}
                                 >
-                                    <MenuItem value="0">ALL</MenuItem>
-                                    {vehicleList.map((vehicle) => (
-                                    <MenuItem key={vehicle.categoryId} value={vehicle.id}>
-                                        {vehicle.type}
+                                <MenuItem value="0">ALL</MenuItem>
+                                {vehicleList.map((vehicle) => (
+                                    <MenuItem key={vehicle.id} value={vehicle.id}>
+                                    {vehicle.type}
                                     </MenuItem>
-                                    ))}
+                                ))}
                                 </Select>
                             </FormControl>
 

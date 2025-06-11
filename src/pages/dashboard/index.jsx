@@ -34,27 +34,6 @@ const Dashboard = () => {
 
   useEffect(() => {
     const fetchOrderData = async () => {
-      try {
-        const response = await axiosInstance.get(
-          `${BASE_URL}/order-history/orders/get-all-riders-count`
-        );
-
-        console.log("API Response:", response.data.data);
-
-        setActiveRiders(response.data.data.activeRiders || 0);
-        setOnRoleRiders(response.data.data.onRoleRiders || 0);
-        setTotalRiders(response.data.data.totalRiders || 0);
-        setUnregisteredRiders(response.data.data.unregisteredRiders || 0);
-      } catch (error) {
-        console.error("Error fetching order data:", error);
-      }
-    };
-
-    fetchOrderData();
-  }, []);
-
-  useEffect(() => {
-    const fetchOrderData = async () => {
       const token = localStorage.getItem("jwtToken");
       try {
         const responseCompleted = await axiosInstance.post(`${BASE_URL}/order-history/orders/count-total/city-wide`,).then((response) => {
@@ -137,14 +116,14 @@ const Dashboard = () => {
         <div className="lg:col-span-12 col-span-12">
           <OrderAnalytics dateRange={dateRange} onDateRangeChange={handleDateRangeChange} />
         </div>
-        <div className="lg:col-span-12 col-span-12">
+        {/* <div className="lg:col-span-12 col-span-12">
           <Card title="Recent Completed Orders">
             <RecentCompletedOrders />
           </Card>
-        </div>
-        <div className="lg:col-span-12 col-span-12">
+        </div> */}
+        {/* <div className="lg:col-span-12 col-span-12">
           <OnRoleRiders />
-        </div>
+        </div> */}
       </div>
     </div>
   );

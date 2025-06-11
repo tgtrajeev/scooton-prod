@@ -15,14 +15,10 @@ const profileLabel = () => {
   const [userData, setUserData] = useState({
     user: "",
   });
-  const navigate = useNavigate();
 
   useEffect(() => {
     if (userData?.id) {
-      //const notficationDone = localStorage.getItem("notficationDone");
-      //if(!notficationDone){
         requestFCMToken(userData.id);
-     // }
    }
   }, [userData?.id]);
   
@@ -42,34 +38,6 @@ const profileLabel = () => {
       });
     } 
   }, []);
-  const[tokenexpires, setTokenExpire] = useState([]);
-  const serviceAreaId = localStorage.getItem('serviceAreaId');
-  useEffect(() => {
-    const token = localStorage.getItem("jwtToken");
-    if (token) {
-      axiosInstance.post(`${BASE_URL}/order-history/orders/count-total/${serviceAreaId}`,{ type: "INCOMING" }, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })      
-      .then(response => {
-        setTokenExpire(response.data);
-      })
-      .catch(error => {
-        if (error.response && error.response.status === 401) {
-          handleLogoutAndRedirect();
-        } else {
-          console.error('Error fetching protected data:', error);
-        }
-      });
-    } 
-  }, []);
-  
-  const handleLogoutAndRedirect = () => {
-    window.localStorage.clear();
-    navigate('/');
-  };
-
   
   return (
     <div className="flex items-center">
@@ -95,25 +63,8 @@ const profileLabel = () => {
 };
 
 const Profile = () => {
-  const navigate = useNavigate();
   const dispatch = useDispatch();
-  
   const ProfileMenu = [
-    // {
-    //   label: "Profile",
-    //   icon: "heroicons-outline:user",
-
-    //   action: () => {
-    //     navigate("/profile");
-    //   },
-    // },
-    // {
-    //   label: "Settings",
-    //   icon: "heroicons-outline:cog",
-    //   action: () => {
-    //     navigate("/settings");
-    //   },
-    // },
     {
       label: "Logout",
       icon: "heroicons-outline:login",
