@@ -30,28 +30,9 @@ const Export_Reports = () => {
 
     // Define the state for orderType
     const [orderType, setOrderType] = useState("CITYWIDE"); // Default to "CITYWIDE"
-
+    
     useEffect(() => {
-        const fetchLogoutAllList = async () => {
-            try {
-                const token = localStorage.getItem('jwtToken');
-                if (token) {
-                    const response = await axiosInstance.get(`${BASE_URL}/auth/get-logout-details`, {
-                        headers: {
-                            Authorization: `Bearer ${token}`,
-                        },
-                    });
-                    const validLogoutList = response.data.filter(item => !item.isExpired);
-
-                    setLogoutAllList(validLogoutList);
-                }
-            } catch (error) {
-                console.error('Error fetching order detail:', error);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchLogoutAllList();
+        setLoading(false);
     }, []);
 
     const handleCheckboxChange = (e) => {
@@ -221,7 +202,6 @@ const Export_Reports = () => {
         }
         );
 
-        // Check if data is present and non-empty
         const reportData = response.data?.jsonData || [];
         if (reportData.length === 0) {
         alert("No data found for the specified date range.");
@@ -229,29 +209,30 @@ const Export_Reports = () => {
         return;
         }
 
-        // Map the data for CSV export
-        const csvData = reportData.map((item) => ({
-        "Order ID": item.orderId || "N/A",
-        "Order Date": item.orderDate || "N/A",
-        "User Mobile": item.mobileNumber || "N/A",
-        "User Name": (item.userName && item.userName.trim() !== "null") ? item.userName.trim() : "N/A",
-        "Fare Amount": item.mrp || 0,
-        "Discount": item.discount || 0,
-        "Toll tax": item.tollTax || 0,
-        "MCD tax": item.mcdTax || 0,
-        "State tax": item.stateTax || 0,
-        "Collective Amount": item.freightAmount || 0,
-        "Order Status": item.orderStatus || "N/A",
-        "Delivery DateTime": item.deliveryDateTime || "N/A",
-        "Pickup Address": item.pickupAddress || "N/A",
-        "Delivery Address": item.deliveryAddress || "N/A",
-        "Delivery Contact": item.deliveryContact || "N/A",
-        "Rider ID": item.riderId || "N/A",
-        "Rider Name": item.riderName || "N/A",
-        "Rider Contact": item.riderPhone || "N/A",
-        "Vehicle Type": item.vehicleType || "N/A",
-        "Rider Payout": item.riderPayout || 0,
-        }));
+        // Dynamically get all keys from the first record
+        const allKeys = Array.from(
+        new Set(reportData.flatMap(item => Object.keys(item)))
+        );
+
+        // Map data for Excel export dynamically
+        const csvData = reportData.map(item => {
+        const row = {};
+        allKeys.forEach(key => {
+            let value = item[key];
+
+            // Special handling for userName
+            if (key === "userName" && (value === "null " || value === null)) {
+            value = "N/A";
+            } else if (typeof value === "string" && value.trim() === "null") {
+            value = "N/A";
+            } else if (value === null || value === undefined) {
+            value = "N/A";
+            }
+
+            row[key] = value;
+        });
+        return row;
+        });
 
         // Create Excel file
         const workbook = XLSX.utils.book_new();
@@ -267,6 +248,7 @@ const Export_Reports = () => {
         setEndDate(null);
     } catch (error) {
         console.error("Error exporting data:", error);
+        toast.error("Failed to export data. Please try again.");
     } finally {
         setLoadingCSV(false);
     }

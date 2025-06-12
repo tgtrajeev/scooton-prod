@@ -10,26 +10,7 @@ const Third_Party_Vendors = () => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-      const fetchLogoutAllList = async () => {
-        try {
-          const token = localStorage.getItem('jwtToken');
-          if (token) {
-            const response = await axiosInstance.get(`${BASE_URL}/auth/get-logout-details`, {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            });
-            const validLogoutList = response.data.filter(item => !item.isExpired);
-
-            setLogoutAllList(validLogoutList);
-          }
-        } catch (error) {
-          console.error('Error fetching order detail:', error);
-        } finally {
-            setLoading(false);
-        }
-      };  
-      fetchLogoutAllList();
+      setLoading(false);
     }, []);
     
     
